@@ -11,19 +11,19 @@ import SwiftData
 @Model
 final class Asset {
     @Attribute(.unique) var id: UUID
-    var assetType: String
+    var assetType: AssetType
     var symbol: String
     var name: String
     var currency: Currency
     var country: String
     
-    @Relationship(deleteRule: .deny, inverse: \Holding.asset)
+    @Relationship(deleteRule: .cascade, inverse: \Holding.asset)
     var holdings: [Holding] = []
     
-    @Relationship(deleteRule: .deny, inverse: \Transaction.asset)
+    @Relationship(deleteRule: .cascade, inverse: \Transaction.asset)
     var transactions: [Transaction] = []
     
-    init(assetType: String, symbol: String, name: String, currency: Currency, country: String) {
+    init(assetType: AssetType, symbol: String, name: String, currency: Currency, country: String) {
         self.id = UUID()
         self.assetType = assetType
         self.symbol = symbol
@@ -32,4 +32,3 @@ final class Asset {
         self.country = country
     }
 }
-
