@@ -14,7 +14,7 @@ final class Portfolio {
     var name: String
     var targetAmount: Decimal
     var targetDate: Date
-    var totalAmount: Decimal
+    var currentPortfolioValue: Decimal
     var isActive: Bool
     var createdAt: Date
     var updatedAt: Date
@@ -25,12 +25,12 @@ final class Portfolio {
     @Relationship(deleteRule: .cascade, inverse: \Transaction.portfolio)
     var transactions: [Transaction] = []
     
-    init(name: String, targetAmount: Decimal, targetDate: Date, totalAmount: Decimal, isActive: Bool, createdAt: Date, updatedAt: Date) {
+    init(name: String, targetAmount: Decimal, targetDate: Date, currentPortfolioValue: Decimal, isActive: Bool, createdAt: Date, updatedAt: Date) {
         self.id = UUID()
         self.name = name
         self.targetAmount = targetAmount
         self.targetDate = targetDate
-        self.totalAmount = totalAmount
+        self.currentPortfolioValue = currentPortfolioValue
         self.isActive = isActive
         self.createdAt = createdAt
         self.updatedAt = updatedAt
