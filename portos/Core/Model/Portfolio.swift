@@ -19,7 +19,7 @@ final class Portfolio {
     var createdAt: Date
     var updatedAt: Date
     
-    @Relationship(deleteRule: .cascade, inverse: \Holding.porfolio)
+    @Relationship(deleteRule: .cascade, inverse: \Holding.portfolio)
     var holdings: [Holding] = []
     
     @Relationship(deleteRule: .cascade, inverse: \Transaction.portfolio)
