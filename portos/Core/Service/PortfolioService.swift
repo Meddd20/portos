@@ -38,27 +38,23 @@ class PortfolioService {
     }
     
     func getProfitAmount(portfolioName: String, valueInPortfolio: Int) throws -> (Int, Bool) {
-        var initialCapitalDecimal: Decimal = 0
-        var initialCapitalInt: Int
+        var initialCapital: Decimal = 0
+        let valueInPortfolioDecimal = Decimal(valueInPortfolio)
         
         if portfolioName != "All" {
             let portfolio = try portfolioRepository.getPortfolioByName(portfolioName)!
-            initialCapitalInt = NSDecimalNumber(decimal: portfolio.currentPortfolioValue).intValue
+            initialCapital = portfolio.currentPortfolioValue
         } else {
             let portfolios = try portfolioRepository.allPortfolios()
             for portfolio in portfolios {
-                initialCapitalDecimal += portfolio.currentPortfolioValue
+                initialCapital += portfolio.currentPortfolioValue
             }
-            initialCapitalInt = NSDecimalNumber(decimal: initialCapitalDecimal).intValue
         }
         
-        let profitAmount = valueInPortfolio - initialCapitalInt
+        let profitAmount = valueInPortfolioDecimal - initialCapital
+        let profitAmountInt = NSDecimalNumber(decimal: profitAmount).intValue
         
-        if profitAmount > 0 {
-            return (profitAmount, true)
-        } else {
-            return (profitAmount, false)
-        }
+        return (profitAmountInt, profitAmountInt > 0)
     }
     
     /// - Returns: A tuple `(growthRate, isProfit)` where:
@@ -78,17 +74,15 @@ class PortfolioService {
             initialCapital = portfolio.currentPortfolioValue
         }
         
-        let growthRate = (valueInPortfolioDecimal - initialCapital) / initialCapital
+        guard initialCapital != 0 else { return (0, false) }
+        
+        let growthRate = (valueInPortfolioDecimal / initialCapital)
         let growthRateDouble = (growthRate as NSDecimalNumber).doubleValue
         
-        if growthRateDouble > 0 {
-            return (growthRateDouble, true)
-        } else {
-            return (growthRateDouble, false)
-        }
+        return (growthRateDouble, growthRateDouble > 0)
     }
     
-    func getAssetNames(portfolioName: String) throws -> [AssetPosition] {
+    func getHoldings(portfolioName: String) throws -> [AssetPosition] {
         var holdings: [Holding] = []
         if portfolioName == "All" {
             holdings = try holdingRepository.getAllHoldings()
@@ -96,11 +90,11 @@ class PortfolioService {
             holdings = try holdingRepository.getHoldings(byPortfolioName: portfolioName)
         }
         
-        let grouped = Dictionary(grouping: holdings, by: { $0.asset.name })
+        let grouped = Dictionary(grouping: holdings, by: { $0.asset.assetType })
 
-        let positions = grouped.map { (assetName, holdings) in
+        let positions = grouped.map { (assetType, holdings) in
             let limitedHoldings = Array(holdings.prefix(3))
-            return AssetPosition(assetName: assetName, holdings: limitedHoldings)
+            return AssetPosition(assetType: assetType, holdings: limitedHoldings)
         }
 
         return positions
@@ -122,6 +116,7 @@ class PortfolioService {
 
 
 struct AssetPosition {
-    var assetName: String
+    let id = UUID()
+    var assetType: AssetType
     var holdings: [Holding]
 }
