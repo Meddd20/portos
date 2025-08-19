@@ -16,6 +16,11 @@ class PortfolioService {
         self.portfolioRepository = portfolioRepository
     }
     
+    func getAllPortfolios() throws -> [Portfolio] {
+        let portfolios = try portfolioRepository.allPortfolios()
+        return portfolios
+    }
+    
     func getPortfolioValue(portfolio: String) throws -> Int {
         var holdings: [Holding] = try holdingRepository.getAllHoldings()
         
@@ -99,6 +104,19 @@ class PortfolioService {
         }
 
         return positions
+    }
+    
+    func createPortfolio(name: String, targetAmount: Decimal, targetDate: Date) throws {
+        let p = Portfolio(
+            name: name,
+            targetAmount: targetAmount,
+            targetDate: targetDate,
+            currentPortfolioValue: 0,
+            isActive: true,
+            createdAt: Date.now,
+            updatedAt: Date.now
+        )
+        try portfolioRepository.create(p: p)
     }
 }
 

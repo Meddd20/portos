@@ -26,7 +26,6 @@ struct PickerSegmented: View {
                             .lineLimit(1)
                             .truncationMode(.tail)
 
-                        // underline indicator
                         Rectangle()
                             .frame(height: 2)
                             .foregroundColor(selectedIndex == idx ? .black : .clear)

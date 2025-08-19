@@ -10,21 +10,11 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-//    @StateObject private var diContainer = DIContainer()
     
     var body: some View {
-        PortfolioScreen()
-//            .environment(\.diContainer, diContainer)
-//            .onAppear {
-//                setupDependencyInjection()
-//            }
+        let di = AppDI.live(modelContext: modelContext)
+        PortfolioScreen(service: di.portfolioService)
     }
-    
-//    private func setupDependencyInjection() {
-//        // Inject ModelContext ke DIContainer
-//        diContainer.setModelContext(modelContext)
-//    }
-
 }
 
 #Preview {

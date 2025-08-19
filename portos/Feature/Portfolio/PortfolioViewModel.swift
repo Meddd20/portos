@@ -13,23 +13,14 @@ final class PortfolioViewModel: ObservableObject {
     @Published private(set) var portfolios: [Portfolio] = []
     @Published var error: String?
     
-    private let repo: any PortfolioRepositoryProtocol
-    
-    init(repo: PortfolioRepositoryProtocol) {
-        self.repo = repo
+    private let service: PortfolioService
+
+    init(service: PortfolioService) {
+        self.service = service
     }
 
     func load() {
-        do { portfolios = try repo.allPortfolios() }
+        do { portfolios = try service.getAllPortfolios() }
         catch { self.error = error.localizedDescription }
-    }
-
-    func archive(_ portfolio: Portfolio) {
-        do {
-            try repo.setActive(portfolio, false)
-            load()
-        } catch {
-            self.error = error.localizedDescription
-        }
     }
 }

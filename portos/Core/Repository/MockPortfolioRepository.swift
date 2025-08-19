@@ -17,21 +17,9 @@ class MockPortfolioRepository: PortfolioRepositoryProtocol {
         return portfolios
     }
     
-    @discardableResult
-    func create(name: String, targetAmount: Decimal, targetDate: Date) throws -> Portfolio {
+    func create(p: Portfolio) throws {
         if shouldThrow { throw NSError(domain: "Mock", code: 1) }
-        
-        let portfolio = Portfolio(
-            name: name,
-            targetAmount: targetAmount,
-            targetDate: targetDate,
-            currentPortfolioValue: 10000.00,
-            isActive: true,
-            createdAt: .now,
-            updatedAt: .now
-        )
-        portfolios.append(portfolio)
-        return portfolio
+        portfolios.append(p)
     }
     
     func rename(p: Portfolio, to newName: String) throws {

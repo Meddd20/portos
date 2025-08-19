@@ -11,15 +11,12 @@ import SwiftData
 struct AddPortfolioSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    private var di: AppDI { AppDI.live(modelContext: modelContext) }
     
-    @StateObject private var viewModel : AddPortfolioViewModel
+    @StateObject private var viewModel: AddPortfolioViewModel
     
-//    init(portfolioRepo: PortfolioRepositoryProtocol) {
-//        _viewModel = StateObject(wrappedValue: AddPortfolioViewModel(repo: portfolioRepo))
-//    }
-    
-    init (modelContext: ModelContext) {
-        _viewModel = StateObject(wrappedValue: AddPortfolioViewModel(modelContext: modelContext))
+    init(service: PortfolioService) {
+        _viewModel = StateObject(wrappedValue: AddPortfolioViewModel(service: service))
     }
 
     var body: some View {

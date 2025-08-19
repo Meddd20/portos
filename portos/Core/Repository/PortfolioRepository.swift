@@ -10,8 +10,7 @@ import SwiftData
 
 protocol PortfolioRepositoryProtocol {
     func allPortfolios() throws -> [Portfolio]
-    @discardableResult
-    func create(name: String, targetAmount: Decimal, targetDate: Date) throws -> Portfolio
+    func create(p: Portfolio) throws
     func rename(p: Portfolio, to newName: String) throws
     func setActive(_ p: Portfolio, _ isActive: Bool) throws
     @discardableResult
@@ -30,20 +29,9 @@ struct PortfolioRepository : PortfolioRepositoryProtocol {
         return try ctx.fetch(d)
     }
     
-    @discardableResult
-    func create(name: String, targetAmount: Decimal, targetDate: Date) throws -> Portfolio {
-        let p = Portfolio(
-            name: name,
-            targetAmount: targetAmount,
-            targetDate: targetDate,
-            currentPortfolioValue: 0,
-            isActive: true,
-            createdAt: Date.now,
-            updatedAt: Date.now
-        )
+    func create(p: Portfolio) throws {
         ctx.insert(p)
         try ctx.save()
-        return p
     }
     
     func rename(p: Portfolio, to newName: String) throws {

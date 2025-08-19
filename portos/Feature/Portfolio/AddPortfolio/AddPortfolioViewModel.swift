@@ -16,26 +16,16 @@ final class AddPortfolioViewModel: ObservableObject {
     @Published var didSave = false
     @Published var errorMessage: String?
     
-    @Published var error: String?
-    
-    private let modelContext: ModelContext
-    
-//    private let repo: PortfolioRepositoryProtocol
-//    
-//    init(repo: PortfolioRepositoryProtocol) {
-//        self.repo = repo
-//    }
-    
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-    }
+    private let service: PortfolioService
 
+    init(service: PortfolioService) {
+        self.service = service
+    }
     
     private var targetAmount: Decimal? {
         Decimal(string: targetAmountText.replacingOccurrences(of: ",", with: "."))
     }
     
-//    func add(name: String, targetAmount: Decimal?, targetDate: Date)
     func add() {
         guard let target = targetAmount else {
             self.errorMessage = "Target amount is required"
@@ -50,20 +40,9 @@ final class AddPortfolioViewModel: ObservableObject {
         }
         
         do {
-//            let p = try repo.create(
-//                name: trimmed,
-//                targetAmount: target,
-//                targetDate: targetDate
-//            )
-            let p = Portfolio(name: trimmed, targetAmount: target, targetDate: targetDate, currentPortfolioValue: 0, isActive: true, createdAt: .now, updatedAt: .now)
-            
-            modelContext.insert(p)
-            
-            try modelContext.save()
-            
+            try service.createPortfolio(name: trimmed, targetAmount: target, targetDate: targetDate)
             self.didSave = true
             self.errorMessage = nil
-            print(p)
             print("add portfolio - save success")
         }
         catch {

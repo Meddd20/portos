@@ -9,28 +9,24 @@ import SwiftUI
 import SwiftData
 
 struct PortfolioScreen: View {
-    @Environment(\.diContainer) private var diContainer
     @Environment(\.modelContext) private var modelContext
-//    let repo = PortfolioRepository(ctx: modelContext)
-
+    private var di: AppDI { AppDI.live(modelContext: modelContext) }
+    
     @StateObject private var viewModel: PortfolioViewModel
-    init() {
-        // Temporary initialization dengan mock - akan di-replace di onAppear
-        _viewModel = StateObject(wrappedValue: PortfolioViewModel(repo: MockPortfolioRepository()))
+    
+    init(service: PortfolioService) {
+        _viewModel = StateObject(wrappedValue: PortfolioViewModel(service: service))
     }
-
 
     @State private var selection: Portfolio?
     @State private var selectionID: UUID? = nil
-    
     @State private var selectedIndex: Int = 0
+    @State private var showingAdd = false
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     @Query(
         filter: #Predicate<Holding> { $0.portfolio.name == "x" }
     ) var holdings: [Holding]
-    
-    @State private var showingAdd = false
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -52,14 +48,21 @@ struct PortfolioScreen: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .sheet(isPresented: $showingAdd) {
-            AddPortfolioSheet(modelContext: modelContext)
+            AddPortfolioSheet(service: di.portfolioService)
         }
-//        .onAppear {
-//            setupDependencies()
-//        }
     }
 }
 
-#Preview {
-    PortfolioScreen()
-}
+
+//struct PortfolioScreen_PreviewWrapper: View {
+//    @Environment(\.modelContext) private var modelContext
+//
+//    var body: some View {
+//        let di = AppDI.live(modelContext: modelContext)
+//        PortfolioScreen(service: di.portfolioService)
+//    }
+//}
+//
+//#Preview {
+//    PortfolioScreen_PreviewWrapper()
+//}
