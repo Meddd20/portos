@@ -16,6 +16,8 @@ final class Asset {
     var name: String
     var currency: Currency
     var country: String
+    var lastPrice: Decimal
+    var asOf: Date
     
     @Relationship(deleteRule: .cascade, inverse: \Holding.asset)
     var holdings: [Holding] = []
@@ -23,12 +25,14 @@ final class Asset {
     @Relationship(deleteRule: .cascade, inverse: \Transaction.asset)
     var transactions: [Transaction] = []
     
-    init(assetType: AssetType, symbol: String, name: String, currency: Currency, country: String) {
+    init(assetType: AssetType, symbol: String, name: String, currency: Currency, country: String, lastPrice: Decimal, asOf: Date) {
         self.id = UUID()
         self.assetType = assetType
         self.symbol = symbol
         self.name = name
         self.currency = currency
         self.country = country
+        self.lastPrice = lastPrice
+        self.asOf = asOf
     }
 }
