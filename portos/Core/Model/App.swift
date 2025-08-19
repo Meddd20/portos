@@ -14,10 +14,10 @@ final class AppSource {
     var name: String
     var iconPath: String
     
-    @Relationship(deleteRule: .deny, inverse: \Holding.app)
+    @Relationship(deleteRule: .cascade, inverse: \Holding.app)
     var holdings: [Holding] = []
     
-    @Relationship(deleteRule: .deny, inverse: \Transaction.app)
+    @Relationship(deleteRule: .cascade, inverse: \Transaction.app)
     var transactions: [Transaction] = []
     
     init(name: String, iconPath: String) {

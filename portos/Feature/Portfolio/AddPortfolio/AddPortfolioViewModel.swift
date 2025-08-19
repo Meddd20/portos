@@ -55,7 +55,7 @@ final class AddPortfolioViewModel: ObservableObject {
 //                targetAmount: target,
 //                targetDate: targetDate
 //            )
-            let p = Portfolio(name: trimmed, targetAmount: target, targetDate: targetDate, totalAmount: 0, isActive: true, createdAt: .now, updatedAt: .now)
+            let p = Portfolio(name: trimmed, targetAmount: target, targetDate: targetDate, currentPortfolioValue: 0, isActive: true, createdAt: .now, updatedAt: .now)
             
             modelContext.insert(p)
             

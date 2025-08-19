@@ -14,6 +14,7 @@ final class Transaction {
     @Relationship var app: AppSource
     @Relationship var asset: Asset
     @Relationship var portfolio: Portfolio
+    @Relationship var holding: Holding
     
     var transactionType: TransactionType
     var quantity: Decimal
@@ -22,12 +23,14 @@ final class Transaction {
     var tradeCurrency: Currency
     var exchangeRate: Decimal
     var createdAt: Date
+    var updatedAt: Date
     
-    init(app: AppSource, asset: Asset, portfolio: Portfolio, transactionType: TransactionType, quantity: Decimal, price: Decimal, date: Date, tradeCurrency: Currency, exchangeRate: Decimal, createdAt: Date) {
+    init(app: AppSource, asset: Asset, portfolio: Portfolio, holding:Holding, transactionType: TransactionType, quantity: Decimal, price: Decimal, date: Date, tradeCurrency: Currency, exchangeRate: Decimal, createdAt: Date, updatedAt: Date) {
         self.id = UUID()
         self.app = app
         self.asset = asset
         self.portfolio = portfolio
+        self.holding = holding
         self.transactionType = transactionType
         self.quantity = quantity
         self.price = price
@@ -35,5 +38,6 @@ final class Transaction {
         self.tradeCurrency = tradeCurrency
         self.exchangeRate = exchangeRate
         self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
 }

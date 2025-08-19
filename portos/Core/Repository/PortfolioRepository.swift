@@ -36,7 +36,7 @@ struct PortfolioRepository : PortfolioRepositoryProtocol {
             name: name,
             targetAmount: targetAmount,
             targetDate: targetDate,
-            totalAmount: 0,
+            currentPortfolioValue: 0,
             isActive: true,
             createdAt: Date.now,
             updatedAt: Date.now

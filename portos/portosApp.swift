@@ -10,14 +10,27 @@ import SwiftData
 
 @main
 struct portosApp: App {
-//    private let di = AppDI.live()
+    let container: ModelContainer = {
+        let scheme = Schema([AppSource.self, Asset.self, Portfolio.self, Holding.self, Transaction.self])
+        return try! ModelContainer(for: scheme)
+    }()
+    
+    init() {
+        #if DEBUG
+        let key = "sseded.v1"
+        if !UserDefaults.standard.bool(forKey: key) {
+            let ctx = ModelContext(container)
+            try? MockSeederV1(context: ctx).wipe()
+            try? MockSeederV1(context: ctx).seed()
+            UserDefaults.standard.set(true, forKey: key)
+        }
+        #endif
+    }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: [Portfolio.self, Holding.self, Transaction.self])
         }
-//        .modelContainer(di.container)
-        
+        .modelContainer(container)
     }
 }

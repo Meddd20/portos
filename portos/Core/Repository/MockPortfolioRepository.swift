@@ -25,7 +25,7 @@ class MockPortfolioRepository: PortfolioRepositoryProtocol {
             name: name,
             targetAmount: targetAmount,
             targetDate: targetDate,
-            totalAmount: 10000.00,
+            currentPortfolioValue: 10000.00,
             isActive: true,
             createdAt: .now,
             updatedAt: .now

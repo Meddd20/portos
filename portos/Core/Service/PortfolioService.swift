@@ -21,7 +21,7 @@ class PortfolioService {
         
         if portfolio != "All" {
             holdings = holdings
-                .filter { $0.porfolio.name == portfolio }
+                .filter { $0.portfolio.name == portfolio }
         }
         
         var portfolioValue: Decimal = 0.0
@@ -38,11 +38,11 @@ class PortfolioService {
         
         if portfolioName != "All" {
             let portfolio = try portfolioRepository.getPortfolioByName(portfolioName)!
-            initialCapitalInt = NSDecimalNumber(decimal: portfolio.totalAmount).intValue
+            initialCapitalInt = NSDecimalNumber(decimal: portfolio.currentPortfolioValue).intValue
         } else {
             let portfolios = try portfolioRepository.allPortfolios()
             for portfolio in portfolios {
-                initialCapitalDecimal += portfolio.totalAmount
+                initialCapitalDecimal += portfolio.currentPortfolioValue
             }
             initialCapitalInt = NSDecimalNumber(decimal: initialCapitalDecimal).intValue
         }
@@ -66,11 +66,11 @@ class PortfolioService {
         if portfolioName == "All" {
             let portfolios = try portfolioRepository.allPortfolios()
             for portfolio in portfolios {
-                initialCapital += portfolio.totalAmount
+                initialCapital += portfolio.currentPortfolioValue
             }
         } else {
             let portfolio = try portfolioRepository.getPortfolioByName(portfolioName)!
-            initialCapital = portfolio.totalAmount
+            initialCapital = portfolio.currentPortfolioValue
         }
         
         let growthRate = (valueInPortfolioDecimal - initialCapital) / initialCapital

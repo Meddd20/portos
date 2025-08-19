@@ -67,7 +67,7 @@ class HoldingRepository {
     func getHoldings(byPortfolioName name: String) throws -> [Holding] {
         let descriptor = FetchDescriptor<Holding>(
             predicate: #Predicate { holding in
-                holding.porfolio.name == name
+                holding.portfolio.name == name
             }
         )
         return try modelContext.fetch(descriptor)

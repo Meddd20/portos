@@ -27,7 +27,7 @@ struct PortfolioScreen: View {
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     @Query(
-        filter: #Predicate<Holding> { $0.porfolio.name == "x" }
+        filter: #Predicate<Holding> { $0.portfolio.name == "x" }
     ) var holdings: [Holding]
     
     @State private var showingAdd = false
