@@ -8,12 +8,20 @@
 import Foundation
 import SwiftData
 
-struct PortfolioRepository {
+protocol PortfolioRepositoryProtocol {
+    func allPortfolios() throws -> [Portfolio]
+    @discardableResult
+    func create(name: String, targetAmount: Decimal, targetDate: Date) throws -> Portfolio
+    func rename(p: Portfolio, to newName: String) throws
+    func setActive(_ p: Portfolio, _ isActive: Bool) throws
+    @discardableResult
+    func delete(id: UUID) throws -> Bool
+}
+
+struct PortfolioRepository : PortfolioRepositoryProtocol {
     let ctx: ModelContext
     
-    init(ctx: ModelContext) {
-        self.ctx = ctx
-    }
+    init(ctx: ModelContext) { self.ctx = ctx }
     
     func allPortfolios() throws -> [Portfolio] {
         let d = FetchDescriptor<Portfolio>(
@@ -22,9 +30,8 @@ struct PortfolioRepository {
         return try ctx.fetch(d)
     }
     
-    
     @discardableResult
-    func createPortfolio(name: String, targetAmount: Decimal, targetDate: Date) throws -> Portfolio {
+    func create(name: String, targetAmount: Decimal, targetDate: Date) throws -> Portfolio {
         let p = Portfolio(
             name: name,
             targetAmount: targetAmount,
@@ -51,7 +58,6 @@ struct PortfolioRepository {
         try ctx.save()
     }
     
-    
     @discardableResult
     func delete(id: UUID) throws -> Bool {
         let fd = FetchDescriptor<Portfolio>(
@@ -68,5 +74,13 @@ struct PortfolioRepository {
         } catch {
             throw error
         }
+    }
+    
+    func getPortfolioByName(_ name: String) throws -> Portfolio? {
+        let fd = FetchDescriptor<Portfolio>(
+            predicate: #Predicate { $0.name == name },
+            sortBy: []
+        )
+        return try ctx.fetch(fd).first
     }
 }

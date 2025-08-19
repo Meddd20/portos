@@ -14,7 +14,7 @@ final class Portfolio {
     var name: String
     var targetAmount: Decimal
     var targetDate: Date
-    var totalAmount: Decimal
+    var totalAmount: Decimal // yg dipunya
     var isActive: Bool
     var createdAt: Date
     var updatedAt: Date

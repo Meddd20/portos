@@ -8,15 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+//    @StateObject private var diContainer = DIContainer()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        PortfolioScreen()
+//            .environment(\.diContainer, diContainer)
+//            .onAppear {
+//                setupDependencyInjection()
+//            }
     }
+    
+//    private func setupDependencyInjection() {
+//        // Inject ModelContext ke DIContainer
+//        diContainer.setModelContext(modelContext)
+//    }
+
 }
 
 #Preview {
