@@ -15,7 +15,7 @@ extension Holding {
         let oldCost = oldQty * self.averagePricePerUnit
         
         let newCost = buyQty * buyPrice
-        let newQty = oldQty + quantity
+        let newQty = oldQty + buyQty
         let newAvgPrice = (oldCost + newCost) / newQty
         
         self.quantity = newQty
