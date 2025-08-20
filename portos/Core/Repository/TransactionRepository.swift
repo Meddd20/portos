@@ -32,7 +32,7 @@ class TransactionRepository {
         return try modelContext.fetch(descriptor)
     }
     
-    func getTransaction(id: UUID) throws -> Transaction? {
+    func getDetailTransaction(id: UUID) throws -> Transaction? {
         var descriptor = FetchDescriptor<Transaction>(
             predicate: #Predicate<Transaction> { $0.id == id }
         )

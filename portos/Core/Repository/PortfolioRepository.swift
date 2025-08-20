@@ -45,6 +45,12 @@ struct PortfolioRepository {
         try ctx.save()
     }
     
+    func editCurrentPortfolioValue(p: Portfolio, to newValue: Decimal) throws {
+        p.currentPortfolioValue = newValue
+        p.updatedAt = .now
+        try ctx.save()
+    }
+    
     func setActive(_ p: Portfolio, _ isActive: Bool) throws {
         p.isActive = isActive
         p.updatedAt = .now

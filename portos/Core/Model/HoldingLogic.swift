@@ -9,7 +9,7 @@ import Foundation
 
 extension Holding {
     func applyBuyTransactions(buyQty: Decimal, buyPrice: Decimal, tradeCurrency: Currency, exchangeRate: Decimal) throws {
-        guard quantity > 0 else { return }
+        guard buyQty > 0, buyPrice > 0 else { return }
         
         let oldQty = self.quantity
         let oldCost = oldQty * self.averagePricePerUnit
@@ -24,7 +24,7 @@ extension Holding {
     }
     
     func applySellTransactions(sellQty: Decimal, sellPrice: Decimal, tradeCurrency: Currency, exchangeRate: Decimal) throws {
-        guard sellQty > 0 else { return }
+        guard sellQty > 0, sellPrice > 0 else { return }
         guard sellQty <= self.quantity else { return }
         
         // Information that good to know, personally doesn't have an idea where to use or store so just keep it there
@@ -35,4 +35,14 @@ extension Holding {
         self.quantity -= sellQty
         self.updatedAt = .now
     }
+    
+    func applyTransferIn(qty: Decimal, pricePerUnit: Decimal, tradeCurrency: Currency, exchangeRate: Decimal) throws {
+        try applyBuyTransactions(buyQty: qty, buyPrice: pricePerUnit, tradeCurrency: tradeCurrency, exchangeRate: exchangeRate)
+    }
+    
+    func applyTransferOut(qty: Decimal, pricePerUnit: Decimal, tradeCurrency: Currency, exchangeRate: Decimal) throws {
+        try applySellTransactions (sellQty: qty, sellPrice: pricePerUnit, tradeCurrency: tradeCurrency, exchangeRate: exchangeRate)
+    }
+    
+    
 }

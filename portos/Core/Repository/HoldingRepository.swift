@@ -41,7 +41,7 @@ class HoldingRepository {
         try modelContext.save()
     }
     
-    func updateHolding(id: UUID,  apply changes: (Holding) -> Void) throws {
+    func updateHolding(id: UUID, apply changes: (Holding) throws -> Void) throws {
         var descriptor = FetchDescriptor<Holding>(
             predicate: #Predicate<Holding> { $0.id == id }
         )
@@ -52,7 +52,7 @@ class HoldingRepository {
             return
         }
         
-        changes(holding)
+        try changes(holding)
         holding.updatedAt = .now
         try modelContext.save()
     }
