@@ -21,6 +21,17 @@ class PortfolioService {
         return portfolios
     }
     
+    // fungsi buat get portfolio values/get values dari setiap asset di portfolio
+    func getCurrentValue(holdings: [Holding]) throws -> Int {
+        var portfolioValue: Decimal = 0.0
+        
+        for holding in holdings {
+            portfolioValue += (holding.quantity * holding.lastUpdatedPrice)
+        }
+        
+        return NSDecimalNumber(decimal: portfolioValue).intValue
+    }
+    
     func getPortfolioValue(portfolio: String) throws -> Int {
         var holdings: [Holding] = try holdingRepository.getAllHoldings()
         
@@ -31,13 +42,38 @@ class PortfolioService {
         
         var portfolioValue: Decimal = 0.0
         for holding in holdings {
-            portfolioValue += holding.averagePricePerUnit * holding.quantity * holding.lastUpdatedPrice
+            portfolioValue += holding.quantity * holding.lastUpdatedPrice
         }
         
         return NSDecimalNumber(decimal: portfolioValue).intValue
     }
     
     func getProfitAmount(portfolioName: String, valueInPortfolio: Int) throws -> (Int, Bool) {
+        var initialCapital: Decimal = 0
+        let valueInPortfolioDecimal = Decimal(valueInPortfolio)
+        
+        if portfolioName != "All" {
+            let holdings = try holdingRepository.getHoldings(byPortfolioName: portfolioName)
+            for holding in holdings {
+                initialCapital += (holding.averagePricePerUnit * holding.quantity)
+            }
+        } else {
+            let holdings = try holdingRepository.getAllHoldings()
+            for holding in holdings {
+                initialCapital += (holding.averagePricePerUnit * holding.quantity)
+            }
+        }
+        
+        print("profitAmount1 ===== pakai holding.averagePricePerUnit * holding.quantity")
+        let profitAmount = valueInPortfolioDecimal - initialCapital
+        print("profitAmount DECIMAL: \(profitAmount)")
+        let profitAmountInt = NSDecimalNumber(decimal: profitAmount).intValue
+        print("profitAmount INT: \(profitAmountInt)")
+        
+        return (profitAmountInt, profitAmountInt > 0)
+    }
+    
+    func getProfitAmount2(portfolioName: String, valueInPortfolio: Int) throws -> (Int, Bool) {
         var initialCapital: Decimal = 0
         let valueInPortfolioDecimal = Decimal(valueInPortfolio)
         
@@ -51,8 +87,11 @@ class PortfolioService {
             }
         }
         
+        print("profitAmount2 ===== pakai portfolio.currentPortfolioValue")
         let profitAmount = valueInPortfolioDecimal - initialCapital
+        print("profitAmount2 DECIMAL: \(profitAmount)")
         let profitAmountInt = NSDecimalNumber(decimal: profitAmount).intValue
+        print("profitAmount2 INT: \(profitAmountInt)")
         
         return (profitAmountInt, profitAmountInt > 0)
     }
@@ -60,6 +99,32 @@ class PortfolioService {
     /// - Returns: A tuple `(growthRate, isProfit)` where:
     ///   - `growthRate` is a `Double` representing the rate of growth.
     ///   - `isProfit` is `true` if growthRate > 0, otherwise `false`.
+    func getGrowthRate2(portfolioName: String, valueInPortfolio: Int) throws -> (Double, Bool) {
+        let valueInPortfolioDecimal = Decimal(valueInPortfolio)
+        var initialCapital: Decimal = 0
+        
+        if portfolioName != "All" {
+            let holdings = try holdingRepository.getHoldings(byPortfolioName: portfolioName)
+            for holding in holdings {
+                initialCapital += (holding.averagePricePerUnit * holding.quantity)
+            }
+        } else {
+            let holdings = try holdingRepository.getAllHoldings()
+            for holding in holdings {
+                initialCapital += (holding.averagePricePerUnit * holding.quantity)
+            }
+        }
+        
+        guard initialCapital != 0 else { return (0, false) }
+        
+        let growthRate = (valueInPortfolioDecimal - initialCapital) / initialCapital
+        print("growthRate2 ===== pakai holding.averagePricePerUnit * holding.quantity")
+        print("growthRate2: \(growthRate)")
+        let growthRateDouble = (growthRate as NSDecimalNumber).doubleValue
+        
+        return (growthRateDouble, growthRateDouble > 0)
+    }
+    
     func getGrowthRate(portfolioName: String, valueInPortfolio: Int) throws -> (Double, Bool) {
         let valueInPortfolioDecimal = Decimal(valueInPortfolio)
         var initialCapital: Decimal = 0
@@ -76,11 +141,19 @@ class PortfolioService {
         
         guard initialCapital != 0 else { return (0, false) }
         
-        let growthRate = (valueInPortfolioDecimal / initialCapital)
+        let growthRate = (valueInPortfolioDecimal - initialCapital) / initialCapital
+        print("growthRate1 ===== pakai portfolio.currentPortfolioValue")
+        print("growthRate1: \(growthRate)")
         let growthRateDouble = (growthRate as NSDecimalNumber).doubleValue
         
         return (growthRateDouble, growthRateDouble > 0)
     }
+    
+//    func getGrowthRateNew(holdings: [Holding]) {
+//        for holding in holdings {
+//            <#body#>
+//        }
+//    }
     
     func getHoldings(portfolioName: String) throws -> [AssetPosition] {
         var holdings: [Holding] = []

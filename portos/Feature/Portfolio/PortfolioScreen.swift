@@ -38,44 +38,48 @@ struct PortfolioScreen: View {
                         viewModel.getHoldings(portfolioName: "All")
                         viewModel.getPortfolioValue(portfolioName: "All")
                         viewModel.getProfitAmount(portfolioName: "All")
+                        viewModel.getProfitAmount2(portfolioName: "All")
                         viewModel.getGrowthRate(portfolioName: "All")
+                        viewModel.getGrowthRate2(portfolioName: "All")
                     } else {
                         viewModel.getHoldings(portfolioName: portfolios[selectedIndex-1].name)
                         viewModel.getPortfolioValue(portfolioName: portfolios[selectedIndex-1].name)
                         viewModel.getProfitAmount(portfolioName: portfolios[selectedIndex-1].name)
+                        viewModel.getProfitAmount2(portfolioName: portfolios[selectedIndex-1].name)
                         viewModel.getGrowthRate(portfolioName: portfolios[selectedIndex-1].name)
+                        viewModel.getGrowthRate2(portfolioName: portfolios[selectedIndex-1].name)
                     }
                 }
-            ).padding(.bottom, 27)
-            
-            Text("Rp \(viewModel.portfolioValue)")
-            
-            HStack(alignment: .center) {
-                Image(systemName: "triangle.fill")
-                    .font(.system(size: 12))
-
-                Text("\(viewModel.growthRate)%")
-                    .font(.system(size: 16, weight: .regular))
-                    .padding(.trailing, 14)
-
-                Text("Rp \(viewModel.profitAmount)")
-                    .font(.system(size: 16, weight: .regular))
-            }
-            .foregroundColor(Color(red: 0.05, green: 0.6, blue: 0.11))
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
-            .background(Color(red: 0.86, green: 0.92, blue: 0.86))
-            .cornerRadius(14)
-            
-            Spacer().frame(width: 391, height: 184).padding(.top, 23.04)
-            
-            HStack {
-                CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History", action: { print("history clicked") })
-                CircleButton(systemName: "plus", title: "Add", action: { showingAdd = true })
-                CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
-            }
+            )
             
             ScrollView {
+                Text("Rp \(viewModel.portfolioValue)")
+                    .padding(.top, 27)
+                
+                HStack(alignment: .center) {
+                    Image(systemName: "triangle.fill")
+                        .font(.system(size: 12))
+
+                    Text("\(viewModel.growthRate)%")
+                        .font(.system(size: 16, weight: .regular))
+                        .padding(.trailing, 14)
+
+                    Text("Rp \(viewModel.profitAmount)")
+                        .font(.system(size: 16, weight: .regular))
+                }
+                .foregroundColor(Color(red: 0.05, green: 0.6, blue: 0.11))
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .background(Color(red: 0.86, green: 0.92, blue: 0.86))
+                .cornerRadius(14)
+                
+                Spacer().frame(width: 391, height: 184).padding(.top, 23.04)
+                
+                HStack {
+                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History", action: { print("history clicked") })
+                    CircleButton(systemName: "plus", title: "Add", action: { showingAdd = true })
+                    CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
+                }
                 ForEach(viewModel.assetPositions, id: \.id) { assetPosition in
                     HStack {
                         Text("\(assetPosition.assetType)")
@@ -107,7 +111,7 @@ struct PortfolioScreen: View {
                         }.padding(.top, 10)
                     }
                 }
-            }
+            }.scrollIndicators(.hidden)  
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -120,6 +124,8 @@ struct PortfolioScreen: View {
             viewModel.getPortfolioValue(portfolioName: "All")
             viewModel.getProfitAmount(portfolioName: "All")
             viewModel.getGrowthRate(portfolioName: "All")
+            viewModel.getGrowthRate2(portfolioName: "All")
+            viewModel.getProfitAmount2(portfolioName: "All")
         }
     }
 }
