@@ -14,6 +14,10 @@ struct PortfolioAssetPosition {
     let currency: Currency
     let totalQty: Decimal
     let avgCost: Decimal
+    let portfolioMarketValue: Decimal
+    let costBasis: Decimal
+    let unrealizedPnLValue: Decimal
+    let unrealizedPnLPercentage: Decimal
     let lastPrice: Decimal
     let asOf: Date
     let accounts: [AccountPosition]
