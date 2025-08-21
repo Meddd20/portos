@@ -9,11 +9,11 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+    
     var body: some View {
-        VStack {
-            
-        }
-        .padding()
+        let di = AppDI.live(modelContext: modelContext)
+        PortfolioScreen(service: di.portfolioService)
     }
 }
 
