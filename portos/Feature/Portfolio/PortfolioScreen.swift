@@ -30,7 +30,8 @@ struct PortfolioScreen: View {
             PickerSegmented(
                 selectedIndex: $selectedIndex,
                 titles: ["All"] + portfolios.map { $0.name },
-                onChange: onPickerChange
+                onChange: onPickerChange,
+                onAdd: { showingAdd = true }
             )
             
             ScrollView {
@@ -58,7 +59,7 @@ struct PortfolioScreen: View {
                 Spacer().frame(width: 391, height: 184).padding(.top, 23.04)
                 HStack {
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History", action: { print("history clicked") })
-                    CircleButton(systemName: "plus", title: "Add", action: { showingAdd = true })
+                    CircleButton(systemName: "plus", title: "Add", action: { print("add clicked") })
                     CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
                 }
                 ForEach(viewModel.assetPositions, id: \.id) { assetPosition in
