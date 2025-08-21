@@ -1,5 +1,5 @@
 //
-//  App.swift
+//  AppSource.swift
 //  portos
 //
 //  Created by Medhiko Biraja on 12/08/25.
@@ -13,9 +13,6 @@ final class AppSource {
     @Attribute(.unique) var id: UUID
     var name: String
     var iconPath: String
-    
-    @Relationship(deleteRule: .cascade, inverse: \Holding.app)
-    var holdings: [Holding] = []
     
     @Relationship(deleteRule: .cascade, inverse: \Transaction.app)
     var transactions: [Transaction] = []

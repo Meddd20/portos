@@ -17,9 +17,6 @@ final class PortfolioViewModel: ObservableObject {
     @Published var growthRate: String = "5.5"
     @Published var assetPositions: [AssetPosition] = []
     
-    @Published var profitAmount2: Int = 20
-    @Published var growthRate2: String = "5.5"
-    
     private let service: PortfolioService
 
     init(service: PortfolioService) {
@@ -50,30 +47,11 @@ final class PortfolioViewModel: ObservableObject {
         }
     }
     
-    func getProfitAmount2(portfolioName: String) {
-        do {
-            (profitAmount2, _) = try service.getProfitAmount2(portfolioName: portfolioName, valueInPortfolio: portfolioValue)
-            print("get profit amount2 --> \(profitAmount2)")
-        } catch {
-            self.error = error.localizedDescription
-        }
-    }
-    
     func getGrowthRate(portfolioName: String) {
         do {
             let (rate, _) = try service.getGrowthRate(portfolioName: portfolioName, valueInPortfolio: portfolioValue)
             growthRate = formatDouble(rate)
             print("growth rate --> \(rate)")
-        } catch {
-            self.error = error.localizedDescription
-        }
-    }
-    
-    func getGrowthRate2(portfolioName: String) {
-        do {
-            let (rate2, _) = try service.getGrowthRate2(portfolioName: portfolioName, valueInPortfolio: portfolioValue)
-            growthRate = formatDouble(rate2)
-            print("growth rate2 --> \(rate2)")
         } catch {
             self.error = error.localizedDescription
         }

@@ -38,16 +38,12 @@ struct PortfolioScreen: View {
                         viewModel.getHoldings(portfolioName: "All")
                         viewModel.getPortfolioValue(portfolioName: "All")
                         viewModel.getProfitAmount(portfolioName: "All")
-                        viewModel.getProfitAmount2(portfolioName: "All")
                         viewModel.getGrowthRate(portfolioName: "All")
-                        viewModel.getGrowthRate2(portfolioName: "All")
                     } else {
                         viewModel.getHoldings(portfolioName: portfolios[selectedIndex-1].name)
                         viewModel.getPortfolioValue(portfolioName: portfolios[selectedIndex-1].name)
                         viewModel.getProfitAmount(portfolioName: portfolios[selectedIndex-1].name)
-                        viewModel.getProfitAmount2(portfolioName: portfolios[selectedIndex-1].name)
                         viewModel.getGrowthRate(portfolioName: portfolios[selectedIndex-1].name)
-                        viewModel.getGrowthRate2(portfolioName: portfolios[selectedIndex-1].name)
                     }
                 }
             )
@@ -124,8 +120,6 @@ struct PortfolioScreen: View {
             viewModel.getPortfolioValue(portfolioName: "All")
             viewModel.getProfitAmount(portfolioName: "All")
             viewModel.getGrowthRate(portfolioName: "All")
-            viewModel.getGrowthRate2(portfolioName: "All")
-            viewModel.getProfitAmount2(portfolioName: "All")
         }
     }
 }

@@ -19,13 +19,14 @@ final class Transaction {
     var transactionType: TransactionType
     var quantity: Decimal
     var price: Decimal
+    var costBasisPerUnit: Decimal?
     var date: Date
     var tradeCurrency: Currency
     var exchangeRate: Decimal
     var createdAt: Date
     var updatedAt: Date
     
-    init(app: AppSource, asset: Asset, portfolio: Portfolio, holding:Holding, transactionType: TransactionType, quantity: Decimal, price: Decimal, date: Date, tradeCurrency: Currency, exchangeRate: Decimal, createdAt: Date, updatedAt: Date) {
+    init(app: AppSource, asset: Asset, portfolio: Portfolio, holding:Holding, transactionType: TransactionType, quantity: Decimal, price: Decimal, costBasisPerUnit: Decimal? = nil, date: Date, tradeCurrency: Currency, exchangeRate: Decimal, createdAt: Date, updatedAt: Date) {
         self.id = UUID()
         self.app = app
         self.asset = asset
@@ -34,6 +35,7 @@ final class Transaction {
         self.transactionType = transactionType
         self.quantity = quantity
         self.price = price
+        self.costBasisPerUnit = costBasisPerUnit
         self.date = date
         self.tradeCurrency = tradeCurrency
         self.exchangeRate = exchangeRate

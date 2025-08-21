@@ -28,12 +28,20 @@ class HoldingRepository {
         return try modelContext.fetch(descriptor).first
     }
     
-    func addHolding(_ holding: Holding) {
-        modelContext.insert(holding)
-        try? modelContext.save()
+    func getHoldingByAssetAndPortfolio(portfolioId: UUID, assetId: UUID) throws -> Holding? {
+        var descriptor = FetchDescriptor<Holding>(
+            predicate: #Predicate { $0.portfolio.id == portfolioId && $0.asset.id == assetId }
+        )
+        descriptor.fetchLimit = 1
+        return try modelContext.fetch(descriptor).first
     }
     
-    func updateHolding(id: UUID,  apply changes: (Holding) -> Void) throws {
+    func addHolding(_ holding: Holding) throws {
+        modelContext.insert(holding)
+        try modelContext.save()
+    }
+    
+    func updateHolding(id: UUID, apply changes: (Holding) throws -> Void) throws {
         var descriptor = FetchDescriptor<Holding>(
             predicate: #Predicate<Holding> { $0.id == id }
         )
@@ -44,7 +52,7 @@ class HoldingRepository {
             return
         }
         
-        changes(holding)
+        try changes(holding)
         holding.updatedAt = .now
         try modelContext.save()
     }

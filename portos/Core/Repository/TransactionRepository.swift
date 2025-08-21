@@ -23,7 +23,7 @@ class TransactionRepository {
         return try modelContext.fetch(descriptor)
     }
     
-    func getHoldingTransactions(holdingId: UUID) throws -> [Transaction] {
+    func getAssetHoldingTransactions(holdingId: UUID) throws -> [Transaction] {
         let descriptor = FetchDescriptor<Transaction>(
             predicate: #Predicate<Transaction>{ $0.holding.id == holdingId },
                 sortBy: [SortDescriptor(\.date, order: .reverse)]
@@ -32,7 +32,7 @@ class TransactionRepository {
         return try modelContext.fetch(descriptor)
     }
     
-    func getTransaction(id: UUID) throws -> Transaction? {
+    func getDetailTransaction(id: UUID) throws -> Transaction? {
         var descriptor = FetchDescriptor<Transaction>(
             predicate: #Predicate<Transaction> { $0.id == id }
         )

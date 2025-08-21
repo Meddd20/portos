@@ -1,0 +1,30 @@
+//
+//  PortfolioAssetPosition.swift
+//  portos
+//
+//  Created by Medhiko Biraja on 18/08/25.
+//
+
+import Foundation
+
+struct PortfolioAssetPosition {
+    let holdingId: UUID
+    let assetId: UUID
+    let assetSymbol: String
+    let currency: Currency
+    let totalQty: Decimal
+    let avgCost: Decimal
+    let lastPrice: Decimal
+    let asOf: Date
+    let accounts: [AccountPosition]
+    let historyTransactions: [Transaction]
+}
+
+struct AccountPosition {
+    let appSourceId: UUID
+    let qty: Decimal
+    let avgCost: Decimal
+    let lastPrice: Decimal
+    let unrealizedPnL: Decimal
+    let unrealizedPnLPercentage: Decimal
+}
