@@ -71,5 +71,13 @@ class HoldingRepository {
         modelContext.delete(holding)
         try modelContext.save()
     }
+    
+    func getHoldings(byPortfolioName name: String) throws -> [Holding] {
+        let descriptor = FetchDescriptor<Holding>(
+            predicate: #Predicate { holding in
+                holding.portfolio.name == name
+            }
+        )
+        return try modelContext.fetch(descriptor)
+    }
 }
-

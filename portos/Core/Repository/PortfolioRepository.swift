@@ -8,12 +8,19 @@
 import Foundation
 import SwiftData
 
-struct PortfolioRepository {
+protocol PortfolioRepositoryProtocol {
+    func allPortfolios() throws -> [Portfolio]
+    func createPortfolio(p : Portfolio) throws
+    func rename(p: Portfolio, to newName: String) throws
+    func setActive(_ p: Portfolio, _ isActive: Bool) throws
+    @discardableResult
+    func delete(id: UUID) throws -> Bool
+}
+
+struct PortfolioRepository : PortfolioRepositoryProtocol {
     let ctx: ModelContext
     
-    init(ctx: ModelContext) {
-        self.ctx = ctx
-    }
+    init(ctx: ModelContext) { self.ctx = ctx }
     
     func allPortfolios() throws -> [Portfolio] {
         let d = FetchDescriptor<Portfolio>(
@@ -22,21 +29,9 @@ struct PortfolioRepository {
         return try ctx.fetch(d)
     }
     
-    
-    @discardableResult
-    func createPortfolio(name: String, targetAmount: Decimal, targetDate: Date, currentPortfolioValue: Decimal) throws -> Portfolio {
-        let p = Portfolio(
-            name: name,
-            targetAmount: targetAmount,
-            targetDate: targetDate,
-            currentPortfolioValue: currentPortfolioValue,
-            isActive: true,
-            createdAt: Date.now,
-            updatedAt: Date.now
-        )
+    func createPortfolio(p: Portfolio) throws {
         ctx.insert(p)
         try ctx.save()
-        return p
     }
     
     func rename(p: Portfolio, to newName: String) throws {
@@ -45,8 +40,7 @@ struct PortfolioRepository {
         try ctx.save()
     }
     
-    func editCurrentPortfolioValue(p: Portfolio, to newValue: Decimal) throws {
-        p.currentPortfolioValue = newValue
+    func editCurrentPortfolioValue(p: Portfolio) throws {
         p.updatedAt = .now
         try ctx.save()
     }
@@ -56,7 +50,6 @@ struct PortfolioRepository {
         p.updatedAt = .now
         try ctx.save()
     }
-    
     
     @discardableResult
     func delete(id: UUID) throws -> Bool {
@@ -74,5 +67,13 @@ struct PortfolioRepository {
         } catch {
             throw error
         }
+    }
+    
+    func getPortfolioByName(_ name: String) throws -> Portfolio? {
+        let fd = FetchDescriptor<Portfolio>(
+            predicate: #Predicate { $0.name == name },
+            sortBy: []
+        )
+        return try ctx.fetch(fd).first
     }
 }
