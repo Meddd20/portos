@@ -24,12 +24,12 @@ struct PortfolioRepository {
     
     
     @discardableResult
-    func createPortfolio(name: String, targetAmount: Decimal, targetDate: Date) throws -> Portfolio {
+    func createPortfolio(name: String, targetAmount: Decimal, targetDate: Date, currentPortfolioValue: Decimal) throws -> Portfolio {
         let p = Portfolio(
             name: name,
             targetAmount: targetAmount,
             targetDate: targetDate,
-            totalAmount: 0,
+            currentPortfolioValue: currentPortfolioValue,
             isActive: true,
             createdAt: Date.now,
             updatedAt: Date.now
@@ -41,6 +41,12 @@ struct PortfolioRepository {
     
     func rename(p: Portfolio, to newName: String) throws {
         p.name = newName
+        p.updatedAt = .now
+        try ctx.save()
+    }
+    
+    func editCurrentPortfolioValue(p: Portfolio, to newValue: Decimal) throws {
+        p.currentPortfolioValue = newValue
         p.updatedAt = .now
         try ctx.save()
     }
