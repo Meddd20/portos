@@ -29,7 +29,6 @@ struct PortfolioRepository {
             name: name,
             targetAmount: targetAmount,
             targetDate: targetDate,
-            currentPortfolioValue: currentPortfolioValue,
             isActive: true,
             createdAt: Date.now,
             updatedAt: Date.now
@@ -46,7 +45,6 @@ struct PortfolioRepository {
     }
     
     func editCurrentPortfolioValue(p: Portfolio, to newValue: Decimal) throws {
-        p.currentPortfolioValue = newValue
         p.updatedAt = .now
         try ctx.save()
     }
