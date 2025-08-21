@@ -26,6 +26,11 @@ class HoldingService {
         guard let holdingDetail = try? holdingRepository.getHolding(id: holdingId) else {
             return nil
         }
+        
+        let marketValue = holdingDetail.quantity * holdingDetail.asset.lastPrice
+        let costBasis = holdingDetail.quantity * holdingDetail.averagePricePerUnit
+        let unrealizedPnLValue = (marketValue - costBasis)
+        let unrealizedPnLPercentage = (unrealizedPnLValue / costBasis)
                             
         return PortfolioAssetPosition(
             holdingId: holdingId,
@@ -34,6 +39,10 @@ class HoldingService {
             currency: holdingDetail.asset.currency,
             totalQty: holdingDetail.quantity,
             avgCost: holdingDetail.averagePricePerUnit,
+            portfolioMarketValue: marketValue,
+            costBasis: costBasis,
+            unrealizedPnLValue: unrealizedPnLValue,
+            unrealizedPnLPercentage: unrealizedPnLPercentage,
             lastPrice: holdingDetail.asset.lastPrice,
             asOf: holdingDetail.asset.asOf,
             accounts: AccountHoldingPosition(from: holdingAssetTransactions),
