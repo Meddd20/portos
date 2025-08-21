@@ -24,53 +24,38 @@ struct PortfolioScreen: View {
     @State private var showingAdd = false
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
-//    @Query(
-//        filter: #Predicate<Holding> { $0.portfolio.name == "x" }
-//    ) var holdings: [Holding]
     
     var body: some View {
         VStack(alignment: .center) {
             PickerSegmented(
                 selectedIndex: $selectedIndex,
                 titles: ["All"] + portfolios.map { $0.name },
-                onChange: {
-                    if selectedIndex == 0 {
-                        viewModel.getHoldings(portfolioName: "All")
-                        viewModel.getPortfolioValue(portfolioName: "All")
-                        viewModel.getProfitAmount(portfolioName: "All")
-                        viewModel.getGrowthRate(portfolioName: "All")
-                    } else {
-                        viewModel.getHoldings(portfolioName: portfolios[selectedIndex-1].name)
-                        viewModel.getPortfolioValue(portfolioName: portfolios[selectedIndex-1].name)
-                        viewModel.getProfitAmount(portfolioName: portfolios[selectedIndex-1].name)
-                        viewModel.getGrowthRate(portfolioName: portfolios[selectedIndex-1].name)
-                    }
-                }
+                onChange: onPickerChange
             )
             
             ScrollView {
-                Text("Rp \(viewModel.portfolioValue)")
-                    .padding(.top, 27)
-                
-                HStack(alignment: .center) {
-                    Image(systemName: "triangle.fill")
-                        .font(.system(size: 12))
+                VStack(alignment: .center) {
+                    Text("Rp \(viewModel.portfolioValue)")
+                        .padding(.top, 27)
+                    
+                    HStack(alignment: .center) {
+                        Image(systemName: "triangle.fill")
+                            .font(.system(size: 12))
 
-                    Text("\(viewModel.growthRate)%")
-                        .font(.system(size: 16, weight: .regular))
-                        .padding(.trailing, 14)
+                        Text("\(viewModel.growthRate)%")
+                            .font(.system(size: 16, weight: .regular))
+                            .padding(.trailing, 14)
 
-                    Text("Rp \(viewModel.profitAmount)")
-                        .font(.system(size: 16, weight: .regular))
+                        Text("Rp \(viewModel.profitAmount)")
+                            .font(.system(size: 16, weight: .regular))
+                    }
+                    .foregroundColor(Color(red: 0.05, green: 0.6, blue: 0.11))
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(Color(red: 0.86, green: 0.92, blue: 0.86))
+                    .cornerRadius(14)
                 }
-                .foregroundColor(Color(red: 0.05, green: 0.6, blue: 0.11))
-                .padding(.vertical, 4)
-                .padding(.horizontal, 8)
-                .background(Color(red: 0.86, green: 0.92, blue: 0.86))
-                .cornerRadius(14)
-                
                 Spacer().frame(width: 391, height: 184).padding(.top, 23.04)
-                
                 HStack {
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History", action: { print("history clicked") })
                     CircleButton(systemName: "plus", title: "Add", action: { showingAdd = true })
@@ -78,13 +63,11 @@ struct PortfolioScreen: View {
                 }
                 ForEach(viewModel.assetPositions, id: \.id) { assetPosition in
                     HStack {
-                        Text("\(assetPosition.assetType)")
+                        Text(assetPosition.assetType.displayName)
                             .font(.system(size: 28))
                         Spacer()
                         VStack {
-                            Text("Rp xxxx")
-                            Text("...%")
-                                .foregroundColor(.blue)
+                            Text("Rp \(viewModel.getValue(holdings: assetPosition.holdings))")
                         }
                     }.padding(.top, 39)
                     Divider().frame(height: 1)
@@ -94,14 +77,14 @@ struct PortfolioScreen: View {
                             VStack(alignment: .leading) {
                                 Text(holding.asset.name)
                                     .font(.system(size: 20))
-                                Text("26 Jan 2026")
+                                Text("\(viewModel.getHoldingQuantity(holding: holding, assetType: assetPosition.assetType))")
                                     .font(.system(size: 13))
                             }
                             Spacer()
                             VStack(alignment: .trailing) {
-                                Text("Rp xxx")
+                                Text("Rp \(viewModel.getHoldingValue(holding: holding))")
                                     .font(.system(size: 17))
-                                Text("...%")
+                                Text("\(viewModel.getGrowthRateOnHolding(holding: holding))%")
                                     .font(.system(size: 12))
                             }
                         }.padding(.top, 10)
@@ -122,17 +105,15 @@ struct PortfolioScreen: View {
             viewModel.getGrowthRate(portfolioName: "All")
         }
     }
+
+    private func onPickerChange() {
+        let name = (selectedIndex == 0) ? "All" : portfolios[selectedIndex-1].name
+        viewModel.getHoldings(portfolioName: name)
+        viewModel.getPortfolioValue(portfolioName: name)
+        viewModel.getProfitAmount(portfolioName: name)
+        viewModel.getGrowthRate(portfolioName: name)
+    }
 }
 
-//struct PortfolioScreen_PreviewWrapper: View {
-//    @Environment(\.modelContext) private var modelContext
-//
-//    var body: some View {
-//        let di = AppDI.live(modelContext: modelContext)
-//        PortfolioScreen(service: di.portfolioService)
-//    }
-//}
-//
-//#Preview {
-//    PortfolioScreen_PreviewWrapper()
-//}
+
+

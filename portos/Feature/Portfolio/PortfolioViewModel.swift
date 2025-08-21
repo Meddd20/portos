@@ -65,6 +65,64 @@ final class PortfolioViewModel: ObservableObject {
         }
     }
     
+    func getValue(holdings: [Holding]) -> Int {
+        var value: Int = 0
+        do {
+            value = try service.getValueByHoldings(holdings: holdings)
+            return value
+        }
+        catch {
+            self.error = error.localizedDescription
+        }
+        return value
+    }
+    
+    func getGrowthRateByHoldings(holdings: [Holding], currentValue: Int) -> Double {
+        var rate: Double = 0
+        var isSuccess: Bool = false
+        
+        (rate, isSuccess) = service.getGrowthRateByHoldings(holdings: holdings, currentValue: Decimal(currentValue))
+        if isSuccess == false {
+            self.error = "Failed to calculate growth rate"
+            return 0
+        }
+        
+        return rate
+    }
+    
+    func getHoldingQuantity(holding: Holding, assetType: AssetType) -> String {
+        let quantity = holding.quantity
+        
+        switch assetType {
+            case .Bonds:
+                return "Rp \(quantity)"
+            case .MutualFunds:
+                return "\(quantity)"
+            case .Options:
+                return ""
+            case .Stocks:
+                return "\(quantity) lot"
+            case .Crypto:
+                return "\(quantity)"
+            case .ETF:
+                return "\(quantity) eth"
+        }
+    }
+    
+    func getHoldingValue(holding: Holding) -> String {
+        return "\(holding.quantity * holding.asset.lastPrice)"
+    }
+    
+    func getGrowthRateOnHolding(holding: Holding) -> String {
+        let res = ((holding.quantity * holding.asset.lastPrice) - (holding.quantity * holding.averagePricePerUnit)) / (holding.quantity * holding.averagePricePerUnit)
+        
+        let formatter = NumberFormatter()
+            formatter.maximumFractionDigits = 2
+            formatter.minimumFractionDigits = 2
+
+        return formatter.string(from: res as NSDecimalNumber) ?? "0.00"
+    }
+    
     func formatDouble(_ value: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
