@@ -28,9 +28,9 @@ extension Holding {
         guard sellQty <= self.quantity else { return }
         
         // Information that good to know, personally doesn't have an idea where to use or store so just keep it there
-        let sellRealizedValue = sellQty * sellPrice
-        let costBasis = self.averagePricePerUnit * sellQty
-        let realizedPnL = sellRealizedValue - costBasis
+//        let sellRealizedValue = sellQty * sellPrice
+//        let costBasis = self.averagePricePerUnit * sellQty
+//        let realizedPnL = sellRealizedValue - costBasis
         
         self.quantity -= sellQty
         self.updatedAt = .now

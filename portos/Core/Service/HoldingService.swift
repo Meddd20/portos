@@ -12,8 +12,8 @@ class HoldingService {
     private let portfolioRepository: PortfolioRepository
     private let transactionRepository: TransactionRepository
     
-    init(holdingReportository: HoldingRepository, portfolioRepository: PortfolioRepository, transactionRepository: TransactionRepository) {
-        self.holdingRepository = holdingReportository
+    init(holdingRepository: HoldingRepository, portfolioRepository: PortfolioRepository, transactionRepository: TransactionRepository) {
+        self.holdingRepository = holdingRepository
         self.portfolioRepository = portfolioRepository
         self.transactionRepository = transactionRepository
     }

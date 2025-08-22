@@ -41,7 +41,7 @@ class AppSourceRepository {
         
         descriptor.fetchLimit = 1
         
-        guard var appSource = try modelContext.fetch(descriptor).first else {
+        guard let appSource = try modelContext.fetch(descriptor).first else {
             return
         }
         

@@ -29,17 +29,7 @@ struct PortfolioRepository : PortfolioRepositoryProtocol {
         return try ctx.fetch(d)
     }
     
-    
-    @discardableResult
-    func createPortfolio(name: String, targetAmount: Decimal, targetDate: Date, currentPortfolioValue: Decimal) throws -> Portfolio {
-        let p = Portfolio(
-            name: name,
-            targetAmount: targetAmount,
-            targetDate: targetDate,
-            isActive: true,
-            createdAt: Date.now,
-            updatedAt: Date.now
-        )
+    func createPortfolio(p: Portfolio) throws {
         ctx.insert(p)
         try ctx.save()
     }

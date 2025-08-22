@@ -10,7 +10,7 @@ import SwiftData
 
 struct PortfolioScreen: View {
     @Environment(\.modelContext) private var modelContext
-    private var di: AppDI { AppDI.live(modelContext: modelContext) }
+    @Environment(\.di) var di
     
     @StateObject private var viewModel: PortfolioViewModel
     
@@ -87,6 +87,7 @@ struct PortfolioScreen: View {
                                 .foregroundColor(.blue)
                         }
                     }.padding(.top, 39)
+//                        .padding()
                     Divider().frame(height: 1)
                     
                     ForEach(assetPosition.holdings, id: \.id) { holding in
@@ -105,9 +106,10 @@ struct PortfolioScreen: View {
                                     .font(.system(size: 12))
                             }
                         }.padding(.top, 10)
+//                            .padding()
                     }
                 }
-            }.scrollIndicators(.hidden)  
+            }.scrollIndicators(.hidden)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -124,15 +126,15 @@ struct PortfolioScreen: View {
     }
 }
 
-//struct PortfolioScreen_PreviewWrapper: View {
-//    @Environment(\.modelContext) private var modelContext
-//
-//    var body: some View {
-//        let di = AppDI.live(modelContext: modelContext)
-//        PortfolioScreen(service: di.portfolioService)
-//    }
-//}
-//
+struct PortfolioScreen_PreviewWrapper: View {
+    @Environment(\.modelContext) private var modelContext
+
+    var body: some View {
+        let di = AppDI.live(modelContext: modelContext)
+        PortfolioScreen(service: di.portfolioService)
+    }
+}
+
 //#Preview {
 //    PortfolioScreen_PreviewWrapper()
 //}
