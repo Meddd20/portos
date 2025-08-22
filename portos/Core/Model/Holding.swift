@@ -15,7 +15,7 @@ final class Holding {
     @Relationship var portfolio: Portfolio
     
     var quantity: Decimal
-    var averagePricePerUnit: Decimal
+    var averagePricePerUnit: Decimal // average buying price per unit
     var createdAt: Date
     var updatedAt: Date
     

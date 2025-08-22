@@ -21,8 +21,7 @@ class PortfolioService {
         return portfolios
     }
     
-    // fungsi buat get portfolio values/get values dari setiap asset di portfolio
-    func getCurrentValue(holdings: [Holding]) throws -> Int {
+    func getValueByHoldings(holdings: [Holding]) throws -> Int {
         var portfolioValue: Decimal = 0.0
         
         for holding in holdings {
@@ -102,12 +101,21 @@ class PortfolioService {
         return (growthRateDouble, growthRateDouble > 0)
     }
     
+    func getGrowthRateByHoldings(holdings: [Holding], currentValue: Decimal) -> (Double, Bool) {
+        var initialCapital: Decimal = 0
+        
+        for holding in holdings {
+            initialCapital += (holding.averagePricePerUnit * holding.quantity)
+        }
+        guard initialCapital != 0 else { return (0, false) }
+        
+        let growthRate = (currentValue - initialCapital) / initialCapital
+        let growthRateDouble = (growthRate as NSDecimalNumber).doubleValue
+        
+        return (growthRateDouble, growthRateDouble > 0)
+    }
     
-//    func getGrowthRateNew(holdings: [Holding]) {
-//        for holding in holdings {
-//            <#body#>
-//        }
-//    }
+    // TODO: merge getGrowthRate & getGrowthRateByHoldings
     
     func getHoldings(portfolioName: String) throws -> [AssetPosition] {
         var holdings: [Holding] = []
