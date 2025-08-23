@@ -37,8 +37,13 @@ class TransactionService {
         self.holdingService = holdingService
     }
     
-    func getAllTransactions() throws -> [Transaction] {
-        try transactionRepository.getAllTransactions()
+    func getAllTransactions(portfolioId: UUID?) throws -> [Transaction] {
+        var transactions = try transactionRepository.getAllTransactions()
+        if portfolioId != nil {
+            return transactions.filter { $0.portfolio.id == portfolioId }
+        } else {
+            return transactions
+        }
     }
     
     func getHoldingTransactions(holdingId: UUID) throws -> [Transaction] {
@@ -418,7 +423,6 @@ class TransactionService {
                 }
             }
         } else {
-            let sameAssHolding = transferTransaction.toTransaction.holding
             let oldAmount = transferTransaction.amount
             let delta = amount - oldAmount
             

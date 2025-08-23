@@ -12,18 +12,29 @@ import SwiftData
 struct MockSeederV1 {
     let context: ModelContext
     
-    func wipe() throws {
-        try context.deleteAll(Transaction.self)
-        try context.deleteAll(Holding.self)
-        try context.deleteAll(Asset.self)
-        try context.deleteAll(Portfolio.self)
-        try context.save()
-    }
+//    func wipe() throws {
+//        try context.deleteAll(Transaction.self)
+//        try context.deleteAll(Holding.self)
+//        try context.deleteAll(Asset.self)
+//        try context.deleteAll(Portfolio.self)
+//        try context.save()
+//    }
     
     func seed() throws {
-        let app1 = AppSource(name: "Bibit")
-        let app2 = AppSource(name: "Stockbit")
-        let app3 = AppSource(name: "Binance")
+        let appBibit = AppSource(name: "Bibit")
+        let appBareksa = AppSource(name: "Bareksa")
+        let appStockbit = AppSource(name: "Stockbit")
+        let appAjaib = AppSource(name: "Ajaib")
+        let appIpot = AppSource(name: "IPOT")
+        let appMiraeAsset = AppSource(name: "Mirae Asset Sekuritas")
+        
+        let appCryptoBinance = AppSource(name: "Binance")
+        let appCryptoIndodax = AppSource(name: "Indodax")
+        let appCryptoPluang = AppSource(name: "Pluang")
+        let appTokocrypto = AppSource(name: "Tokocrypto")
+        let appTriv = AppSource(name: "Triv")
+        let appPintu = AppSource(name: "Pintu")
+        let appCoinbase = AppSource(name: "Coinbase")
         
         let asset1 = Asset(
             assetType: .Stocks,
@@ -166,7 +177,11 @@ struct MockSeederV1 {
             updatedAt: Date()
         )
         
-        context.insert(app1); context.insert(app2); context.insert(app3)
+        [
+            appBibit, appBareksa, appStockbit, appAjaib, appIpot, appMiraeAsset,
+            appCryptoBinance, appCryptoIndodax, appCryptoPluang, appTokocrypto,
+            appTriv, appPintu, appCoinbase
+        ].forEach { context.insert($0) }
         context.insert(asset1); context.insert(asset2); context.insert(asset3); context.insert(asset4); context.insert(asset5); context.insert(asset6)
         context.insert(portfolio1); context.insert(portfolio2)
         context.insert(holding1); context.insert(holding2); context.insert(holding3); context.insert(holding4); context.insert(holding5); context.insert(holding6); context.insert(holding7)
