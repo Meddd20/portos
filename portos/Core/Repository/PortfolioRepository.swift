@@ -29,9 +29,7 @@ struct PortfolioRepository : PortfolioRepositoryProtocol {
         return try ctx.fetch(d)
     }
     
-    
-    @discardableResult
-    func createPortfolio(p : Portfolio) throws{
+    func createPortfolio(p: Portfolio) throws {
         ctx.insert(p)
         try ctx.save()
     }

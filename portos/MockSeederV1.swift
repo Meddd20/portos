@@ -21,20 +21,9 @@ struct MockSeederV1 {
     }
     
     func seed() throws {
-        let app1 = AppSource(
-            name: "Bibit",
-            iconPath: "bibit"
-        )
-        
-        let app2 = AppSource(
-            name: "Stockbit",
-            iconPath: "stockbit"
-        )
-        
-        let app3 = AppSource(
-            name: "Binance",
-            iconPath: "binance"
-        )
+        let app1 = AppSource(name: "Bibit")
+        let app2 = AppSource(name: "Stockbit")
+        let app3 = AppSource(name: "Binance")
         
         let asset1 = Asset(
             assetType: .Stocks,
@@ -227,8 +216,7 @@ extension ModelContext {
 //    
 //    func seed() throws {
 //        let app1 = AppSource(
-//            name: "Bibit",
-//            iconPath: "bibit"
+//            name: "Bibi//
 //        )
 //        
 //        let app2 = AppSource(

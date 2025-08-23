@@ -16,6 +16,9 @@ final class Transaction {
     @Relationship var portfolio: Portfolio
     @Relationship var holding: Holding
     
+    @Relationship(inverse: \TransferTransaction.fromTransaction)
+    var transferTransaction: TransferTransaction?
+        
     var transactionType: TransactionType
     var quantity: Decimal
     var price: Decimal

@@ -9,17 +9,15 @@ import Foundation
 import SwiftData
 
 @Model
-final class AppSource {
+final class AppSource: Identifiable, Hashable {
     @Attribute(.unique) var id: UUID
     var name: String
-    var iconPath: String
     
     @Relationship(deleteRule: .cascade, inverse: \Transaction.app)
     var transactions: [Transaction] = []
     
-    init(name: String, iconPath: String) {
+    init(name: String) {
         self.id = UUID()
         self.name = name
-        self.iconPath = iconPath
     }
 }

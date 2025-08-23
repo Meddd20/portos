@@ -26,12 +26,14 @@ class TransactionService {
     private let holdingRepository: HoldingRepository
     private let transactionRepository: TransactionRepository
     private let portfolioRepository: PortfolioRepository
+    private let transferTransactionRepository: TransferTransactionRepository
     private let holdingService: HoldingService
     
-    init(transactionRepository: TransactionRepository, holdingRepository: HoldingRepository, portfolioRepository: PortfolioRepository, holdingService: HoldingService) {
+    init(transactionRepository: TransactionRepository, holdingRepository: HoldingRepository, portfolioRepository: PortfolioRepository, transferTransactionRepository: TransferTransactionRepository, holdingService: HoldingService) {
         self.transactionRepository = transactionRepository
         self.holdingRepository = holdingRepository
         self.portfolioRepository = portfolioRepository
+        self.transferTransactionRepository = transferTransactionRepository
         self.holdingService = holdingService
     }
     
@@ -85,7 +87,7 @@ class TransactionService {
             holding = newHolding
         }
                 
-        var transaction: Transaction = Transaction(
+        let transaction: Transaction = Transaction(
             app: appSource,
             asset: asset,
             portfolio: portfolio,
@@ -114,8 +116,8 @@ class TransactionService {
         tradeCurrency: Currency,
         exchangeRate: Decimal
     ) throws {
-        var portfolioAssetPosition = try? holdingService.getHoldingAssetDetail(holdingId: holding.id)
-        var accountPosition: [AccountPosition] = portfolioAssetPosition?.accounts ?? []
+        let portfolioAssetPosition = try? holdingService.getHoldingAssetDetail(holdingId: holding.id)
+        let accountPosition: [AccountPosition] = portfolioAssetPosition?.accounts ?? []
         
         guard let sellFromAccount = accountPosition.first(where: { $0.appSourceId == appSource.id }) else {
             throw TransactionError.accountNotFound
@@ -127,7 +129,7 @@ class TransactionService {
             try holding.applySellTransactions(sellQty: quantity, sellPrice: sellPrice, tradeCurrency: tradeCurrency, exchangeRate: exchangeRate)
         }
                 
-        var transaction: Transaction = Transaction(
+        let transaction: Transaction = Transaction(
             app: appSource,
             asset: asset,
             portfolio: portfolio,
@@ -159,8 +161,8 @@ class TransactionService {
     ) throws {
         guard destinationPortfolio.id != currentPortfolio.id else { throw TransferError.samePortfolio }
         
-        var portfolioAssetPosition = try holdingService.getHoldingAssetDetail(holdingId: holding.id)
-        var accountPosition: [AccountPosition] = portfolioAssetPosition?.accounts ?? []
+        let portfolioAssetPosition = try holdingService.getHoldingAssetDetail(holdingId: holding.id)
+        let accountPosition: [AccountPosition] = portfolioAssetPosition?.accounts ?? []
         
         guard let transferAssetFromApp = accountPosition.first(where: { $0.appSourceId == appSource.id }) else {
             throw TransferError.holdingNotFound
@@ -203,10 +205,8 @@ class TransactionService {
                 exchangeRate: exchangeRate
             )
         }
-        
-        let transferValue = quantity * transferAssetFromApp.avgCost
-        
-        var transferOutTransaction = Transaction(
+                
+        let transferOutTransaction = Transaction(
             app: appSource,
             asset: asset,
             portfolio: currentPortfolio,
@@ -214,7 +214,7 @@ class TransactionService {
             transactionType: .allocateOut,
             quantity: quantity,
             price: basisPerUnit,
-            costBasisPerUnit: holding.averagePricePerUnit,
+            costBasisPerUnit: basisPerUnit,
             date: date,
             tradeCurrency: tradeCurrency,
             exchangeRate: exchangeRate,
@@ -222,9 +222,7 @@ class TransactionService {
             updatedAt: .now
         )
         
-        transactionRepository.addTransaction(transferOutTransaction)
-    
-        var transferInTransaction = Transaction(
+        let transferInTransaction = Transaction(
             app: appSource,
             asset: asset,
             portfolio: destinationPortfolio,
@@ -240,152 +238,247 @@ class TransactionService {
             updatedAt: .now
         )
         
+        let transferTransaction = TransferTransaction(
+            date: date,
+            amount: quantity,
+            fromTransaction: transferOutTransaction,
+            toTransaction: transferInTransaction,
+            platform: appSource
+        )
+        
+        transferOutTransaction.transferTransaction = transferTransaction
+        transferInTransaction.transferTransaction = transferTransaction
+        
+        transactionRepository.addTransaction(transferOutTransaction)
         transactionRepository.addTransaction(transferInTransaction)
+        
+        transferTransactionRepository.addTransferTransaction(transferTransaction)
     }
     
-    func editTransaction(transactionId: UUID, amount: Decimal, price: Decimal, platform: AppSource, asset: Asset, portfolio:Portfolio, date: Date) throws {
+    private func revertHolding(holding: Holding, transaction: Transaction, quantity: Decimal, price: Decimal, basis: Decimal) throws {
+        try holdingRepository.updateHolding(id: holding.id) { holding in
+            switch transaction.transactionType {
+            case .buy:
+                let oldCost = holding.quantity * holding.averagePricePerUnit
+                let newQty = holding.quantity - quantity
+                let newCost = oldCost - (quantity * price)
+                holding.quantity = newQty
+                holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
+                
+            case .sell:
+                let oldCost = holding.quantity * holding.averagePricePerUnit
+                let newQty = holding.quantity + quantity
+                let newCost = oldCost + (quantity * basis)
+                holding.quantity = newQty
+                holding.averagePricePerUnit = newQty == 0 ? 0 : newCost / newQty
+                
+            default: break
+            }
+            holding.updatedAt = .now
+        }
+    }
+    
+    private func applyHolding(holding: Holding, transaction: Transaction, qty: Decimal, price: Decimal, basis: Decimal) throws {
+        try holdingRepository.updateHolding(id: holding.id) { holding in
+            switch transaction.transactionType {
+            case .buy:
+                let oldCost = holding.quantity * holding.averagePricePerUnit
+                let newQty = holding.quantity + qty
+                let newCost = oldCost + (qty * price)
+                holding.quantity = newQty
+                holding.averagePricePerUnit = newQty == 0 ? 0 : newCost / newQty
+            case .sell:
+                let oldCost = holding.quantity * holding.averagePricePerUnit
+                let newQty = holding.quantity - qty
+                let newCost = oldCost - (qty * basis)
+                holding.quantity = newQty
+                holding.averagePricePerUnit = newQty == 0 ? 0 : newCost / newQty
+            default: break
+            }
+            holding.updatedAt = .now
+        }
+    }
+    
+    
+    func editTransaction(transactionId: UUID, amount: Decimal, price: Decimal, platform: AppSource, asset: Asset, portfolio: Portfolio, date: Date) throws {
         guard let transaction = try transactionRepository.getDetailTransaction(id: transactionId) else {
             return
         }
-        
+                
         let isQuantityChange: Bool = transaction.quantity != amount
         let isPriceChange: Bool = transaction.price != price
         let isPlatformChange: Bool = transaction.app.id != platform.id
         let isPortfolioChange: Bool = transaction.portfolio.id != portfolio.id
         let isDateChange: Bool = transaction.date != date
         
-        let txsQuantity = transaction.quantity
-        let tradePrice = transaction.price
+        let oldQty = transaction.quantity
+        let oldPrice = transaction.price
         guard let basis = transaction.costBasisPerUnit else {
             throw TransactionError.repositoryError("Missing costBasisPerUnit on sell")
         }
         
         if isPortfolioChange {
-            // Check if there's a holding available for that platform
-            if let holding = try holdingRepository.getHoldingByAssetAndPortfolio(portfolioId: portfolio.id, assetId: asset.id) {
-                
-                // Change the holding's quantity, averagePricePerUnit, and updatedAt in both current and destination
-                // Change the currentPortfolioValue in the current and destination portfolio
-                switch transaction.transactionType {
-                case .buy:
-                    try holdingRepository.updateHolding(id: holding.id) { holding in
-                        let oldQty = holding.quantity
-                        let oldCost = oldQty * holding.averagePricePerUnit
-                        let newQty = oldQty - txsQuantity
-                        let newCost = oldCost - (txsQuantity * tradePrice)
-                        
-                        holding.quantity = newQty
-                        holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                        holding.updatedAt = .now
-                    }
-                                                            
-                case .sell:
-                    try holdingRepository.updateHolding(id: holding.id) { holding in
-                        let oldQty = holding.quantity
-                        let oldCost = oldQty * holding.averagePricePerUnit
-                        let newQty = oldQty + txsQuantity
-                        let newCost = oldCost + (txsQuantity * basis)
-                        
-                        holding.quantity = newQty
-                        holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                        holding.updatedAt = .now
-                    }
-                                                            
-                case .allocateIn:
-                    try holdingRepository.updateHolding(id: holding.id) { holding in
-                        let oldQty = holding.quantity
-                        let oldCost = oldQty * holding.averagePricePerUnit
-                        let newQty = oldQty - txsQuantity
-                        let newCost = oldCost - (txsQuantity * basis)
-                        
-                        holding.quantity = newQty
-                        holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                        holding.updatedAt = .now
-                    }
-                                        
-                case .allocateOut:
-                    try holdingRepository.updateHolding(id: holding.id) { holding in
-                        let oldQty = holding.quantity
-                        let oldCost = oldQty * holding.averagePricePerUnit
-                        let newQty = oldQty + txsQuantity
-                        let newCost = oldCost + (txsQuantity * basis)
-                        
-                        holding.quantity = newQty
-                        holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                        holding.updatedAt = .now
-                    }
+            
+            let oldHolding = transaction.holding
+            try revertHolding(holding: oldHolding, transaction: transaction, quantity: oldQty, price: oldPrice, basis: basis)
+            
+            if let newHolding = try holdingRepository.getHoldingByAssetAndPortfolio(portfolioId: portfolio.id, assetId: asset.id) {
+                try applyHolding(holding: newHolding, transaction: transaction, qty: amount, price: price, basis: basis)
+            } else {
+                // bikin holding baru hanya kalau transaksi ini BUY
+                if transaction.transactionType == .buy {
+                    let newHolding = Holding(
+                        asset: asset,
+                        portfolio: portfolio,
+                        quantity: amount,
+                        averagePricePerUnit: price,
+                        createdAt: .now,
+                        updatedAt: .now
+                    )
+                    try holdingRepository.addHolding(newHolding)
+                } else {
+                    throw TransactionError.repositoryError("Destination holding not found for sell/transfer")
                 }
             }
-        }
-        
-        if isPriceChange || isQuantityChange {
-            // Change the holding's quantity, averagePricePerUnit, and updatedAt in both current and destination
-            // Change the currentPortfolioValue in the current and destination portfolio
+            
+        } else if isQuantityChange || isPriceChange {
             let holding = transaction.holding
-
-            switch transaction.transactionType {
-            case .buy:
-                try holdingRepository.updateHolding(id: holding.id) { holding in
-                    let oldQty = holding.quantity
-                    let oldCost = oldQty * holding.averagePricePerUnit
-                    let newQty = oldQty - txsQuantity
-                    let newCost = oldCost - (txsQuantity * tradePrice)
-                    
-                    holding.quantity = newQty
-                    holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                    holding.updatedAt = .now
-                }
-                                                
-            case .sell:
-                try holdingRepository.updateHolding(id: holding.id) { holding in
-                    let oldQty = holding.quantity
-                    let oldCost = oldQty * holding.averagePricePerUnit
-                    let newQty = oldQty + txsQuantity
-                    let newCost = oldCost + (txsQuantity * basis)
-                    
-                    holding.quantity = newQty
-                    holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                    holding.updatedAt = .now
-                }
-                
-            case .allocateIn:
-                try holdingRepository.updateHolding(id: holding.id) { holding in
-                    let oldQty = holding.quantity
-                    let oldCost = oldQty * holding.averagePricePerUnit
-                    let newQty = oldQty - txsQuantity
-                    let newCost = oldCost - (txsQuantity * basis)
-                    
-                    holding.quantity = newQty
-                    holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                    holding.updatedAt = .now
-                }
-                                
-            case .allocateOut:
-                try holdingRepository.updateHolding(id: holding.id) { holding in
-                    let oldQty = holding.quantity
-                    let oldCost = oldQty * holding.averagePricePerUnit
-                    let newQty = oldQty + txsQuantity
-                    let newCost = oldCost + (txsQuantity * basis)
-                    
-                    holding.quantity = newQty
-                    holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost / newQty)
-                    holding.updatedAt = .now
-                }
-                
-            }
+            // revert posisi lama
+            try revertHolding(holding: holding, transaction: transaction, quantity: oldQty, price: oldPrice, basis: basis)
+            // apply posisi baru
+            try applyHolding(holding: holding, transaction: transaction, qty: amount, price: price, basis: basis)
         }
         
-        // There's nothing changing
-        if !(isQuantityChange || isPriceChange || isPlatformChange || isPortfolioChange || isDateChange) {
+        if isQuantityChange || isPriceChange || isPlatformChange || isPortfolioChange || isDateChange {
+            try transactionRepository.editTransaction(id: transactionId) { tx in
+                if isQuantityChange { tx.quantity = amount }
+                if isPriceChange { tx.price = price }
+                if isPlatformChange { tx.app = platform }
+                if isPortfolioChange { tx.portfolio = portfolio }
+                if isDateChange { tx.date = date }
+            }
+        }
+    }
+            
+    
+    
+    func editTransferTransaction(transferTransactionId: UUID, amount: Decimal, portfolioDestination: Portfolio, platform: AppSource, asset: Asset) throws {
+        guard let transferTransaction = try transferTransactionRepository.getTransferTransaction(id: transferTransactionId) else { return }
+        
+        var isAmountChange: Bool {
+            transferTransaction.amount != amount
+        }
+        var isPortfolioDestinationChange: Bool {
+            transferTransaction.toTransaction.portfolio.id != portfolioDestination.id
+        }
+        var isPlatformChange: Bool {
+            transferTransaction.platform != platform
+        }
+        
+        guard isAmountChange || isPortfolioDestinationChange || isPlatformChange else {
             return
         }
         
-        try transactionRepository.editTransaction(id: transactionId) { transaction in
-            if isQuantityChange { transaction.quantity = amount }
-            if isPriceChange { transaction.price = price }
-            if isPlatformChange { transaction.app = platform }
-            if isPortfolioChange { transaction.portfolio = portfolio }
-            if isDateChange { transaction.date = date }
+        if isPortfolioDestinationChange {
+            try transferTransactionRepository.editTransferTransaction(id: transferTransactionId) { transferTransaction in
+                let oldTransaction = transferTransaction.toTransaction
+                let oldHolding = oldTransaction.holding
+                guard let basis = oldTransaction.costBasisPerUnit else {
+                    throw TransactionError.repositoryError("Missing costBasisPerUnit on transfer")
+                }
+                
+                //Update Old Holding On Old Portfolio
+                try holdingRepository.updateHolding(id: oldHolding.id) { holding in
+                    let oldQty = oldHolding.quantity
+                    let oldCost = oldHolding.quantity * oldHolding.averagePricePerUnit
+                    let newQty = oldQty - amount
+                    let newCost = oldCost - (amount * basis)
+                    
+                    holding.quantity = newQty
+                    holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost/newQty)
+                    holding.updatedAt = .now
+                }
+                
+                //Update Holding On New Portfolio
+                if let holding = try holdingRepository.getHoldingByAssetAndPortfolio(portfolioId: portfolioDestination.id, assetId: asset.id) {
+                    try holdingRepository.updateHolding(id: holding.id) { holding in
+                        holding.quantity += amount
+                        holding.averagePricePerUnit = ((holding.quantity * basis) + (holding.averagePricePerUnit * (holding.quantity - amount))) / holding.quantity
+                    }
+                    
+                } else {
+                    try holdingRepository.addHolding(Holding(
+                        asset: asset,
+                        portfolio: portfolioDestination,
+                        quantity: amount,
+                        averagePricePerUnit: basis,
+                        createdAt: .now,
+                        updatedAt: .now
+                    ))
+                }
+            }
+        } else {
+            let sameAssHolding = transferTransaction.toTransaction.holding
+            let oldAmount = transferTransaction.amount
+            let delta = amount - oldAmount
+            
+            if delta != 0 {
+                let oldHolding = transferTransaction.fromTransaction.holding
+                guard let basis = transferTransaction.fromTransaction.costBasisPerUnit else {
+                    throw TransactionError.repositoryError("Missing costBasisPerUnit on transfer")
+                }
+                
+                try holdingRepository.updateHolding(id: oldHolding.id) { holding in
+                    let oldQty = holding.quantity
+                    let oldCost = holding.quantity * holding.averagePricePerUnit
+                    let newQty = oldQty - delta
+                    let newCost = oldCost - (delta * basis)
+                    
+                    holding.quantity = newQty
+                    holding.averagePricePerUnit = (newQty == 0) ? 0 : (newCost/newQty)
+                    holding.updatedAt = .now
+                }
+                
+                let newHolding = transferTransaction.toTransaction.holding
+                guard let basis = transferTransaction.toTransaction.costBasisPerUnit else {
+                    throw TransactionError.repositoryError("Missing costBasisPerUnit on transfer")
+                }
+                
+                try holdingRepository.updateHolding(id: newHolding.id) { holding in
+                    let oldQty = holding.quantity
+                    let oldCost = oldQty * holding.averagePricePerUnit
+                    let newQty = oldQty + delta
+                    let newCost = oldCost + (delta * basis)
+                    
+                    holding.quantity = newQty
+                    holding.averagePricePerUnit = newQty == 0 ? 0 : (newCost/newQty)
+                    holding.updatedAt = .now
+                }
+            }
+        }
+        try transactionRepository.editTransaction(id: transferTransaction.fromTransaction.id) { transaction in
+            if isAmountChange {
+                transaction.quantity = amount
+            }
+            
+            if isPlatformChange {
+                transaction.app = platform
+            }
+        }
+        
+        try transactionRepository.editTransaction(id: transferTransaction.toTransaction.id) { transaction in
+            if isAmountChange {
+                transaction.quantity = amount
+            }
+            
+            if isPlatformChange {
+                transaction.app = platform
+            }
+        }
+        
+        try transferTransactionRepository.editTransferTransaction(id: transferTransactionId) { transferTransaction in
+            transferTransaction.amount = amount
+            transferTransaction.platform = platform
         }
     }
     
@@ -394,8 +487,12 @@ class TransactionService {
             return
         }
         
-        let portfolio = transaction.portfolio
+        let transferTransaction = transaction.transferTransaction
         
+        if let transferTransaction {
+            try transferTransactionRepository.deleteTransferTransaction(id: transferTransaction.id)
+        }
+                
         let holdingId = transaction.holding.id
         let txsQuantity = transaction.quantity
         let tradePrice = transaction.price
@@ -462,6 +559,8 @@ class TransactionService {
             }
         }
         
-        try transactionRepository.deleteTransaction(id: transactionId)
+        if transferTransaction == nil {
+            try transactionRepository.deleteTransaction(id: transactionId)
+        }
     }
 }
