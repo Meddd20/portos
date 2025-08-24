@@ -15,8 +15,9 @@ struct portosApp: App {
     
     init() {
         // build the SwiftData container
+        let storeURL = URL.documentsDirectory.appending(path: "Portos.store")
+        let cfg = ModelConfiguration(url: storeURL)
         let schema = Schema([AppSource.self, Asset.self, Portfolio.self, Holding.self, Transaction.self])
-        let cfg = ModelConfiguration(isStoredInMemoryOnly: true)
         container = try! ModelContainer(for: schema, configurations: cfg)
         
         // make a ModelContext
@@ -45,7 +46,7 @@ private func runSeederIfNeeded(ctx: ModelContext) {
     let key = "seeded.v1"
     if !UserDefaults.standard.bool(forKey: key) {
         Task { @MainActor in
-            try? MockSeederV1(context: ctx).wipe()
+//            try? MockSeederV1(context: ctx).wipe()
             try? MockSeederV1(context: ctx).seed()
             UserDefaults.standard.set(true, forKey: key)
         }

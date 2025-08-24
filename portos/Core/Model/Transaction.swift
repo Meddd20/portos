@@ -16,7 +16,7 @@ final class Transaction {
     @Relationship var portfolio: Portfolio
     @Relationship var holding: Holding
     
-    @Relationship(inverse: \TransferTransaction.fromTransaction)
+    @Relationship(deleteRule: .cascade, inverse: \TransferTransaction.fromTransaction)
     var transferTransaction: TransferTransaction?
         
     var transactionType: TransactionType

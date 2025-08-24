@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 class TradeTransactionViewModel: ObservableObject {
     @Published var amountText: String = "" {
         didSet { updateIsDataFilled() }
@@ -39,87 +40,76 @@ class TradeTransactionViewModel: ObservableObject {
     private let transactionId: UUID?
     private var transaction: Transaction?
     let transactionMode: TransactionMode
+    let asset: Asset
+    let currentPortfolioAt: Portfolio?
     
-    var platforms: [AppSource] = []
-    var portfolios: [Portfolio] = []
+    @Published var platforms: [AppSource] = []
+    @Published var portfolios: [Portfolio] = []
     
-    init(di: AppDI, transactionMode: TransactionMode, transactionId: UUID? = nil) {
+    init(
+        di: AppDI,
+        transactionMode: TransactionMode,
+        transactionId: UUID? = nil,
+        asset: Asset,
+        currentPortfolioAt: Portfolio?
+    ) {
         self.portfolioService = di.portfolioService
         self.transactionService = di.transactionService
         self.appSourceRepository = di.appSourceRepository
         self.transactionMode = transactionMode
         self.transactionId = transactionId
+        self.asset = asset
+        self.currentPortfolioAt = currentPortfolioAt
+        self.portfolio = currentPortfolioAt
     }
         
-    func loadData() async {
+    @MainActor
+    func loadData() {
         do {
             platforms = try appSourceRepository.getAllAppSource()
             portfolios = try portfolioService.getAllPortfolios()
+                        
+            for p in platforms {
+                print(p.name)
+            }
             
-//            platforms = [
-//                AppSource(name: "Bibit"),
-//                AppSource(name: "Stockbit"),
-//                AppSource(name: "Binance")
-//            ]
-//            
-//            portfolios = [
-//                Portfolio(
-//                    name: "Retirement Fund",
-//                    targetAmount: 1_000_000_000,
-//                    targetDate: Date().addingTimeInterval(60*60*24*365),
-//                    isActive: true,
-//                    createdAt: Date(),
-//                    updatedAt: Date()
-//                ),
-//                Portfolio(
-//                    name: "Vacation Fund",
-//                    targetAmount: 100_000_000,
-//                    targetDate: Date().addingTimeInterval(60*60*24*180),
-//                    isActive: true,
-//                    createdAt: Date(),
-//                    updatedAt: Date()
-//                ),
-//                Portfolio(
-//                    name: "Education Fund",
-//                    targetAmount: 500_000_000,
-//                    targetDate: Date().addingTimeInterval(60*60*24*365*5),
-//                    isActive: false,
-//                    createdAt: Date(),
-//                    updatedAt: Date()
-//                )
-//            ]
+            for po in portfolios {
+                print(po.name)
+            }
         } catch {
             print("Error fetching apps: \(error)")
             return
         }
     }
     
-    func proceedTransaction() async {
+    func proceedTransaction() {
         guard isDataFilled else { return }
         
         switch transactionMode {
         case .buy:
-            await addBuyTransaction()
+            addBuyTransaction()
         case .liquidate:
-            await addLiquidateTransaction()
+            addLiquidateTransaction()
         case .editBuy, .editLiquidate:
-            await editTransaction()
+            editTransaction()
         }
     }
     
-    func addBuyTransaction() async {
+    func addBuyTransaction() {
         do {
+            guard isDataFilled, let platform = platform, let portfolio = portfolio else { return }
+            
             if isDataFilled {
-//                try transactionService.recordBuyTransaction(
-//                    appSource: platform ?? AppSource(name: "Unknown"),
-//                    asset: <#T##Asset#>,
-//                    portfolio: portfolio ?? Portfolio(name: "Unknown"),
-//                    quantity: amount,
-//                    price: price,
-//                    date: purchaseDate,
-//                    tradeCurrency: <#T##Currency#>,
-//                    exchangeRate: <#T##Decimal#>
-//                )
+                try transactionService.recordBuyTransaction(
+                    appSource: platform,
+                    asset: asset,
+                    portfolio: portfolio,
+                    quantity: amount,
+                    price: price,
+                    date: purchaseDate,
+                    tradeCurrency: .usd,
+                    exchangeRate: 16586
+                )
                 
                 didFinishTransaction = true
             }
@@ -129,7 +119,7 @@ class TradeTransactionViewModel: ObservableObject {
         }
     }
     
-    func addLiquidateTransaction() async {
+    func addLiquidateTransaction() {
         do {
 //            try transactionService.recordSellTransaction(
 //                appSource: platform,
@@ -148,7 +138,7 @@ class TradeTransactionViewModel: ObservableObject {
         }
     }
     
-    func editTransaction() async {
+    func editTransaction() {
         do {
 //            try transactionService.editTransaction(
 //                transactionId: transactionId,
@@ -165,21 +155,21 @@ class TradeTransactionViewModel: ObservableObject {
         }
     }
     
-    func getDetailTransaction() async {
+    func getDetailTransaction() {
         guard let transactionId, transactionMode.isEdit else { return }
         
         do {
             transaction = transactionService.getDetailTransaction(transactionId: transactionId)
             
-            await MainActor.run {
-                if let transaction {
-                    self.amountText = transaction.quantity.description
-                    self.priceText = transaction.price.description
-                    self.platform = transaction.app
-                    self.portfolio = transaction.portfolio
-                    self.purchaseDate = transaction.date
-                }
-            }
+//            MainActor.run {
+//                if let transaction {
+//                    self.amountText = transaction.quantity.description
+//                    self.priceText = transaction.price.description
+//                    self.platform = transaction.app
+//                    self.portfolio = transaction.portfolio
+//                    self.purchaseDate = transaction.date
+//                }
+//            }
         } catch {
             print("Error loading transaction: \(error)")
             return

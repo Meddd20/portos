@@ -43,16 +43,25 @@ enum TransactionMode {
 
 struct TradeTransactionView: View {
     @Environment(\.di) private var di
+    @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: TradeTransactionViewModel
     let transactionMode: TransactionMode
+    let asset: Asset
+    let portfolio: Portfolio?
         
-    init(di: AppDI, transactionMode: TransactionMode) {
+    init(di: AppDI, transactionMode: TransactionMode, asset: Asset, currentPortfolioAt: Portfolio? = nil) {
+        self.transactionMode = transactionMode
+        self.asset = asset
+        self.portfolio = currentPortfolioAt
+        
         _viewModel = StateObject(
             wrappedValue: TradeTransactionViewModel(
-                di: di, transactionMode: transactionMode
+                di: di,
+                transactionMode: transactionMode,
+                asset: asset,
+                currentPortfolioAt: currentPortfolioAt
             )
         )
-        self.transactionMode = transactionMode
     }
     
     var body: some View {
@@ -60,7 +69,7 @@ struct TradeTransactionView: View {
             Spacer()
                 .frame(height: 40)
             
-            Text("BBCA")
+            Text(asset.symbol)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .font(.title)
                 .fontWeight(.bold)
@@ -68,7 +77,7 @@ struct TradeTransactionView: View {
             Spacer()
                 .frame(height: 9)
                 
-            Text("PT Bank Central Asia Tbk.")
+            Text(asset.name)
                 .frame(maxWidth: .infinity, alignment: .center)
             
             Spacer()
@@ -81,7 +90,7 @@ struct TradeTransactionView: View {
             
             VStack {
                 FormRow(label: "Amount") {
-                    TextField("0 Lot", text: $viewModel.amountText)
+                    TextField("0 \(viewModel.asset.assetType.unit)", text: $viewModel.amountText)
                         .keyboardType(.decimalPad)
                 }
                 
@@ -103,10 +112,10 @@ struct TradeTransactionView: View {
                     .padding(.vertical, 10)
                     .ignoresSafeArea(edges: .all)
                     .frame(maxWidth: .infinity)
-                
+                                
                 FormRow(label: "Platform") {
                     Menu {
-                        ForEach(viewModel.platforms, id: \.id) { platform in
+                        ForEach(viewModel.platforms, id: \.persistentModelID) { platform in
                             Button(platform.name) {
                                 viewModel.platform = platform
                             }
@@ -136,7 +145,7 @@ struct TradeTransactionView: View {
                             .font(.system(size: 12))
                             .tint(.black)
                     }
-                    
+                    .id(viewModel.platforms.map(\.persistentModelID))
                 }
                 
                 Divider()
@@ -146,7 +155,7 @@ struct TradeTransactionView: View {
                 
                 FormRow(label: "Portfolio") {
                     Menu {
-                        ForEach(viewModel.portfolios, id: \.id) { portfolio in
+                        ForEach(viewModel.portfolios, id: \.persistentModelID) { portfolio in
                             Button(portfolio.name) {
                                 viewModel.portfolio = portfolio
                             }
@@ -202,9 +211,7 @@ struct TradeTransactionView: View {
             Spacer()
             
             Button(action: {
-                Task {
-                    Task { await viewModel.proceedTransaction() }
-                }
+                viewModel.proceedTransaction()
             }, label: {
                 Text("Confirm")
                     .buttonStyle(.borderedProminent)
@@ -216,25 +223,44 @@ struct TradeTransactionView: View {
             .disabled(viewModel.isDataFilled ? false : true)
         }
         .onAppear {
-            Task {
-                await viewModel.loadData()
-                await viewModel.getDetailTransaction()
-            }
+            viewModel.loadData()
+            viewModel.getDetailTransaction()
         }
-        .navigationBarTitle(transactionMode.fullTitle ?? "\(transactionMode.titlePrefix!) Stock")
+        .navigationBarTitle(transactionMode.fullTitle ?? "\(transactionMode.titlePrefix!) \(asset.assetType.displayName)")
         .navigationBarTitleDisplayMode(.inline)
         .padding(.bottom, 26)
         .navigationDestination(isPresented: $viewModel.didFinishTransaction) {
             PortfolioScreen(service: viewModel.portfolioService)
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem (placement: .topBarLeading) {
+                Button (action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(.black)
+                }
+            }
         }
     }
 }
 
 #Preview {
     let di = AppDI.preview
+    let asset5 = Asset(
+        assetType: .Crypto,
+        symbol: "BTC",
+        name: "Bitcoin",
+        currency: .usd,
+        country: "Outside Indonesia",
+        lastPrice: 65000, // harga BTC dalam USD
+        asOf: Date()
+    )
     
     TradeTransactionView(
         di: .preview,
-        transactionMode: .buy
+        transactionMode: .buy,
+        asset: asset5
     )
 }

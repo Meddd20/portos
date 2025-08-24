@@ -26,6 +26,7 @@ final class PortfolioViewModel: ObservableObject {
     func load() {
         do {
             portfolios = try service.getAllPortfolios()
+            print(portfolios.count)
         }
         catch { self.error = error.localizedDescription }
     }
@@ -101,6 +102,8 @@ final class PortfolioViewModel: ObservableObject {
             case .Options:
                 return ""
             case .Stocks:
+                return "\(quantity) share"
+            case .StocksId:
                 return "\(quantity) lot"
             case .Crypto:
                 return "\(quantity)"

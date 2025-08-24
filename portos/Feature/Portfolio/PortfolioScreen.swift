@@ -22,6 +22,8 @@ struct PortfolioScreen: View {
     @State private var selectionID: UUID? = nil
     @State private var selectedIndex: Int = 0
     @State private var showingAdd = false
+    @State private var showTrade = false
+    @State private var showTransactionHistory = false
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
@@ -58,8 +60,29 @@ struct PortfolioScreen: View {
                 }
                 Spacer().frame(width: 391, height: 184).padding(.top, 23.04)
                 HStack {
-                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History", action: { print("history clicked") })
-                    CircleButton(systemName: "plus", title: "Add", action: { print("add clicked") })
+                    
+                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
+                        showTransactionHistory = true
+                    }
+                    .navigationDestination(isPresented: $showTransactionHistory) {
+                        if selectedIndex == 0 {
+                            TransactionHistoryView(di: di)
+                        } else {
+                            TransactionHistoryView(di: di, portfolio: portfolios[selectedIndex - 1])
+                        }
+                    }
+                    
+                    CircleButton(systemName: "plus", title: "Add") {
+                        showTrade = true
+                    }
+                    .navigationDestination(isPresented: $showTrade) {
+                        if selectedIndex == 0 {
+                            SearchAssetView(di: di, currentPortfolioAt: nil)
+                        } else {
+                            SearchAssetView(di: di, currentPortfolioAt: portfolios[selectedIndex - 1])
+                        }
+                    }
+                    
                     CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
                 }
                 ForEach(viewModel.assetPositions, id: \.id) { assetPosition in
@@ -90,10 +113,10 @@ struct PortfolioScreen: View {
                                     .font(.system(size: 12))
                             }
                         }.padding(.top, 10)
-//                            .padding()
                     }
                 }
             }.scrollIndicators(.hidden)
+                .padding()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
