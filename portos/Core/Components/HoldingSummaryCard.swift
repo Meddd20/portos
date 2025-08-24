@@ -1,5 +1,5 @@
 //
-//  CardApp.swift
+//  HoldingSummaryCard.swift
 //  portos
 //
 //  Created by James Silaban on 23/08/25.
@@ -7,42 +7,81 @@
 
 import SwiftUI
 
-struct CardApp: View {
+struct HoldingSummaryCard: View {
+    // MARK: Formatting
+    private var maskedIDR: String { "••••••••" }
+    let platform: String
+    let totalValue: Double
+    let quantityLabel: String
+    let currentPrice: Double
+    let averagePrice: Double
+    
+    // Mark: Local UI State
+    @Binding var showAmounts: Bool
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Bibit")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 32) {
+            // Platform
+            Text(platform)
+                .font(.body)
             
             
-            Text("Rp8,000,000")
-                .font(.title)
-                .fontWeight(.bold)
-                .monospacedDigit()
-            
-            Text("8 lot")
-                .
-            
+            VStack(alignment: .leading){
+                // Amount
+                Text(showAmounts ? cashAmount(totalValue) : maskedIDR)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                // Quantity
+                Text(quantityLabel)
+                    .font(.body)
+                    .fontWeight(.regular)
+            }
             
             HStack {
-                VStack{
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Curr. Price")
-                    Text("3.800")
+                        .font(.subheadline)
+                        .fontWeight(.light)
+                    Text(cashAmount(currentPrice))
+                        .font(.subheadline)
+                        .fontWeight(.regular)
                 }
-                VStack{
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 4){
                     Text("Avg. Price")
-                    Text("3.800")
+                        .font(.subheadline)
+                        .fontWeight(.light)
+                    Text(cashAmount(averagePrice))
+                        .font(.subheadline)
+                        .fontWeight(.regular)
                 }
             }
         }
-        .frame(width: .infinity)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 25)
+        .frame(width: 300)
         .background(
-            Color(.systemGray5)
+            Color.blue.opacity(0.1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(
+            cornerRadius: 28,
+            style: .continuous)
+        )
     }
 }
 
 #Preview {
-    CardApp()
+    HoldingSummaryCard(
+        platform: "Bibit",
+        totalValue: 8_000_000.0,
+        quantityLabel: "8 Lot",
+        currentPrice: 3_800.0,
+        averagePrice: 3_800.0,
+        showAmounts: .constant(true)
+    )
 }
