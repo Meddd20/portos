@@ -15,12 +15,15 @@ final class PortfolioViewModel: ObservableObject {
     @Published var portfolioValue: Int = 0
     @Published var profitAmount: Int = 20
     @Published var growthRate: String = "5.5"
-    @Published var assetPositions: [AssetPosition] = []
+//    @Published var assetPositions: [AssetPosition] = []
+    
+    @Published var portfolioOverview: PortfolioOverview = PortfolioOverview(portfolioValue: "default", portfolioGrowthRate: "default", portfolioProfitAmount: "default", groupItems: [])
     
     private let service: PortfolioService
 
     init(service: PortfolioService) {
         self.service = service
+        getPortfolioOverview()
     }
 
     func load() {
@@ -57,13 +60,13 @@ final class PortfolioViewModel: ObservableObject {
         }
     }
     
-    func getHoldings(portfolioName: String) {
-        do {
-            assetPositions = try service.getHoldings(portfolioName: portfolioName)
-        } catch {
-            self.error = error.localizedDescription
-        }
-    }
+//    func getHoldings(portfolioName: String) {
+//        do {
+//            assetPositions = try service.getHoldings(portfolioName: portfolioName)
+//        } catch {
+//            self.error = error.localizedDescription
+//        }
+//    }
     
     func getValue(holdings: [Holding]) -> Int {
         var value: Int = 0
@@ -90,24 +93,12 @@ final class PortfolioViewModel: ObservableObject {
         return rate
     }
     
-    func getHoldingQuantity(holding: Holding, assetType: AssetType) -> String {
-        let quantity = holding.quantity
-        
-        switch assetType {
-            case .Bonds:
-                return "Rp \(quantity)"
-            case .MutualFunds:
-                return "\(quantity)"
-            case .Options:
-                return ""
-            case .Stocks:
-                return "\(quantity) lot"
-            case .Crypto:
-                return "\(quantity)"
-            case .ETF:
-                return "\(quantity) eth"
-        }
-    }
+//    func getHoldingQuantity(holding: Holding, group: String) -> String {
+//        let quantity = holding.quantity
+//        
+//        
+//        }
+//    }
     
     func getHoldingValue(holding: Holding) -> String {
         return "\(holding.quantity * holding.asset.lastPrice)"
@@ -121,6 +112,21 @@ final class PortfolioViewModel: ObservableObject {
             formatter.minimumFractionDigits = 2
 
         return formatter.string(from: res as NSDecimalNumber) ?? "0.00"
+    }
+    
+    func getPortfolioOverview(portfolioName: String? = nil) {
+        do {
+            if portfolioName == nil {
+                portfolioOverview = try service.getPortfolioOverview()
+            } else {
+                portfolioOverview = try service.getPortfolioOverviewByGoal(portfolioName!)
+            }
+            
+            print("portfolioOverview: ------- \(portfolioOverview)")
+        }
+        catch {
+            self.error = error.localizedDescription
+        }
     }
     
     func formatDouble(_ value: Double) -> String {
