@@ -99,7 +99,7 @@ struct PortfolioScreen: View {
                             Text("Rp \(item.value!)")
                         }
                     }.padding(.top, 39)
-//                        .padding()
+                    
                     Divider().frame(height: 1)
                     
                     ForEach(item.assets, id: \.id) { asset in

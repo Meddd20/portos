@@ -21,127 +21,21 @@ class PortfolioService {
         return portfolios
     }
     
-    func getValueByHoldings(holdings: [Holding]) throws -> Int {
-        var portfolioValue: Decimal = 0.0
-        
-        for holding in holdings {
-            portfolioValue += (holding.quantity * holding.asset.lastPrice)
-        }
-        
-        return NSDecimalNumber(decimal: portfolioValue).intValue
-    }
-    
-    func getPortfolioValue(portfolio: String) throws -> Int {
-        var holdings: [Holding] = try holdingRepository.getAllHoldings()
-        
-        if portfolio != "All" {
-            holdings = holdings
-                .filter { $0.portfolio.name == portfolio }
-        }
-        
-        var portfolioValue: Decimal = 0.0
-        for holding in holdings {
-            portfolioValue += holding.quantity * holding.asset.lastPrice
-        }
-        
-        return NSDecimalNumber(decimal: portfolioValue).intValue
-    }
-    
-    func getProfitAmount(portfolioName: String, valueInPortfolio: Int) throws -> (Int, Bool) {
-        var initialCapital: Decimal = 0
-        let valueInPortfolioDecimal = Decimal(valueInPortfolio)
-        
-        if portfolioName != "All" {
-            let holdings = try holdingRepository.getHoldings(byPortfolioName: portfolioName)
-            for holding in holdings {
-                initialCapital += (holding.averagePricePerUnit * holding.quantity)
-            }
-        } else {
-            let holdings = try holdingRepository.getAllHoldings()
-            for holding in holdings {
-                initialCapital += (holding.averagePricePerUnit * holding.quantity)
-            }
-        }
-        
-        print("profitAmount1 ===== pakai holding.averagePricePerUnit * holding.quantity")
-        let profitAmount = valueInPortfolioDecimal - initialCapital
-        print("profitAmount DECIMAL: \(profitAmount)")
-        let profitAmountInt = NSDecimalNumber(decimal: profitAmount).intValue
-        print("profitAmount INT: \(profitAmountInt)")
-        
-        return (profitAmountInt, profitAmountInt > 0)
-    }
-    
-    /// - Returns: A tuple `(growthRate, isProfit)` where:
-    ///   - `growthRate` is a `Double` representing the rate of growth.
-    ///   - `isProfit` is `true` if growthRate > 0, otherwise `false`.
-    func getGrowthRate(portfolioName: String, valueInPortfolio: Int) throws -> (Double, Bool) {
-        let valueInPortfolioDecimal = Decimal(valueInPortfolio)
-        var initialCapital: Decimal = 0
-        
-        if portfolioName != "All" {
-            let holdings = try holdingRepository.getHoldings(byPortfolioName: portfolioName)
-            for holding in holdings {
-                initialCapital += (holding.averagePricePerUnit * holding.quantity)
-            }
-        } else {
-            let holdings = try holdingRepository.getAllHoldings()
-            for holding in holdings {
-                initialCapital += (holding.averagePricePerUnit * holding.quantity)
-            }
-        }
-        
-        guard initialCapital != 0 else { return (0, false) }
-        
-        let growthRate = (valueInPortfolioDecimal - initialCapital) / initialCapital
-        print("growthRate ===== pakai holding.averagePricePerUnit * holding.quantity")
-        print("growthRate: \(growthRate)")
-        let growthRateDouble = (growthRate as NSDecimalNumber).doubleValue
-        
-        return (growthRateDouble, growthRateDouble > 0)
-    }
-    
-    func getGrowthRateByHoldings(holdings: [Holding], currentValue: Decimal) -> (Double, Bool) {
-        var initialCapital: Decimal = 0
-        
-        for holding in holdings {
-            initialCapital += (holding.averagePricePerUnit * holding.quantity)
-        }
-        guard initialCapital != 0 else { return (0, false) }
-        
-        let growthRate = (currentValue - initialCapital) / initialCapital
-        let growthRateDouble = (growthRate as NSDecimalNumber).doubleValue
-        
-        return (growthRateDouble, growthRateDouble > 0)
-    }
-    
     func getHoldings(portfolioName: String) throws -> [AssetPosition] {
         var holdings: [Holding] = []
-        var grouped: [String: [Holding]] = [:]
-        var positions: [AssetPosition] = []
-        
         if portfolioName == "All" {
             holdings = try holdingRepository.getAllHoldings()
-            grouped = Dictionary(grouping: holdings, by: { $0.portfolio.name })
-            
-            positions = grouped
-                .map{(portfolioName, holdings) in
-                    let limitedHoldings = Array(holdings.prefix(3))
-                    return AssetPosition(group: portfolioName, holdings: limitedHoldings)
-                }
-            
         } else {
             holdings = try holdingRepository.getHoldings(byPortfolioName: portfolioName)
-            grouped = Dictionary(grouping: holdings, by: { $0.asset.assetType.displayName })
-            
-            positions = grouped
-                .map { (assetType, holdings) in
-                    let limitedHoldings = Array(holdings.prefix(3))
-                    
-                    return AssetPosition(group: assetType, holdings: limitedHoldings)
-                }
         }
         
+        let grouped = Dictionary(grouping: holdings, by: { $0.asset.assetType })
+
+        let positions = grouped.map { (assetType, holdings) in
+            let limitedHoldings = Array(holdings.prefix(3))
+            return AssetPosition(group: assetType.rawValue, holdings: limitedHoldings)
+        }
+
         return positions
     }
     
