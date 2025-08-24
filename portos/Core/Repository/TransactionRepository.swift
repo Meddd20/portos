@@ -53,9 +53,7 @@ class TransactionRepository {
         
         descriptor.fetchLimit = 1
         
-        guard var transaction = try modelContext.fetch(descriptor).first else {
-            return
-        }
+        guard let transaction = try modelContext.fetch(descriptor).first else { return }
         
         changes(transaction)
         transaction.updatedAt = .now

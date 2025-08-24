@@ -29,6 +29,7 @@ final class PortfolioViewModel: ObservableObject {
     func load() {
         do {
             portfolios = try service.getAllPortfolios()
+            print(portfolios.count)
         }
         catch { self.error = error.localizedDescription }
     }
@@ -92,13 +93,6 @@ final class PortfolioViewModel: ObservableObject {
         
         return rate
     }
-    
-//    func getHoldingQuantity(holding: Holding, group: String) -> String {
-//        let quantity = holding.quantity
-//        
-//        
-//        }
-//    }
     
     func getHoldingValue(holding: Holding) -> String {
         return "\(holding.quantity * holding.asset.lastPrice)"

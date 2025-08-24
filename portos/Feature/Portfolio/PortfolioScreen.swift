@@ -10,7 +10,7 @@ import SwiftData
 
 struct PortfolioScreen: View {
     @Environment(\.modelContext) private var modelContext
-    private var di: AppDI { AppDI.live(modelContext: modelContext) }
+    @Environment(\.di) var di
     
     @StateObject private var viewModel: PortfolioViewModel
     
@@ -23,6 +23,9 @@ struct PortfolioScreen: View {
     @State private var selectedIndex: Int = 0
     @State private var showingAdd = false
     @State private var items: [Holding] = []
+    @State private var showTrade = false
+    @State private var showTransactionHistory = false
+    
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
     let sampleData = createSampleData()
@@ -61,8 +64,29 @@ struct PortfolioScreen: View {
                 InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
                 
                 HStack {
-                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History", action: { print("history clicked") })
-                    CircleButton(systemName: "plus", title: "Add", action: { print("add clicked") })
+                    
+                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
+                        showTransactionHistory = true
+                    }
+                    .navigationDestination(isPresented: $showTransactionHistory) {
+                        if selectedIndex == 0 {
+                            TransactionHistoryView(di: di)
+                        } else {
+                            TransactionHistoryView(di: di, portfolio: portfolios[selectedIndex - 1])
+                        }
+                    }
+                    
+                    CircleButton(systemName: "plus", title: "Add") {
+                        showTrade = true
+                    }
+                    .navigationDestination(isPresented: $showTrade) {
+                        if selectedIndex == 0 {
+                            SearchAssetView(di: di, currentPortfolioAt: nil)
+                        } else {
+                            SearchAssetView(di: di, currentPortfolioAt: portfolios[selectedIndex - 1])
+                        }
+                    }
+                    
                     CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
                 }
                 
@@ -75,6 +99,7 @@ struct PortfolioScreen: View {
                             Text("Rp \(item.value!)")
                         }
                     }.padding(.top, 39)
+//                        .padding()
                     Divider().frame(height: 1)
                     
                     ForEach(item.assets, id: \.id) { asset in
@@ -96,8 +121,8 @@ struct PortfolioScreen: View {
                         }.padding(.top, 10)
                     }
                 }
-
             }.scrollIndicators(.hidden)
+                .padding()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -139,7 +164,11 @@ struct PortfolioScreen: View {
     }
 }
 
+struct PortfolioScreen_PreviewWrapper: View {
+    @Environment(\.modelContext) private var modelContext
 
-#Preview {
-    
+    var body: some View {
+        let di = AppDI.live(modelContext: modelContext)
+        PortfolioScreen(service: di.portfolioService)
+    }
 }
