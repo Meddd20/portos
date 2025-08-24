@@ -126,8 +126,8 @@ struct PortfolioScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
-        .sheet(isPresented: $showingAdd) {
-            AddPortfolioSheet(service: di.portfolioService)
+        .navigationDestination(isPresented: $showingAdd) {
+            AddPortfolio(di: di)
         }
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name

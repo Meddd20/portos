@@ -229,30 +229,31 @@ class PortfolioService {
                             break
                         }
                         
-                            let assetItem = AssetItem(
-                                name: h.asset.name,
-                                value: formatDecimal(totalValue),
-                                growthRate: formatDecimal(growthRate),
-                                profitAmount: formatDecimal(profitAmount),
-                                quantity: quantityStr)
-                            
-                            group.assets.append(assetItem)
-                        }
-                        assetGroup.append(group)
+                        let assetItem = AssetItem(
+                            name: h.asset.name,
+                            value: formatDecimal(totalValue),
+                            growthRate: formatDecimal(growthRate),
+                            profitAmount: formatDecimal(profitAmount),
+                            quantity: quantityStr)
+                        
+                        group.assets.append(assetItem)
                     }
+                    assetGroup.append(group)
+                    
                 }
             }
-            
-            let p = PortfolioOverview(
-                portfolioValue: formatDecimal(portValue),
-                portfolioGrowthRate: formatDecimal(portGrowthRate),
-                portfolioProfitAmount: formatDecimal(portProfit),
-                groupItems: assetGroup
-            )
-            
-            return p
         }
+        
+        let p = PortfolioOverview(
+            portfolioValue: formatDecimal(portValue),
+            portfolioGrowthRate: formatDecimal(portGrowthRate),
+            portfolioProfitAmount: formatDecimal(portProfit),
+            groupItems: assetGroup
+        )
+        
+        return p
     }
+}
     
     
     struct AssetPosition {

@@ -12,14 +12,14 @@ import SwiftData
 final class AddPortfolioViewModel: ObservableObject {
     @Published var name = ""
     @Published var targetAmountText = ""
-    @Published var targetDate: Date = .now
     @Published var didSave = false
     @Published var errorMessage: String?
+    @Published var years: Int = 0
     
-    private let service: PortfolioService
+    let service: PortfolioService
 
-    init(service: PortfolioService) {
-        self.service = service
+    init(di: AppDI) {
+        self.service = di.portfolioService
     }
     
     private var targetAmount: Decimal? {
@@ -39,6 +39,8 @@ final class AddPortfolioViewModel: ObservableObject {
             return
         }
         
+        let targetDate: Date = Calendar.current.date(byAdding: .year, value: years, to: .now) ?? .now
+
         do {
             try service.createPortfolio(name: trimmed, targetAmount: target, targetDate: targetDate)
             self.didSave = true
