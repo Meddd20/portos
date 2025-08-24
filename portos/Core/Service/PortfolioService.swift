@@ -206,6 +206,8 @@ class PortfolioService {
                     holdingsByType["Options"]?.append(holding)
                 case .ETF:
                     holdingsByType["ETFs"]?.append(holding)
+                default:
+                    print("error here")
                 }
             }
             
@@ -293,6 +295,8 @@ class PortfolioService {
                 holdingsByType["Options"]?.append(holding)
             case .ETF:
                 holdingsByType["ETFs"]?.append(holding)
+            default :
+                break
             }
             
             for (name, holdings) in holdingsByType {
@@ -327,6 +331,8 @@ class PortfolioService {
                             quantityStr = formatDecimal(h.quantity) ?? ""
                         case .ETF:
                             quantityStr = "\(formatDecimal(h.quantity) ?? "") eth"
+                        default:
+                            break
                         }
                         
                             let assetItem = AssetItem(
