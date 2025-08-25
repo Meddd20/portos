@@ -243,23 +243,33 @@ class TransactionService {
             updatedAt: .now
         )
         
+        transactionRepository.addTransaction(transferOutTransaction)
+        transactionRepository.addTransaction(transferInTransaction)
+        
+        guard
+            let persistedOut = try transactionRepository.getDetailTransaction(id: transferOutTransaction.id),
+            let persistedIn  = try transactionRepository.getDetailTransaction(id: transferInTransaction.id)
+        else {
+            return
+        }
+        
         let transferTransaction = TransferTransaction(
             date: date,
             amount: quantity,
-            fromTransaction: transferOutTransaction,
-            toTransaction: transferInTransaction,
+            fromTransaction: persistedOut,
+            toTransaction: persistedIn,
             platform: appSource
         )
         
-        transferOutTransaction.transferTransaction = transferTransaction
-        transferInTransaction.transferTransaction = transferTransaction
-        
-        transactionRepository.addTransaction(transferOutTransaction)
-        transactionRepository.addTransaction(transferInTransaction)
-        print(transferOutTransaction.portfolio.name)
-        print(transferInTransaction.portfolio.name)
-        
         transferTransactionRepository.addTransferTransaction(transferTransaction)
+        
+        try transactionRepository.editTransaction(id: persistedIn.id) { tsx in
+            tsx.transferTransaction = transferTransaction
+        }
+        
+        try transactionRepository.editTransaction(id: persistedOut.id) { tsx in
+            tsx.transferTransaction = transferTransaction
+        }
     }
     
     private func revertHolding(holding: Holding, transaction: Transaction, quantity: Decimal, price: Decimal, basis: Decimal?) throws {
@@ -489,7 +499,7 @@ class TransactionService {
         }
     }
     
-    func deleteTransaction(transactionId: UUID) throws {
+    @MainActor func deleteTransaction(transactionId: UUID) throws {
         guard let transaction = try transactionRepository.getDetailTransaction(id: transactionId) else {
             return
         }
@@ -503,7 +513,6 @@ class TransactionService {
         let holdingId = transaction.holding.id
         let txsQuantity = transaction.quantity
         let tradePrice = transaction.price
-        print(transaction.transactionType)
                 
         switch transaction.transactionType {
         case .buy:
