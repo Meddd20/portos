@@ -98,6 +98,7 @@ struct SearchAssetView: View {
                             .frame(maxWidth: .infinity)
                     }
                 }
+                Spacer()
             } else {
                 ForEach(viewModel.filterAssetSection, id: \.id) {section in
                     Text(section.type.displayName)

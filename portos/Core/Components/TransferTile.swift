@@ -10,7 +10,7 @@ import SwiftUI
 
 struct TransferTile: View {
     let transferTransaction: TransferTransaction
-//    let onDelete: () -> Void
+    let onDelete: () -> Void
 //    let onEdit: () -> Void
     
     var body: some View {
@@ -81,7 +81,7 @@ struct TransferTile: View {
         .padding(.vertical, 3)
         .swipeActions(edge: .trailing) {
             Button(role: .destructive, action: {
-                print(transferTransaction.fromTransaction.portfolio.name)
+                onDelete()
             }, label: {
                 Label("Delete", systemImage: "trash")
             })

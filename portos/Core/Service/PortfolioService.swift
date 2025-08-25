@@ -133,6 +133,7 @@ class PortfolioService {
                     let growthRate: Decimal = (totalValue - profitAmount) / profitAmount
                     
                     let assetAllocation: AssetItem = AssetItem(
+                        holding: nil,
                         name: name,
                         value: formatDecimal(totalValue),
                         growthRate: formatDecimal(growthRate),
@@ -239,6 +240,7 @@ class PortfolioService {
                         }
                         
                         let assetItem = AssetItem(
+                            holding: h,
                             name: h.asset.name,
                             value: formatDecimal(totalValue),
                             growthRate: formatDecimal(growthRate),

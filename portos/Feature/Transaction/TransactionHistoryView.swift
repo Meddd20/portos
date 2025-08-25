@@ -13,6 +13,7 @@ struct TransactionHistoryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: TransactionHistoryViewModel
     @State private var selectedTransactionForEdit: Transaction?
+    @State private var selectedTransferForEdit: TransferTransaction?
     
     let portfolio: Portfolio?
     let today = Calendar.current.startOfDay(for: Date())
@@ -35,12 +36,16 @@ struct TransactionHistoryView: View {
                         Section {
                             ForEach(section.transactions, id: \.id) { transaction in
                                 if let tt = transaction.transferTransaction {
-                                    if tt.fromTransaction.persistentModelID == transaction.id {
-                                        TransferTile(transferTransaction: tt)
-                                            .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 20))
-                                            .listRowSeparator(.hidden)
+                                    if tt.fromTransaction.id == transaction.id {
+                                        TransferTile(
+                                            transferTransaction: tt,
+                                            onDelete: { viewModel.deleteTransfer(transactionId: tt.id )}
+//                                            onEdit: { viewModel.selectedTransferForEdit = tt }
+                                        )
+                                        .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 20))
+                                        .listRowSeparator(.hidden)
                                     } else {
-                                        EmptyView() // skip the "to" leg
+                                        EmptyView()
                                     }
                                 } else {
                                     TransactionTile(
@@ -111,6 +116,14 @@ struct TransactionHistoryView: View {
                 transaction: transaction,
                 asset: transaction.asset,
                 currentPortfolioAt: transaction.portfolio
+            )
+        }
+        .navigationDestination(item: $selectedTransferForEdit) { transfer in
+            TransferTransactionView(
+                di: di,
+                asset: transfer.fromTransaction.asset,
+                transferMode: .editTransferTransaction,
+                holding: transfer.fromTransaction.holding
             )
         }
     }
