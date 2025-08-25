@@ -118,63 +118,80 @@ struct PortfolioScreen: View {
                 }
                 .padding(.top, 32)
                 
-                ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
-                    HStack {
-                        Text(item.name!)
-                            .font(.system(size: 20, weight: .semibold))
-                        Spacer()
-                        Text("Rp \(item.value!)")
-                            .font(.system(size: 20, weight: .semibold))
-                    }.padding(.top, 32)
+                if viewModel.portfolioOverview.groupItems.isEmpty {
+                    Image(systemName: "plus.circle.dashed")
+                        .font(.system(size: 58))
+                        .padding(.top, 98)
+                        .foregroundColor(Color.primaryApp.opacity(0.75))
                     
-                    Divider()
-                        .frame(height: 0)
-                        .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
-                        .padding(.top, 16)
+                    Text(selectedIndex == 0 ? "No Portfolio" : "No Asset")
+                        .font(.system(size: 20, weight: .semibold))
+                        .padding(.top, 15)
+                        .multilineTextAlignment(.center)
                     
-                    ForEach(item.assets, id: \.id) { asset in
-                        VStack {
-                            HStack {
-                                Text(asset.name!)
-                                    .font(.system(size: 17))
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                Spacer()
-                                Text("Rp \(asset.value!)")
-                                    .font(.system(size: 17))
-                            }
-                            .padding(.top, 10)
-                            HStack {
-                                if (selectedIndex != 0) {
-                                    Text(asset.quantity!)
-                                        .font(.system(size: 15)) }
-                                Spacer()
-                                if asset.growthRate! >= 0 {
-                                    Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
-                                        .font(.system(size: 15))
-                                        .foregroundStyle(Color.greenApp)
-                                } else {
-                                    Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
-                                        .font(.system(size: 15))
-                                        .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+                    Text(selectedIndex == 0 ? "Create portfolios, and they will be here." : "Try add an asset, and it will be shown here.")
+                        .font(.system(size: 17))
+                        .padding(.top, 10)
+                        .multilineTextAlignment(.center)
+                } else {
+                    ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
+                        HStack {
+                            Text(item.name!)
+                                .font(.system(size: 20, weight: .semibold))
+                            Spacer()
+                            Text("Rp \(item.value!)")
+                                .font(.system(size: 20, weight: .semibold))
+                        }.padding(.top, 32)
+                        
+                        Divider()
+                            .frame(height: 0)
+                            .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                            .padding(.top, 16)
+                        
+                        ForEach(item.assets, id: \.id) { asset in
+                            VStack {
+                                HStack {
+                                    Text(asset.name!)
+                                        .font(.system(size: 17))
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                    Spacer()
+                                    Text("Rp \(asset.value!)")
+                                        .font(.system(size: 17))
                                 }
-                            }
-                                .padding(.top, 16)
-                                .onTapGesture { selectedHolding =  asset.holding }
-                            
-                            Divider()
-                                .frame(height: 0)
-                                .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
                                 .padding(.top, 10)
+                                HStack {
+                                    if (selectedIndex != 0) {
+                                        Text(asset.quantity!)
+                                            .font(.system(size: 15)) }
+                                    Spacer()
+                                    if asset.growthRate! >= 0 {
+                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
+                                            .font(.system(size: 15))
+                                            .foregroundStyle(Color.greenApp)
+                                    } else {
+                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
+                                            .font(.system(size: 15))
+                                            .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+                                    }
+                                }
+                                    .padding(.top, 16)
+                                    .onTapGesture { selectedHolding =  asset.holding }
+                                
+                                Divider()
+                                    .frame(height: 0)
+                                    .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                                    .padding(.top, 10)
+                            }
                         }
+                        
+                        HStack() {
+                            Spacer()
+                            Text("View More")
+                                .font(.system(size: 15, weight: .semibold))
+                            Image(systemName: "chevron.down")
+                        }.padding(.top, 16)
                     }
-                    
-                    HStack() {
-                        Spacer()
-                        Text("View More")
-                            .font(.system(size: 15, weight: .semibold))
-                        Image(systemName: "chevron.down")
-                    }.padding(.top, 16)
                 }
             }.scrollIndicators(.hidden)
                 .padding()
