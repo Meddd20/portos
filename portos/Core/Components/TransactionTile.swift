@@ -10,15 +10,21 @@ import SwiftUI
 
 struct TransactionTile: View {
     let transaction: Transaction
+    let onDelete: () -> Void
+    let onEdit: () -> Void
 
     var transactionIcon: String {
         switch transaction.transactionType {
         case .buy: return "plus"
         case .sell: return "minus"
-        default: return "arrow.down.right"
+        default: return "plus"
         }
     }
     
+    var transactionAmount: Decimal {
+        transaction.quantity * transaction.price
+    }
+        
     var body: some View {
         HStack(alignment: .top) {
             Image(systemName: transactionIcon)
@@ -38,59 +44,87 @@ struct TransactionTile: View {
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("\(transaction.quantity) \(transaction.asset.assetType.unit)")
+                Text(transaction.asset.name)
                     .font(.system(size: 16))
                     .fontWeight(.semibold)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: 140, alignment: .leading)
                 
-                if transaction.transactionType == .buy || transaction.transactionType == .sell{
-                    Text("Rp \(transaction.price)")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.black.opacity(0.5))
-                } else {
-                    if let transferTransaction = transaction.transferTransaction {
-                        let portfolioFrom = transferTransaction.fromTransaction.portfolio.name
-                        let portfolioTo = transferTransaction.toTransaction.portfolio.name
-                        
-                        HStack{
-                            Text("\(portfolioFrom)")
-                                .font(.system(size: 13))
-                                .foregroundStyle(.black.opacity(0.5))
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                            
-                            Image(systemName: "arrow.forward")
-                            
-                            Text("\(portfolioTo)")
-                                .font(.system(size: 13))
-                                .foregroundStyle(.black.opacity(0.5))
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                        }
-                    }
-                }
+                Text("\(transaction.app.name) • Rp \(transaction.price)")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.black.opacity(0.5))
+//                if transaction.transactionType == .buy || transaction.transactionType == .sell {
+//                        
+//
+//                } else {
+//                    if let transferTransaction = transaction.transferTransaction {
+//                        let portfolioFrom = transferTransaction.fromTransaction.portfolio.name
+//                        let portfolioTo = transferTransaction.toTransaction.portfolio.name
+//                        
+//                        HStack{
+//                            Text("\(portfolioFrom)")
+//                                .font(.system(size: 13))
+//                                .foregroundStyle(.black.opacity(0.5))
+//                                .lineLimit(1)
+//                                .truncationMode(.tail)
+//                            
+//                            Image(systemName: "arrow.forward")
+//                            
+//                            Text("\(portfolioTo)")
+//                                .font(.system(size: 13))
+//                                .foregroundStyle(.black.opacity(0.5))
+//                                .lineLimit(1)
+//                                .truncationMode(.tail)
+//                        }
+//                    }
+//                }
             }
             
             Spacer()
             
             VStack(alignment: .trailing, spacing: 8) {
-                HStack {
-                    Text("Rp")
-                        .font(.system(size: 14))
-                        .fontWeight(.regular)
-                    
-                    Text("\(transaction.quantity * transaction.price)")
+                
+                HStack(spacing: 4) {
+                    Text("\(transaction.quantity)")
                         .font(.system(size: 16))
                         .fontWeight(.semibold)
+                    
+                    Text(transaction.asset.assetType.unit)
+                        .font(.system(size: 14))
+                        .fontWeight(.regular)
                 }
                 
-                Text(transaction.app.name)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.black.opacity(0.5))
+//                if transaction.transactionType == .buy || transaction.transactionType == .sell {
+                    Text("Rp \(transactionAmount)")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.black.opacity(0.5))
+//                } else {
+//                    Text(transaction.app.name)
+//                        .font(.system(size: 13))
+//                        .foregroundStyle(.black.opacity(0.5))
+//                }
+                
             }
+            .padding(.trailing, 3)
             
             
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 3)
+        .padding(.vertical, 3)
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive, action: {
+                onDelete()
+            }, label: {
+                Label("Delete", systemImage: "trash")
+            })
+            
+            Button {
+                onEdit()
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            .tint(.blue)
+        }
     }
 }

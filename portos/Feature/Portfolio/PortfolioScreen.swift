@@ -35,6 +35,7 @@ struct PortfolioScreen: View {
     @State private var items: [Holding] = []
     @State private var showTrade = false
     @State private var showTransactionHistory = false
+    @State private var selectedHolding: Holding? = nil
     
     @State private var showMore: Bool = false
     
@@ -58,11 +59,11 @@ struct PortfolioScreen: View {
                     HStack(alignment: .center) {
                         Image(systemName: "triangle.fill")
                             .font(.system(size: 12))
-
+                        
                         Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
                             .font(.system(size: 16, weight: .regular))
                             .padding(.trailing, 14)
-
+                        
                         Text("Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)")
                             .font(.system(size: 16, weight: .regular))
                     }
@@ -107,6 +108,7 @@ struct PortfolioScreen: View {
                         }
                     } label: {
                         CircleButton(systemName: "ellipsis", title: "More") { }
+                            .foregroundStyle(.black)
                     }
                 }
                 
@@ -139,6 +141,8 @@ struct PortfolioScreen: View {
                                     .font(.system(size: 12))
                             }
                         }.padding(.top, 10)
+                        //                            .onTapGesture { selectedHolding = holding }
+                        
                     }
                 }
             }.scrollIndicators(.hidden)
@@ -171,14 +175,15 @@ struct PortfolioScreen: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This action cannot be undone, are you sure to delete this portfolio?")
+            Text("This action cannot be undone, are you sure to delete this portfolio?") }
+        .navigationDestination(item: $selectedHolding) {holding in
+            DetailHoldingView(holding: holding)
         }
     }
-
-    private func onPickerChange() {
-        let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-        viewModel.getPortfolioOverview(portfolioName: name)
-    }
+        func onPickerChange() {
+            let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
+            viewModel.getPortfolioOverview(portfolioName: name)
+        }
     
     // Projection: tren halus + gelombang
     func makeProjection(months: Int = 72, start: Double = 100) -> [DataPoint] {
