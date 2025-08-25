@@ -51,6 +51,15 @@ class PortfolioService {
         try portfolioRepository.createPortfolio(p: p)
     }
     
+    func update(p: Portfolio, newName: String, newTargetAmount: Decimal, newTerm: Int) throws {
+        let newTargetDate: Date = Calendar.current.date(byAdding: .year, value: newTerm, to: .now) ?? p.targetDate
+        try portfolioRepository.update(p: p, newName: newName, newTargetAmount: newTargetAmount, newTargetDate: newTargetDate)
+    }
+    
+    func delete(id: UUID) throws {
+        try portfolioRepository.delete(id: id)
+    }
+    
     func getPortfolioOverview() throws -> PortfolioOverview {
         var portValue: Decimal = 0.0
         var initialCapital: Decimal = 0
@@ -256,23 +265,23 @@ class PortfolioService {
 }
     
     
-    struct AssetPosition {
-        let id = UUID()
-        var group: String
-        var holdings: [Holding]
-    }
+struct AssetPosition {
+    let id = UUID()
+    var group: String
+    var holdings: [Holding]
+}
 
-    func formatDecimal(_ value: Decimal,
-                       locale: Locale = .current,
-                       useGrouping: Bool = true,
-                       rounding: NumberFormatter.RoundingMode = .down) -> String? {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.locale = locale
-        f.usesGroupingSeparator = useGrouping
-        f.minimumFractionDigits = 0
-        f.maximumFractionDigits = 2
-        f.roundingMode = rounding
-        
-        return f.string(from: NSDecimalNumber(decimal: value))!
-    }
+func formatDecimal(_ value: Decimal,
+                   locale: Locale = .current,
+                   useGrouping: Bool = true,
+                   rounding: NumberFormatter.RoundingMode = .down) -> String? {
+    let f = NumberFormatter()
+    f.numberStyle = .decimal
+    f.locale = locale
+    f.usesGroupingSeparator = useGrouping
+    f.minimumFractionDigits = 0
+    f.maximumFractionDigits = 2
+    f.roundingMode = rounding
+    
+    return f.string(from: NSDecimalNumber(decimal: value))!
+}

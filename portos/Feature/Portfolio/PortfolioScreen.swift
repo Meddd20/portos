@@ -11,8 +11,16 @@ import SwiftData
 struct PortfolioScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.di) var di
+    @Environment(\.dismiss) private var dismiss
+    
+    enum Route: Hashable {
+        case settings
+        case editPortfolio
+        case deletePortfolio
+    }
     
     @StateObject private var viewModel: PortfolioViewModel
+    @State private var path = NavigationPath()
     
     init(service: PortfolioService) {
         _viewModel = StateObject(wrappedValue: PortfolioViewModel(service: service))
@@ -22,9 +30,13 @@ struct PortfolioScreen: View {
     @State private var selectionID: UUID? = nil
     @State private var selectedIndex: Int = 0
     @State private var showingAdd = false
+    @State private var showingEdit = false
+    @State private var showingDeleteConfirmation: Bool = false
     @State private var items: [Holding] = []
     @State private var showTrade = false
     @State private var showTransactionHistory = false
+    
+    @State private var showMore: Bool = false
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
@@ -87,7 +99,15 @@ struct PortfolioScreen: View {
                         }
                     }
                     
-                    CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
+                    Menu {
+                        Button("Settings") { print("settings is clicked") }
+                        if selectedIndex != 0 {
+                            Button("Edit Portfolio")  { showingEdit = true }
+                            Button("Delete Portfolio") { showingDeleteConfirmation = true }
+                        }
+                    } label: {
+                        CircleButton(systemName: "ellipsis", title: "More") { }
+                    }
                 }
                 
                 ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
@@ -127,11 +147,31 @@ struct PortfolioScreen: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .navigationDestination(isPresented: $showingAdd) {
-            AddPortfolio(di: di)
+            AddPortfolio(di: di, screenMode: .add)
+        }
+        .navigationDestination(isPresented: $showingEdit) {
+            if selectedIndex != 0 {
+                AddPortfolio(
+                    di: di,
+                    screenMode: .edit,
+                    portfolio: portfolios[selectedIndex - 1],
+                    portfolioName: portfolios[selectedIndex - 1].name,
+                    portfolioTargetAmount: formatDecimal(portfolios[selectedIndex - 1].targetAmount) ?? "999999999"
+                )
+            }
         }
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
+        }
+        .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                viewModel.deletePortfolio(id: portfolios[selectedIndex - 1].id)
+                selectedIndex -= 1
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This action cannot be undone, are you sure to delete this portfolio?")
         }
     }
 

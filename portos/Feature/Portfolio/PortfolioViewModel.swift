@@ -48,6 +48,14 @@ final class PortfolioViewModel: ObservableObject {
         }
     }
     
+    func deletePortfolio(id: UUID) {
+        do {
+            try service.delete(id: id)
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+    
     func formatDouble(_ value: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal

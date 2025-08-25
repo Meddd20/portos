@@ -8,15 +8,49 @@
 import SwiftUI
 import SwiftData
 
+enum ScreenMode {
+    case add, edit
+    
+    var navTitle: String? {
+        switch self {
+        case .add: return "Create portfolio"
+        case .edit: return "Edit portfolio"
+        }
+    }
+    
+    var buttonText: String {
+        switch self {
+        case .add: return "Confirm"
+        case .edit: return "Save"
+        }
+    }
+}
+
 struct AddPortfolio: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     private var di: AppDI { AppDI.live(modelContext: modelContext) }
+    let screenMode: ScreenMode
     
     @StateObject private var viewModel: AddPortfolioViewModel
     
-    init(di: AppDI) {
-        _viewModel = StateObject(wrappedValue: AddPortfolioViewModel(di: di))
+    init(
+        di: AppDI,
+        screenMode: ScreenMode,
+        portfolio: Portfolio? = nil,
+        portfolioName: String = "",
+        portfolioTargetAmount: String = ""
+    ) {
+        self.screenMode = screenMode
+        
+        _viewModel = StateObject(
+            wrappedValue: AddPortfolioViewModel(
+                di: di,
+                screenMode: screenMode,
+                portfolio: portfolio,
+                portfolioName: portfolioName,
+                portfolioTargetAmount: portfolioTargetAmount
+            ))
     }
 
     var body: some View {
@@ -52,8 +86,12 @@ struct AddPortfolio: View {
                 
                 Spacer()
                 
-                Button("Confirm") {
-                    viewModel.add()
+                Button(screenMode.buttonText) {
+                    if screenMode == .add {
+                        viewModel.add()
+                    } else {
+                        viewModel.saveEdit()
+                    }
                     dismiss()
                 }
                 .padding()
@@ -64,7 +102,7 @@ struct AddPortfolio: View {
                 .padding(.horizontal, 40)
             }
             .navigationBarBackButtonHidden()
-            .navigationTitle("Create portfolio")
+            .navigationTitle(screenMode.navTitle ?? "default")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -96,5 +134,5 @@ struct AddPortfolio: View {
 #Preview {
     let di = AppDI.preview
     
-    AddPortfolio(di: .preview)
+    AddPortfolio(di: .preview, screenMode: .edit)
 }
