@@ -25,7 +25,7 @@ struct PortfolioAssetPosition {
 }
 
 struct AccountPosition {
-    let appSourceId: UUID
+    let appSource: AppSource
     let qty: Decimal
     let avgCost: Decimal
     let lastPrice: Decimal

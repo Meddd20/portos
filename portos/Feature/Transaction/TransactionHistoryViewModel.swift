@@ -42,6 +42,14 @@ class TransactionHistoryViewModel: ObservableObject {
         }
         .sorted { $0.date > $1.date }
     }
+    
+    func deleteTransaction(transactionId: UUID) {
+        do {
+            try transactionService.deleteTransaction(transactionId: transactionId)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
 }
 
 struct TransactionSection: Identifiable {

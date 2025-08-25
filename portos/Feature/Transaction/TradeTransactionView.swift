@@ -48,18 +48,30 @@ struct TradeTransactionView: View {
     let transactionMode: TransactionMode
     let asset: Asset
     let portfolio: Portfolio?
+    let transaction: Transaction?
+    let holding: Holding?
         
-    init(di: AppDI, transactionMode: TransactionMode, asset: Asset, currentPortfolioAt: Portfolio? = nil) {
+    init(di: AppDI,
+         transactionMode: TransactionMode,
+         transaction: Transaction? = nil,
+         holding: Holding? = nil,
+         asset: Asset,
+         currentPortfolioAt: Portfolio?
+    ) {
         self.transactionMode = transactionMode
         self.asset = asset
         self.portfolio = currentPortfolioAt
+        self.transaction = transaction
+        self.holding = holding
         
         _viewModel = StateObject(
             wrappedValue: TradeTransactionViewModel(
                 di: di,
                 transactionMode: transactionMode,
+                transaction: transaction,
+                holding: holding,
                 asset: asset,
-                currentPortfolioAt: currentPortfolioAt
+                currentPortfolioAt: currentPortfolioAt,
             )
         )
     }
@@ -81,13 +93,8 @@ struct TradeTransactionView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
             
             Spacer()
-                .frame(height: 44)
-            
-            Divider()
-                .padding(.vertical, 10)
-                .ignoresSafeArea(edges: .all)
-                .frame(maxWidth: .infinity)
-            
+                .frame(height: 80)
+                        
             VStack {
                 FormRow(label: "Amount") {
                     TextField("0 \(viewModel.asset.assetType.unit)", text: $viewModel.amountText)
@@ -193,7 +200,7 @@ struct TradeTransactionView: View {
                 
                 FormRow(label: transactionMode.dateField) {
                     HStack{
-                        DatePicker("Date", selection: $viewModel.purchaseDate, displayedComponents: .date)
+                        DatePicker("Date", selection: $viewModel.purchaseDate, in: ...Date(), displayedComponents: .date)
                             .datePickerStyle(.compact)
                             .labelsHidden()
                         Spacer()
@@ -209,30 +216,31 @@ struct TradeTransactionView: View {
             .padding(EdgeInsets(top: 0, leading: 42, bottom: 0, trailing: 36))
             
             Spacer()
-            
-            Button(action: {
-                viewModel.proceedTransaction()
-            }, label: {
-                Text("Confirm")
-                    .buttonStyle(.borderedProminent)
-                    .frame(width: 306, height: 53)
-                    .background(viewModel.isDataFilled ? .blue : Color(red: 0.7, green: 0.7, blue: 0.7))
-                    .tint(.white)
-                    .cornerRadius(24)
-            })
-            .disabled(viewModel.isDataFilled ? false : true)
+                        
+            if (viewModel.transactionMode == .buy || viewModel.transactionMode == .liquidate) || ( [.editBuy, .editLiquidate].contains(viewModel.transactionMode) && viewModel.isDataFilled ) {
+                Button(action: {
+                    viewModel.proceedTransaction()
+                }, label: {
+                    Text("Confirm")
+                        .buttonStyle(.borderedProminent)
+                        .frame(width: 306, height: 53)
+                        .background(viewModel.isDataFilled ? .blue : Color(red: 0.7, green: 0.7, blue: 0.7))
+                        .tint(.white)
+                        .cornerRadius(24)
+                })
+                .disabled(viewModel.isDataFilled ? false : true)
+            }
         }
         .onAppear {
             viewModel.loadData()
-            viewModel.getDetailTransaction()
         }
         .navigationBarTitle(transactionMode.fullTitle ?? "\(transactionMode.titlePrefix!) \(asset.assetType.displayName)")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .padding(.bottom, 26)
         .navigationDestination(isPresented: $viewModel.didFinishTransaction) {
             PortfolioScreen(service: viewModel.portfolioService)
         }
-        .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
@@ -258,9 +266,17 @@ struct TradeTransactionView: View {
         asOf: Date()
     )
     
-    TradeTransactionView(
-        di: .preview,
-        transactionMode: .buy,
-        asset: asset5
-    )
+//    TradeTransactionView(
+//        di: .preview,
+//        transactionMode: .buy,
+//        asset: asset5,
+//        transactionId: <#T##Transaction?#>
+//    )
+}
+
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                        to: nil, from: nil, for: nil)
+    }
 }

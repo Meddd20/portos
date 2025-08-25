@@ -124,7 +124,7 @@ class TransactionService {
         let portfolioAssetPosition = try? holdingService.getHoldingAssetDetail(holdingId: holding.id)
         let accountPosition: [AccountPosition] = portfolioAssetPosition?.accounts ?? []
         
-        guard let sellFromAccount = accountPosition.first(where: { $0.appSourceId == appSource.id }) else {
+        guard let sellFromAccount = accountPosition.first(where: { $0.appSource == appSource }) else {
             throw TransactionError.accountNotFound
         }
         
@@ -169,7 +169,7 @@ class TransactionService {
         let portfolioAssetPosition = try holdingService.getHoldingAssetDetail(holdingId: holding.id)
         let accountPosition: [AccountPosition] = portfolioAssetPosition?.accounts ?? []
         
-        guard let transferAssetFromApp = accountPosition.first(where: { $0.appSourceId == appSource.id }) else {
+        guard let transferAssetFromApp = accountPosition.first(where: { $0.appSource == appSource }) else {
             throw TransferError.holdingNotFound
         }
         
@@ -256,11 +256,13 @@ class TransactionService {
         
         transactionRepository.addTransaction(transferOutTransaction)
         transactionRepository.addTransaction(transferInTransaction)
+        print(transferOutTransaction.portfolio.name)
+        print(transferInTransaction.portfolio.name)
         
         transferTransactionRepository.addTransferTransaction(transferTransaction)
     }
     
-    private func revertHolding(holding: Holding, transaction: Transaction, quantity: Decimal, price: Decimal, basis: Decimal) throws {
+    private func revertHolding(holding: Holding, transaction: Transaction, quantity: Decimal, price: Decimal, basis: Decimal?) throws {
         try holdingRepository.updateHolding(id: holding.id) { holding in
             switch transaction.transactionType {
             case .buy:
@@ -273,7 +275,7 @@ class TransactionService {
             case .sell:
                 let oldCost = holding.quantity * holding.averagePricePerUnit
                 let newQty = holding.quantity + quantity
-                let newCost = oldCost + (quantity * basis)
+                let newCost = oldCost + (quantity * (basis ?? Decimal(0)))
                 holding.quantity = newQty
                 holding.averagePricePerUnit = newQty == 0 ? 0 : newCost / newQty
                 
@@ -283,7 +285,7 @@ class TransactionService {
         }
     }
     
-    private func applyHolding(holding: Holding, transaction: Transaction, qty: Decimal, price: Decimal, basis: Decimal) throws {
+    private func applyHolding(holding: Holding, transaction: Transaction, qty: Decimal, price: Decimal, basis: Decimal?) throws {
         try holdingRepository.updateHolding(id: holding.id) { holding in
             switch transaction.transactionType {
             case .buy:
@@ -295,7 +297,7 @@ class TransactionService {
             case .sell:
                 let oldCost = holding.quantity * holding.averagePricePerUnit
                 let newQty = holding.quantity - qty
-                let newCost = oldCost - (qty * basis)
+                let newCost = oldCost - (qty * (basis ?? Decimal(0)))
                 holding.quantity = newQty
                 holding.averagePricePerUnit = newQty == 0 ? 0 : newCost / newQty
             default: break
@@ -318,12 +320,15 @@ class TransactionService {
         
         let oldQty = transaction.quantity
         let oldPrice = transaction.price
-        guard let basis = transaction.costBasisPerUnit else {
-            throw TransactionError.repositoryError("Missing costBasisPerUnit on sell")
+        let basis: Decimal?
+        
+        if transaction.transactionType == .sell {
+            basis = transaction.costBasisPerUnit
+        } else {
+            basis = nil
         }
         
         if isPortfolioChange {
-            
             let oldHolding = transaction.holding
             try revertHolding(holding: oldHolding, transaction: transaction, quantity: oldQty, price: oldPrice, basis: basis)
             
@@ -364,8 +369,6 @@ class TransactionService {
             }
         }
     }
-            
-    
     
     func editTransferTransaction(transferTransactionId: UUID, amount: Decimal, portfolioDestination: Portfolio, platform: AppSource, asset: Asset) throws {
         guard let transferTransaction = try transferTransactionRepository.getTransferTransaction(id: transferTransactionId) else { return }
@@ -500,6 +503,7 @@ class TransactionService {
         let holdingId = transaction.holding.id
         let txsQuantity = transaction.quantity
         let tradePrice = transaction.price
+        print(transaction.transactionType)
                 
         switch transaction.transactionType {
         case .buy:
@@ -564,6 +568,7 @@ class TransactionService {
         }
         
         if transferTransaction == nil {
+            print("true")
             try transactionRepository.deleteTransaction(id: transactionId)
         }
     }

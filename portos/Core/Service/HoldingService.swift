@@ -88,7 +88,7 @@ class HoldingService {
             let unrealizedPnLPercentage: Decimal? = avgCost != 0 ? (unrealizedPnL / avgCost) * 100 : nil
             
             result.append(AccountPosition(
-                appSourceId: app.id,
+                appSource: app,
                 qty: qty,
                 avgCost: avgCost,
                 lastPrice: lastPrice,
