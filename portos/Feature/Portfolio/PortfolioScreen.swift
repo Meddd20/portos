@@ -25,6 +25,7 @@ struct PortfolioScreen: View {
     @State private var items: [Holding] = []
     @State private var showTrade = false
     @State private var showTransactionHistory = false
+    @State private var selectedHolding: Holding? = nil
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
@@ -119,6 +120,8 @@ struct PortfolioScreen: View {
                                     .font(.system(size: 12))
                             }
                         }.padding(.top, 10)
+                            .onTapGesture { selectedHolding = holding }
+                            
                     }
                 }
             }.scrollIndicators(.hidden)
@@ -132,6 +135,9 @@ struct PortfolioScreen: View {
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
+        }
+        .navigationDestination(item: $selectedHolding) {holding in
+            DetailHoldingView(holding: holding)
         }
     }
 

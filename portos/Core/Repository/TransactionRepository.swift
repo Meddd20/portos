@@ -70,7 +70,7 @@ class TransactionRepository {
         guard let transaction = try modelContext.fetch(descriptor).first else {
             return
         }
-        
+                
         modelContext.delete(transaction)
         try modelContext.save()
     }
