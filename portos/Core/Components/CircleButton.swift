@@ -21,13 +21,12 @@ struct CircleButton: View {
                         .frame(width: 48, height: 48)
                     Image(systemName: systemName)
                         .font(.system(size: 20, weight: .regular))
-                        .foregroundColor(.black)
                 }
                 Text(title)
                     .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.black)
             }
         }
+        .buttonStyle(.plain)
     }
 }
 
