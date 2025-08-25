@@ -67,3 +67,12 @@ func parseDecimal(from text: String, locale: Locale = .current) throws -> Decima
 func parseDecimalOrNil(_ text: String, locale: Locale = .current) -> Decimal? {
     try? parseDecimal(from: text, locale: locale)
 }
+
+extension Decimal {
+    func rounded(scale: Int, mode: NSDecimalNumber.RoundingMode = .plain) -> Decimal {
+        var result = Decimal()
+        var value = self
+        NSDecimalRound(&result, &value, scale, mode)
+        return result
+    }
+}

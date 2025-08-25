@@ -55,23 +55,28 @@ struct PortfolioScreen: View {
             ScrollView {
                 VStack(alignment: .center) {
                     Text("Rp \(viewModel.portfolioOverview.portfolioValue!)")
-                        .padding(.top, 27)
+                        .font(.system(size: 28, weight: .bold))
+                        .kerning(0.38)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.black)
+                        .padding(.top, 32)
                     HStack(alignment: .center) {
                         Image(systemName: "triangle.fill")
-                            .font(.system(size: 12))
+                            .font(.system(size: 15))
                         
                         Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
-                            .font(.system(size: 16, weight: .regular))
+                            .font(.system(size: 15, weight: .bold))
                             .padding(.trailing, 14)
                         
                         Text("Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)")
-                            .font(.system(size: 16, weight: .regular))
+                            .font(.system(size: 15, weight: .bold))
                     }
-                    .foregroundColor(Color(red: 0.05, green: 0.6, blue: 0.11))
+                    .foregroundStyle(Color.greenApp)
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
-                    .background(Color(red: 0.86, green: 0.92, blue: 0.86))
+                    .background(Color.greenAppLight)
                     .cornerRadius(14)
+                    .padding(.bottom, 32)
                 }
                 
                 InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
@@ -111,44 +116,79 @@ struct PortfolioScreen: View {
                             .foregroundStyle(.black)
                     }
                 }
+                .padding(.top, 32)
                 
                 ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
                     HStack {
                         Text(item.name!)
-                            .font(.system(size: 28))
+                            .font(.system(size: 20, weight: .semibold))
                         Spacer()
-                        VStack {
-                            Text("Rp \(item.value!)")
-                        }
-                    }.padding(.top, 39)
+                        Text("Rp \(item.value!)")
+                            .font(.system(size: 20, weight: .semibold))
+                    }.padding(.top, 32)
                     
-                    Divider().frame(height: 1)
+                    Divider()
+                        .frame(height: 0)
+                        .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                        .padding(.top, 16)
                     
                     ForEach(item.assets, id: \.id) { asset in
-                        HStack {
-                            VStack(alignment: .leading) {
+                        VStack {
+                            HStack {
                                 Text(asset.name!)
-                                    .font(.system(size: 20))
-                                if (selectedIndex != 0) {
-                                    Text(asset.quantity!)
-                                }
-                            }
-                            Spacer()
-                            VStack(alignment: .trailing) {
+                                    .font(.system(size: 17))
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                                Spacer()
                                 Text("Rp \(asset.value!)")
                                     .font(.system(size: 17))
-                                Text("\(asset.growthRate!)%")
-                                    .font(.system(size: 12))
                             }
-                        }.padding(.top, 10)
-                            .onTapGesture { selectedHolding =  asset.holding }
+                            .padding(.top, 10)
+                            HStack {
+                                if (selectedIndex != 0) {
+                                    Text(asset.quantity!)
+                                        .font(.system(size: 15)) }
+                                Spacer()
+                                if asset.growthRate! >= 0 {
+                                    Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundStyle(Color.greenApp)
+                                } else {
+                                    Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+                                }
+                            }
+                                .padding(.top, 16)
+                                .onTapGesture { selectedHolding =  asset.holding }
+                            
+                            Divider()
+                                .frame(height: 0)
+                                .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                                .padding(.top, 10)
+                        }
                     }
+                    
+                    HStack() {
+                        Spacer()
+                        Text("View More")
+                            .font(.system(size: 15, weight: .semibold))
+                        Image(systemName: "chevron.down")
+                    }.padding(.top, 16)
                 }
             }.scrollIndicators(.hidden)
                 .padding()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
+        .background(
+            LinearGradient(
+            stops: [
+                Gradient.Stop(color: .white, location: 0.31),
+                Gradient.Stop(color: Color.backgroundApp, location: 0.49),
+                ],
+            startPoint: UnitPoint(x: 0.5, y: 0),
+            endPoint: UnitPoint(x: 0.5, y: 1) ))
         .navigationDestination(isPresented: $showingAdd) {
             AddPortfolio(di: di, screenMode: .add)
         }
@@ -174,7 +214,9 @@ struct PortfolioScreen: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This action cannot be undone, are you sure to delete this portfolio?") }
+            Text("This action cannot be undone, are you sure to delete this portfolio?")
+                .font(.system(size: 13))
+        }
         .navigationDestination(item: $selectedHolding) {holding in
             DetailHoldingView(holding: holding)
         }
@@ -205,14 +247,5 @@ struct PortfolioScreen: View {
             let noise = p.value * Double.random(in: -0.03...0.03)
             return DataPoint(date: p.date, value: max(1, p.value + noise))
         }
-    }
-}
-
-struct PortfolioScreen_PreviewWrapper: View {
-    @Environment(\.modelContext) private var modelContext
-
-    var body: some View {
-        let di = AppDI.live(modelContext: modelContext)
-        PortfolioScreen(service: di.portfolioService)
     }
 }

@@ -24,7 +24,7 @@ struct InvestmentChart: View {
                         series: .value("Type", "Actual")
                     )
                     .interpolationMethod(.monotone)
-                    .foregroundStyle(.purple)
+                    .foregroundStyle(Color.greenApp)
                     .lineStyle(.init(lineWidth: 2))
                 }
 
@@ -34,7 +34,7 @@ struct InvestmentChart: View {
                         y: .value("Value", last.value)
                     )
                     .symbol(.circle)
-                    .foregroundStyle(Color(red: 0.83, green: 0.25, blue: 0.85))
+                    .foregroundStyle(Color.greenApp)
                     .lineStyle(StrokeStyle(lineWidth: 2))
                 }
                 
@@ -67,8 +67,8 @@ struct InvestmentChart: View {
                     .foregroundStyle(
                         .linearGradient(
                             colors: [
-                                Color(red: 0.83, green: 0.25, blue: 0.85).opacity(0.6),
-                                Color(red: 0.98, green: 0.98, blue: 0.96).opacity(0)],
+                                Color.greenApp.opacity(0.51),
+                                Color.backgroundApp],
                             startPoint: .top, endPoint: .bottom
                         )
                     )

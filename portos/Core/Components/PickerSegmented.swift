@@ -27,13 +27,13 @@ struct PickerSegmented: View {
                             VStack {
                                 Text(titles[idx])
                                     .font(.system(size: 15, weight: selectedIndex == idx ? .semibold : .regular))
-                                    .foregroundColor(selectedIndex == idx ? .primary : .gray)
+                                    .foregroundColor(selectedIndex == idx ? Color.primaryApp : Color.primaryApp.opacity(0.5))
                                     .lineLimit(1)
                                     .truncationMode(.tail)
 
                                 Rectangle()
                                     .frame(height: 1)
-                                    .foregroundColor(selectedIndex == idx ? .black : .clear)
+                                    .foregroundColor(selectedIndex == idx ? Color.primaryApp : .clear)
                             }
                         }
                     }

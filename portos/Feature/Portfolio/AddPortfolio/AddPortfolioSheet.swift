@@ -58,13 +58,15 @@ struct AddPortfolio: View {
             VStack {
                 VStack(spacing: 1) {
                     row("Title") {
-                        TextField("Title", text: $viewModel.name)
+                        TextField("", text: $viewModel.name, prompt: Text("Title").foregroundStyle(Color.textPlaceholderApp))
                             .font(.system(size: 15))
+                            .foregroundStyle(.black)
                     }
                     
                     row("Target Amount") {
-                        TextField("Type Amount...", text: $viewModel.targetAmountText)
+                        TextField("", text: $viewModel.targetAmountText, prompt: Text("Type Amount...").foregroundStyle(Color.textPlaceholderApp))
                             .font(.system(size: 15))
+                            .foregroundStyle(.black)
                             .keyboardType(.numberPad)
                     }
                     
@@ -97,10 +99,17 @@ struct AddPortfolio: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .foregroundColor(.white)
-                .background(Color(red: 0.11, green: 0.11, blue: 0.11))
+                .background(viewModel.name.isEmpty || viewModel.targetAmountText.isEmpty ? Color.secondaryApp : Color.primaryApp)
                 .clipShape(Capsule())
                 .padding(.horizontal, 40)
             }
+            .background(
+                LinearGradient(
+                stops: [
+                    Gradient.Stop(color: .white, location: 0.13),
+                    Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
+                startPoint: UnitPoint(x: 0.5, y: 0),
+                endPoint: UnitPoint(x: 0.5, y: 1) ))
             .navigationBarBackButtonHidden()
             .navigationTitle(screenMode.navTitle ?? "default")
             .navigationBarTitleDisplayMode(.inline)
@@ -129,10 +138,4 @@ struct AddPortfolio: View {
         .padding(.vertical, 12)
         Divider()
     }
-}
-
-#Preview {
-    let di = AppDI.preview
-    
-    AddPortfolio(di: .preview, screenMode: .edit)
 }

@@ -136,7 +136,7 @@ class PortfolioService {
                         holding: nil,
                         name: name,
                         value: formatDecimal(totalValue),
-                        growthRate: formatDecimal(growthRate),
+                        growthRate: growthRate.rounded(scale: 2),
                         profitAmount: formatDecimal(profitAmount),
                         quantity: "")
                     
@@ -243,7 +243,7 @@ class PortfolioService {
                             holding: h,
                             name: h.asset.name,
                             value: formatDecimal(totalValue),
-                            growthRate: formatDecimal(growthRate),
+                            growthRate: growthRate.rounded(scale: 2),
                             profitAmount: formatDecimal(profitAmount),
                             quantity: quantityStr)
                         
