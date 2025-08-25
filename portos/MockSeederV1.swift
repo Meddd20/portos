@@ -96,86 +96,86 @@ struct MockSeederV1 {
             asOf: Date()
         )
         
-        let portfolio1 = Portfolio(
-            name: "Retirement",
-            targetAmount: Decimal(12_000_000_000),
-            targetDate: Date(),
-            isActive: true,
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-        
-        let portfolio2 = Portfolio(
-            name: "Having Fun",
-            targetAmount: Decimal(1_000_000_000),
-            targetDate: Date(),
-            isActive: true,
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-        
-        let holding1 = Holding(
-            asset: asset4,
-            portfolio: portfolio1,
-            quantity: Decimal(4_000_000),
-            averagePricePerUnit: Decimal(100_000),
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-        
-        let holding2 = Holding( // BBCA via Stockbit
-            asset: asset1,
-            portfolio: portfolio1,
-            quantity: Decimal(20),                  // shares
-            averagePricePerUnit: Decimal(9_000),    // IDR
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-
-        let holding3 = Holding(
-            asset: asset5,
-            portfolio: portfolio1,
-            quantity: Decimal(0.020),               // BTC
-            averagePricePerUnit: Decimal(60_000),   // USD
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-        
-        let holding7 = Holding(
-            asset: asset2,
-            portfolio: portfolio1,
-            quantity: Decimal(100),                  // shares
-            averagePricePerUnit: Decimal(9_000),    // IDR
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-
-        let holding4 = Holding( // DOGE via Binance
-            asset: asset6,
-            portfolio: portfolio2,
-            quantity: Decimal(1_000),               // coins
-            averagePricePerUnit: Decimal(0.12),     // USD
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-
-        let holding5 = Holding( // PANI via Stockbit
-            asset: asset2,
-            portfolio: portfolio2,
-            quantity: Decimal(5),
-            averagePricePerUnit: Decimal(3_000),    // IDR
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-
-        let holding6 = Holding( // BNI-AM Dana Lancar Syariah via Bibit
-            asset: asset3,
-            portfolio: portfolio2,
-            quantity: Decimal(2_500_000),
-            averagePricePerUnit: Decimal(100_000),  // example NAV/unit
-            createdAt: Date(),
-            updatedAt: Date()
-        )
+//        let portfolio1 = Portfolio(
+//            name: "Retirement",
+//            targetAmount: Decimal(12_000_000_000),
+//            targetDate: Date(),
+//            isActive: true,
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//        
+//        let portfolio2 = Portfolio(
+//            name: "Having Fun",
+//            targetAmount: Decimal(1_000_000_000),
+//            targetDate: Date(),
+//            isActive: true,
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//        
+//        let holding1 = Holding(
+//            asset: asset4,
+//            portfolio: portfolio1,
+//            quantity: Decimal(4_000_000),
+//            averagePricePerUnit: Decimal(100_000),
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//        
+//        let holding2 = Holding( // BBCA via Stockbit
+//            asset: asset1,
+//            portfolio: portfolio1,
+//            quantity: Decimal(20),                  // shares
+//            averagePricePerUnit: Decimal(9_000),    // IDR
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//
+//        let holding3 = Holding(
+//            asset: asset5,
+//            portfolio: portfolio1,
+//            quantity: Decimal(0.020),               // BTC
+//            averagePricePerUnit: Decimal(60_000),   // USD
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//        
+//        let holding7 = Holding(
+//            asset: asset2,
+//            portfolio: portfolio1,
+//            quantity: Decimal(100),                  // shares
+//            averagePricePerUnit: Decimal(9_000),    // IDR
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//
+//        let holding4 = Holding( // DOGE via Binance
+//            asset: asset6,
+//            portfolio: portfolio2,
+//            quantity: Decimal(1_000),               // coins
+//            averagePricePerUnit: Decimal(0.12),     // USD
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//
+//        let holding5 = Holding( // PANI via Stockbit
+//            asset: asset2,
+//            portfolio: portfolio2,
+//            quantity: Decimal(5),
+//            averagePricePerUnit: Decimal(3_000),    // IDR
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
+//
+//        let holding6 = Holding( // BNI-AM Dana Lancar Syariah via Bibit
+//            asset: asset3,
+//            portfolio: portfolio2,
+//            quantity: Decimal(2_500_000),
+//            averagePricePerUnit: Decimal(100_000),  // example NAV/unit
+//            createdAt: Date(),
+//            updatedAt: Date()
+//        )
         
         [
             appBibit, appBareksa, appStockbit, appAjaib, appIpot, appMiraeAsset,
@@ -183,8 +183,8 @@ struct MockSeederV1 {
             appTriv, appPintu, appCoinbase
         ].forEach { context.insert($0) }
         context.insert(asset1); context.insert(asset2); context.insert(asset3); context.insert(asset4); context.insert(asset5); context.insert(asset6)
-        context.insert(portfolio1); context.insert(portfolio2)
-        context.insert(holding1); context.insert(holding2); context.insert(holding3); context.insert(holding4); context.insert(holding5); context.insert(holding6); context.insert(holding7)
+//        context.insert(portfolio1); context.insert(portfolio2)
+//        context.insert(holding1); context.insert(holding2); context.insert(holding3); context.insert(holding4); context.insert(holding5); context.insert(holding6); context.insert(holding7)
         
         try context.save()
     }

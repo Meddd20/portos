@@ -11,10 +11,12 @@ class TransactionHistoryViewModel: ObservableObject {
     @Published var transactionSectionedByDate: [TransactionSection] = []
     @Published var historyOf: String = "All"
     private var transactionService: TransactionService
+    private var transferTransactionRepository: TransferTransactionRepository
     let portfolio: Portfolio?
     
     init(di: AppDI, portfolio: Portfolio? = nil) {
         self.transactionService = di.transactionService
+        self.transferTransactionRepository = di.transferTransactionRepository
         self.portfolio = portfolio
         
         if portfolio != nil {
@@ -43,12 +45,16 @@ class TransactionHistoryViewModel: ObservableObject {
         .sorted { $0.date > $1.date }
     }
     
-    func deleteTransaction(transactionId: UUID) {
+    @MainActor func deleteTransaction(transactionId: UUID) {
         do {
             try transactionService.deleteTransaction(transactionId: transactionId)
         } catch {
             print(error.localizedDescription)
         }
+    }
+    
+    @MainActor func deleteTransfer(transactionId: UUID) {
+        try? transferTransactionRepository.deleteTransferTransaction(id: transactionId)
     }
 }
 

@@ -25,6 +25,7 @@ struct AssetGroup : Identifiable {
 
 struct AssetItem : Identifiable {
     let id: UUID = UUID()
+    let holding: Holding?
     let name: String?
     let value: String?
     let growthRate: String?

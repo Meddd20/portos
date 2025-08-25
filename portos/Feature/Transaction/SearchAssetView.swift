@@ -98,6 +98,7 @@ struct SearchAssetView: View {
                             .frame(maxWidth: .infinity)
                     }
                 }
+                Spacer()
             } else {
                 ForEach(viewModel.filterAssetSection, id: \.id) {section in
                     Text(section.type.displayName)
@@ -177,7 +178,7 @@ struct SearchAssetView: View {
     
     @ViewBuilder
     private func assetPositionSection(assetPosition: AssetPosition, isFirst: Bool) -> some View {
-        sectionHeader(title: assetPosition.assetType.displayName, isFirst: isFirst)
+//        sectionHeader(title: assetPosition.assetType.displayName, isFirst: isFirst)
         
         ForEach(assetPosition.holdings, id: \.persistentModelID) { holding in
             assetRow(

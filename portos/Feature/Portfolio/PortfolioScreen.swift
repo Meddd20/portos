@@ -120,7 +120,7 @@ struct PortfolioScreen: View {
                                     .font(.system(size: 12))
                             }
                         }.padding(.top, 10)
-                            .onTapGesture { selectedHolding = holding }
+                            .onTapGesture { selectedHolding =  asset.holding }
                             
                     }
                 }
