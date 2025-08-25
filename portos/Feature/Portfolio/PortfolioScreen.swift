@@ -22,10 +22,13 @@ struct PortfolioScreen: View {
     @State private var selectionID: UUID? = nil
     @State private var selectedIndex: Int = 0
     @State private var showingAdd = false
+    @State private var items: [Holding] = []
     @State private var showTrade = false
     @State private var showTransactionHistory = false
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
+    
+    let sampleData = createSampleData()
     
     var body: some View {
         VStack(alignment: .center) {
@@ -38,18 +41,17 @@ struct PortfolioScreen: View {
             
             ScrollView {
                 VStack(alignment: .center) {
-                    Text("Rp \(viewModel.portfolioValue)")
+                    Text("Rp \(viewModel.portfolioOverview.portfolioValue!)")
                         .padding(.top, 27)
-                    
                     HStack(alignment: .center) {
                         Image(systemName: "triangle.fill")
                             .font(.system(size: 12))
 
-                        Text("\(viewModel.growthRate)%")
+                        Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
                             .font(.system(size: 16, weight: .regular))
                             .padding(.trailing, 14)
 
-                        Text("Rp \(viewModel.profitAmount)")
+                        Text("Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)")
                             .font(.system(size: 16, weight: .regular))
                     }
                     .foregroundColor(Color(red: 0.05, green: 0.6, blue: 0.11))
@@ -58,7 +60,9 @@ struct PortfolioScreen: View {
                     .background(Color(red: 0.86, green: 0.92, blue: 0.86))
                     .cornerRadius(14)
                 }
-                Spacer().frame(width: 391, height: 184).padding(.top, 23.04)
+                
+                InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
+                
                 HStack {
                     
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
@@ -85,31 +89,33 @@ struct PortfolioScreen: View {
                     
                     CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
                 }
-                ForEach(viewModel.assetPositions, id: \.id) { assetPosition in
+                
+                ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
                     HStack {
-                        Text(assetPosition.assetType.displayName)
+                        Text(item.name!)
                             .font(.system(size: 28))
                         Spacer()
                         VStack {
-                            Text("Rp \(viewModel.getValue(holdings: assetPosition.holdings))")
+                            Text("Rp \(item.value!)")
                         }
                     }.padding(.top, 39)
-//                        .padding()
+                    
                     Divider().frame(height: 1)
                     
-                    ForEach(assetPosition.holdings, id: \.id) { holding in
+                    ForEach(item.assets, id: \.id) { asset in
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(holding.asset.name)
+                                Text(asset.name!)
                                     .font(.system(size: 20))
-                                Text("\(viewModel.getHoldingQuantity(holding: holding, assetType: assetPosition.assetType))")
-                                    .font(.system(size: 13))
+                                if (selectedIndex != 0) {
+                                    Text(asset.quantity!)
+                                }
                             }
                             Spacer()
                             VStack(alignment: .trailing) {
-                                Text("Rp \(viewModel.getHoldingValue(holding: holding))")
+                                Text("Rp \(asset.value!)")
                                     .font(.system(size: 17))
-                                Text("\(viewModel.getGrowthRateOnHolding(holding: holding))%")
+                                Text("\(asset.growthRate!)%")
                                     .font(.system(size: 12))
                             }
                         }.padding(.top, 10)
@@ -120,24 +126,41 @@ struct PortfolioScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
-        .sheet(isPresented: $showingAdd) {
-            AddPortfolioSheet(service: di.portfolioService)
+        .navigationDestination(isPresented: $showingAdd) {
+            AddPortfolio(di: di)
         }
         .onAppear() {
-            viewModel.load()
-            viewModel.getHoldings(portfolioName: "All")
-            viewModel.getPortfolioValue(portfolioName: "All")
-            viewModel.getProfitAmount(portfolioName: "All")
-            viewModel.getGrowthRate(portfolioName: "All")
+            let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
+            viewModel.getPortfolioOverview(portfolioName: name)
         }
     }
 
     private func onPickerChange() {
-        let name = (selectedIndex == 0) ? "All" : portfolios[selectedIndex-1].name
-        viewModel.getHoldings(portfolioName: name)
-        viewModel.getPortfolioValue(portfolioName: name)
-        viewModel.getProfitAmount(portfolioName: name)
-        viewModel.getGrowthRate(portfolioName: name)
+        let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
+        viewModel.getPortfolioOverview(portfolioName: name)
+    }
+    
+    // Projection: tren halus + gelombang
+    func makeProjection(months: Int = 72, start: Double = 100) -> [DataPoint] {
+        let startDate = Calendar.current.date(byAdding: .month, value: -(months-1), to: Date())!
+        return (0..<months).map { i in
+            let date = Calendar.current.date(byAdding: .month, value: i, to: startDate)!
+            let trend  = Double(i) * 1.7
+            let wave1  = sin(Double(i) * 0.45) * 6
+            let wave2  = sin(Double(i) * 0.12 + 1.1) * 3
+            let step   = (i % 9 == 0) ? 5.0 : 0.0
+            return DataPoint(date: date, value: max(1, start + trend + wave1 + wave2 + step))
+        }
+    }
+
+    // Actual: ambil subset dari projection + noise kecil
+    func makeActual(from projection: [DataPoint], upToMonths count: Int) -> [DataPoint] {
+        let capped = max(1, min(count, projection.count))
+        return projection.prefix(capped).enumerated().map { (idx, p) in
+            // noise ±3% dari nilai untuk “real-life wobble”
+            let noise = p.value * Double.random(in: -0.03...0.03)
+            return DataPoint(date: p.date, value: max(1, p.value + noise))
+        }
     }
 }
 

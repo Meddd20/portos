@@ -26,7 +26,7 @@ struct SearchAssetView: View {
         VStack {
             if viewModel.searchTerms.isEmpty {
                 ForEach (Array(viewModel.assetPosition.enumerated()), id: \.element.id) { index, assetPosition in
-                    Text("\(assetPosition.assetType.displayName)")
+                    Text("\(assetPosition.group)")
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, index == 0 ? 5 : 22)
                         .fontWeight(.semibold)
