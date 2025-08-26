@@ -23,117 +23,134 @@ struct SearchAssetView: View {
     }
     
     var body: some View {
-        VStack {
-            if viewModel.searchTerms.isEmpty {
-                ForEach (Array(viewModel.assetPosition.enumerated()), id: \.element.id) { index, assetPosition in
-                    Text("\(assetPosition.group)")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, index == 0 ? 5 : 22)
-                        .fontWeight(.semibold)
+        ScrollView{
+            LazyVStack {
+                if viewModel.searchTerms.isEmpty {
+                    Spacer()
+                        .frame(height: 30)
                     
-                    Divider()
-                        .padding(.vertical, 10)
-                        .ignoresSafeArea(edges: .all)
-                        .frame(maxWidth: .infinity)
-                    
-                    ForEach (assetPosition.holdings, id: \.persistentModelID) { holding in
-                        NavigationLink{
-                            TradeTransactionView(di: di, transactionMode: .buy, asset: holding.asset, currentPortfolioAt: portfolio ?? nil)
-                        } label: {
-                            HStack {
-                                Text("\(holding.asset.symbol)")
-                                    .font(.system(size: 16))
-                                    .frame(width: 106, alignment: .leading)
-                                
-                                Spacer()
-                                
-                                Text(holding.asset.name)
-                                    .font(.system(size: 14))
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .frame(width: 165, alignment: .trailing)
-                                
-                                
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.primary)
+                    ForEach (Array(viewModel.assetPosition.enumerated()), id: \.element.id) { index, assetPosition in
+                        Text("\(assetPosition.group)")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, index == 0 ? 5 : 22)
+                            .fontWeight(.semibold)
                         
                         Divider()
                             .padding(.vertical, 10)
                             .ignoresSafeArea(edges: .all)
                             .frame(maxWidth: .infinity)
-                    }
-                }
-                Spacer()
-            } else {
-                ForEach(viewModel.filterAssetSection, id: \.id) {section in
-                    Text(section.type.displayName)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 22)
-                        .fontWeight(.semibold)
-                    
-                    Divider()
-                        .padding(.vertical, 10)
-                        .ignoresSafeArea(edges: .all)
-                        .frame(maxWidth: .infinity)
-                    
-                    ForEach(section.assets, id: \.id) { asset in
-                        NavigationLink {
-                            TradeTransactionView(di: di, transactionMode: .buy, asset: asset, currentPortfolioAt: portfolio ?? nil)
-                        } label: {
-                            HStack {
-                                Text(asset.symbol)
-                                    .font(.system(size: 16))
-                                    .frame(width: 106, alignment: .leading)
-                                
-                                Spacer()
-                                
-                                Text(asset.name)
-                                    .font(.system(size: 14))
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .frame(width: 165, alignment: .trailing)
+                        
+                        ForEach (assetPosition.holdings, id: \.persistentModelID) { holding in
+                            NavigationLink{
+                                TradeTransactionView(di: di, transactionMode: .buy, asset: holding.asset, currentPortfolioAt: portfolio ?? nil)
+                            } label: {
+                                HStack {
+                                    Text("\(holding.asset.symbol)")
+                                        .font(.system(size: 16))
+                                        .frame(width: 106, alignment: .leading)
+                                    
+                                    Spacer()
+                                    
+                                    Text(holding.asset.name)
+                                        .font(.system(size: 14))
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                        .frame(width: 165, alignment: .trailing)
+                                    
+                                    
+                                }
                             }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.primary)
+                            
+                            Divider()
+                                .padding(.vertical, 10)
+                                .ignoresSafeArea(edges: .all)
+                                .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.primary)
+                    }
+                    Spacer()
+                    
+                    
+                } else {
+                    ForEach(viewModel.filterAssetSection, id: \.id) {section in
+                        Text(section.type.displayName)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 22)
+                            .fontWeight(.semibold)
                         
                         Divider()
                             .padding(.vertical, 10)
                             .ignoresSafeArea(edges: .all)
                             .frame(maxWidth: .infinity)
+                        
+                        ForEach(section.assets, id: \.id) { asset in
+                            NavigationLink {
+                                TradeTransactionView(di: di, transactionMode: .buy, asset: asset, currentPortfolioAt: portfolio ?? nil)
+                            } label: {
+                                HStack {
+                                    Text(asset.symbol)
+                                        .font(.system(size: 16))
+                                        .frame(width: 106, alignment: .leading)
+                                    
+                                    Spacer()
+                                    
+                                    // DEBUG
+    //                                if (asset.currency == Currency.usd) {
+    //                                    Text("\(asset.lastPrice * viewModel.rateUsdToIdr)") // error in this line
+    //                                } else {
+    //                                    Text("\(asset.lastPrice)")
+    //                                }
+                                    
+                                    Text(asset.name)
+                                        .font(.system(size: 14))
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                        .frame(width: 165, alignment: .trailing)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.primary)
+                            
+                            Divider()
+                                .padding(.vertical, 10)
+                                .ignoresSafeArea(edges: .all)
+                                .frame(maxWidth: .infinity)
+                        }
                     }
+                    Spacer()
                 }
-                Spacer()
             }
-        }
-        .padding(.leading, 20)
-        .padding(.trailing, 26)
-        .navigationTitle("Choose asset to add")
-        .onAppear {
-            viewModel.getAllHoldings()
-            viewModel.getAllAssets()
+            .frame(maxWidth: .infinity)
+            .padding(.leading, 20)
+            .padding(.trailing, 26)
+            .navigationTitle("Choose asset to add")
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                viewModel.getAllHoldings()
+                viewModel.loadAssets()
+            }
+            
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem (placement: .topBarLeading) {
+                    Button (action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "arrow.left")
+                            .foregroundColor(.black)
+                    }
+                }
+            }
+            .background(
+                LinearGradient(
+                stops: [
+                    Gradient.Stop(color: .white, location: 0.13),
+                    Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
+                startPoint: UnitPoint(x: 0.5, y: 0),
+                endPoint: UnitPoint(x: 0.5, y: 1) ))
         }
         .searchable(text: $viewModel.searchTerms, prompt: "Search")
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem (placement: .topBarLeading) {
-                Button (action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.black)
-                }
-            }
-        }
-        .background(
-            LinearGradient(
-            stops: [
-                Gradient.Stop(color: .white, location: 0.13),
-                Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
-            startPoint: UnitPoint(x: 0.5, y: 0),
-            endPoint: UnitPoint(x: 0.5, y: 1) ))
     }
     @ViewBuilder
     private var holdingsContent: some View {

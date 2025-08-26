@@ -111,7 +111,7 @@ struct TradeTransactionView: View {
                     HStack {
                         Text("Rp")
                         .foregroundStyle(.secondary)
-                        TextField("3,800", text: $viewModel.priceText)
+                        TextField(viewModel.pricePlaceholder ?? "0", text: $viewModel.priceText)
                             .keyboardType(.decimalPad)
                     }
                 }
@@ -234,6 +234,7 @@ struct TradeTransactionView: View {
         }
         .onAppear {
             viewModel.loadData()
+            viewModel.getRate(currency: "USD")
         }
         .background(
             LinearGradient(
