@@ -8,15 +8,49 @@
 import SwiftUI
 import SwiftData
 
+enum ScreenMode {
+    case add, edit
+    
+    var navTitle: String? {
+        switch self {
+        case .add: return "Create portfolio"
+        case .edit: return "Edit portfolio"
+        }
+    }
+    
+    var buttonText: String {
+        switch self {
+        case .add: return "Confirm"
+        case .edit: return "Save"
+        }
+    }
+}
+
 struct AddPortfolio: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     private var di: AppDI { AppDI.live(modelContext: modelContext) }
+    let screenMode: ScreenMode
     
     @StateObject private var viewModel: AddPortfolioViewModel
     
-    init(di: AppDI) {
-        _viewModel = StateObject(wrappedValue: AddPortfolioViewModel(di: di))
+    init(
+        di: AppDI,
+        screenMode: ScreenMode,
+        portfolio: Portfolio? = nil,
+        portfolioName: String = "",
+        portfolioTargetAmount: String = ""
+    ) {
+        self.screenMode = screenMode
+        
+        _viewModel = StateObject(
+            wrappedValue: AddPortfolioViewModel(
+                di: di,
+                screenMode: screenMode,
+                portfolio: portfolio,
+                portfolioName: portfolioName,
+                portfolioTargetAmount: portfolioTargetAmount
+            ))
     }
 
     var body: some View {
@@ -24,13 +58,15 @@ struct AddPortfolio: View {
             VStack {
                 VStack(spacing: 1) {
                     row("Title") {
-                        TextField("Title", text: $viewModel.name)
+                        TextField("", text: $viewModel.name, prompt: Text("Title").foregroundStyle(Color.textPlaceholderApp))
                             .font(.system(size: 15))
+                            .foregroundStyle(.black)
                     }
                     
                     row("Target Amount") {
-                        TextField("Type Amount...", text: $viewModel.targetAmountText)
+                        TextField("", text: $viewModel.targetAmountText, prompt: Text("Type Amount...").foregroundStyle(Color.textPlaceholderApp))
                             .font(.system(size: 15))
+                            .foregroundStyle(.black)
                             .keyboardType(.numberPad)
                     }
                     
@@ -52,19 +88,30 @@ struct AddPortfolio: View {
                 
                 Spacer()
                 
-                Button("Confirm") {
-                    viewModel.add()
+                Button(screenMode.buttonText) {
+                    if screenMode == .add {
+                        viewModel.add()
+                    } else {
+                        viewModel.saveEdit()
+                    }
                     dismiss()
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
                 .foregroundColor(.white)
-                .background(Color(red: 0.11, green: 0.11, blue: 0.11))
+                .background(viewModel.name.isEmpty || viewModel.targetAmountText.isEmpty ? Color.secondaryApp : Color.primaryApp)
                 .clipShape(Capsule())
                 .padding(.horizontal, 40)
             }
+            .background(
+                LinearGradient(
+                stops: [
+                    Gradient.Stop(color: .white, location: 0.13),
+                    Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
+                startPoint: UnitPoint(x: 0.5, y: 0),
+                endPoint: UnitPoint(x: 0.5, y: 1) ))
             .navigationBarBackButtonHidden()
-            .navigationTitle("Create portfolio")
+            .navigationTitle(screenMode.navTitle ?? "default")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -91,10 +138,4 @@ struct AddPortfolio: View {
         .padding(.vertical, 12)
         Divider()
     }
-}
-
-#Preview {
-    let di = AppDI.preview
-    
-    AddPortfolio(di: .preview)
 }

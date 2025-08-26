@@ -15,11 +15,27 @@ final class AddPortfolioViewModel: ObservableObject {
     @Published var didSave = false
     @Published var errorMessage: String?
     @Published var years: Int = 0
-    
+    var portfolio: Portfolio?
     let service: PortfolioService
+    let screenMode: ScreenMode
 
-    init(di: AppDI) {
+    init(
+        di: AppDI,
+        screenMode: ScreenMode,
+        portfolio: Portfolio? = nil,
+        portfolioName: String = "",
+        portfolioTargetAmount: String = ""
+    ) {
         self.service = di.portfolioService
+        self.screenMode = screenMode
+        self.portfolio = portfolio
+        self.name = portfolioName
+        self.targetAmountText = portfolioTargetAmount
+        
+        if screenMode == .edit {
+            let currentTerm = Calendar.current.dateComponents([.year], from: .now, to: portfolio!.targetDate).year ?? 0
+            self.years = currentTerm
+        }
     }
     
     private var targetAmount: Decimal? {
@@ -54,5 +70,14 @@ final class AddPortfolioViewModel: ObservableObject {
         }
         
         print("add portfolio - save")
+    }
+    
+    func saveEdit() {
+        do {
+            let targetAmountDecimal = try parseDecimal(from: targetAmountText)
+            try service.update(p: portfolio!, newName: name, newTargetAmount: targetAmountDecimal, newTerm: years)
+        } catch {
+            
+        }
     }
 }

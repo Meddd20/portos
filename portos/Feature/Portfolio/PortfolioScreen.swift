@@ -11,8 +11,16 @@ import SwiftData
 struct PortfolioScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.di) var di
+    @Environment(\.dismiss) private var dismiss
+    
+    enum Route: Hashable {
+        case settings
+        case editPortfolio
+        case deletePortfolio
+    }
     
     @StateObject private var viewModel: PortfolioViewModel
+    @State private var path = NavigationPath()
     
     init(service: PortfolioService) {
         _viewModel = StateObject(wrappedValue: PortfolioViewModel(service: service))
@@ -22,10 +30,14 @@ struct PortfolioScreen: View {
     @State private var selectionID: UUID? = nil
     @State private var selectedIndex: Int = 0
     @State private var showingAdd = false
+    @State private var showingEdit = false
+    @State private var showingDeleteConfirmation: Bool = false
     @State private var items: [Holding] = []
     @State private var showTrade = false
     @State private var showTransactionHistory = false
     @State private var selectedHolding: Holding? = nil
+    
+    @State private var showMore: Bool = false
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
@@ -43,23 +55,28 @@ struct PortfolioScreen: View {
             ScrollView {
                 VStack(alignment: .center) {
                     Text("Rp \(viewModel.portfolioOverview.portfolioValue!)")
-                        .padding(.top, 27)
+                        .font(.system(size: 28, weight: .bold))
+                        .kerning(0.38)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.black)
+                        .padding(.top, 32)
                     HStack(alignment: .center) {
                         Image(systemName: "triangle.fill")
-                            .font(.system(size: 12))
-
+                            .font(.system(size: 15))
+                        
                         Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
-                            .font(.system(size: 16, weight: .regular))
+                            .font(.system(size: 15, weight: .bold))
                             .padding(.trailing, 14)
-
+                        
                         Text("Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)")
-                            .font(.system(size: 16, weight: .regular))
+                            .font(.system(size: 15, weight: .bold))
                     }
-                    .foregroundColor(Color(red: 0.05, green: 0.6, blue: 0.11))
+                    .foregroundStyle(Color.greenApp)
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
-                    .background(Color(red: 0.86, green: 0.92, blue: 0.86))
+                    .background(Color.greenAppLight)
                     .cornerRadius(14)
+                    .padding(.bottom, 32)
                 }
                 
                 InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
@@ -88,40 +105,92 @@ struct PortfolioScreen: View {
                         }
                     }
                     
-                    CircleButton(systemName: "ellipsis", title: "More", action: { print("more clicked") })
-                }
-                
-                ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
-                    HStack {
-                        Text(item.name!)
-                            .font(.system(size: 28))
-                        Spacer()
-                        VStack {
-                            Text("Rp \(item.value!)")
+                    Menu {
+                        Button("Settings") { print("settings is clicked") }
+                        if selectedIndex != 0 {
+                            Button("Edit Portfolio")  { showingEdit = true }
+                            Button("Delete Portfolio") { showingDeleteConfirmation = true }
                         }
-                    }.padding(.top, 39)
+                    } label: {
+                        CircleButton(systemName: "ellipsis", title: "More") { }
+                            .foregroundStyle(.black)
+                    }
+                }
+                .padding(.top, 32)
+                
+                if viewModel.portfolioOverview.groupItems.isEmpty {
+                    Image(systemName: "plus.circle.dashed")
+                        .font(.system(size: 58))
+                        .padding(.top, 98)
+                        .foregroundColor(Color.primaryApp.opacity(0.75))
                     
-                    Divider().frame(height: 1)
+                    Text(selectedIndex == 0 ? "No Portfolio" : "No Asset")
+                        .font(.system(size: 20, weight: .semibold))
+                        .padding(.top, 15)
+                        .multilineTextAlignment(.center)
                     
-                    ForEach(item.assets, id: \.id) { asset in
+                    Text(selectedIndex == 0 ? "Create portfolios, and they will be here." : "Try add an asset, and it will be shown here.")
+                        .font(.system(size: 17))
+                        .padding(.top, 10)
+                        .multilineTextAlignment(.center)
+                } else {
+                    ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
                         HStack {
-                            VStack(alignment: .leading) {
-                                Text(asset.name!)
-                                    .font(.system(size: 20))
-                                if (selectedIndex != 0) {
-                                    Text(asset.quantity!)
-                                }
-                            }
+                            Text(item.name!)
+                                .font(.system(size: 20, weight: .semibold))
                             Spacer()
-                            VStack(alignment: .trailing) {
-                                Text("Rp \(asset.value!)")
-                                    .font(.system(size: 17))
-                                Text("\(asset.growthRate!)%")
-                                    .font(.system(size: 12))
+                            Text("Rp \(item.value!)")
+                                .font(.system(size: 20, weight: .semibold))
+                        }.padding(.top, 32)
+                        
+                        Divider()
+                            .frame(height: 0)
+                            .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                            .padding(.top, 16)
+                        
+                        ForEach(item.assets, id: \.id) { asset in
+                            VStack {
+                                HStack {
+                                    Text(asset.name!)
+                                        .font(.system(size: 17))
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                    Spacer()
+                                    Text("Rp \(asset.value!)")
+                                        .font(.system(size: 17))
+                                }
+                                .padding(.top, 10)
+                                HStack {
+                                    if (selectedIndex != 0) {
+                                        Text(asset.quantity!)
+                                            .font(.system(size: 15)) }
+                                    Spacer()
+                                    if asset.growthRate! >= 0 {
+                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
+                                            .font(.system(size: 15))
+                                            .foregroundStyle(Color.greenApp)
+                                    } else {
+                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
+                                            .font(.system(size: 15))
+                                            .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+                                    }
+                                }
+                                    .padding(.top, 16)
+                                    .onTapGesture { selectedHolding =  asset.holding }
+                                
+                                Divider()
+                                    .frame(height: 0)
+                                    .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                                    .padding(.top, 10)
                             }
-                        }.padding(.top, 10)
-                            .onTapGesture { selectedHolding =  asset.holding }
-                            
+                        }
+                        
+                        HStack() {
+                            Spacer()
+                            Text("View More")
+                                .font(.system(size: 15, weight: .semibold))
+                            Image(systemName: "chevron.down")
+                        }.padding(.top, 16)
                     }
                 }
             }.scrollIndicators(.hidden)
@@ -129,23 +198,51 @@ struct PortfolioScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
+        .background(
+            LinearGradient(
+            stops: [
+                Gradient.Stop(color: .white, location: 0.31),
+                Gradient.Stop(color: Color.backgroundApp, location: 0.49),
+                ],
+            startPoint: UnitPoint(x: 0.5, y: 0),
+            endPoint: UnitPoint(x: 0.5, y: 1) ))
         .navigationDestination(isPresented: $showingAdd) {
-            AddPortfolio(di: di)
+            AddPortfolio(di: di, screenMode: .add)
+        }
+        .navigationDestination(isPresented: $showingEdit) {
+            if selectedIndex != 0 {
+                AddPortfolio(
+                    di: di,
+                    screenMode: .edit,
+                    portfolio: portfolios[selectedIndex - 1],
+                    portfolioName: portfolios[selectedIndex - 1].name,
+                    portfolioTargetAmount: formatDecimal(portfolios[selectedIndex - 1].targetAmount) ?? "999999999"
+                )
+            }
         }
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
+        }
+        .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                viewModel.deletePortfolio(id: portfolios[selectedIndex - 1].id)
+                selectedIndex -= 1
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This action cannot be undone, are you sure to delete this portfolio?")
+                .font(.system(size: 13))
         }
         .navigationDestination(item: $selectedHolding) {holding in
             DetailHoldingView(di: di, holding: holding)
 //            DetailHoldingView(holding: holding)
         }
     }
-
-    private func onPickerChange() {
-        let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-        viewModel.getPortfolioOverview(portfolioName: name)
-    }
+        func onPickerChange() {
+            let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
+            viewModel.getPortfolioOverview(portfolioName: name)
+        }
     
     // Projection: tren halus + gelombang
     func makeProjection(months: Int = 72, start: Double = 100) -> [DataPoint] {
@@ -168,14 +265,5 @@ struct PortfolioScreen: View {
             let noise = p.value * Double.random(in: -0.03...0.03)
             return DataPoint(date: p.date, value: max(1, p.value + noise))
         }
-    }
-}
-
-struct PortfolioScreen_PreviewWrapper: View {
-    @Environment(\.modelContext) private var modelContext
-
-    var body: some View {
-        let di = AppDI.live(modelContext: modelContext)
-        PortfolioScreen(service: di.portfolioService)
     }
 }
