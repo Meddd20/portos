@@ -27,6 +27,9 @@ class TradeTransactionViewModel: ObservableObject {
     @Published var didFinishTransaction = false
     @Published var maxAmountPerAccount: Decimal? = 0
     
+    @Published var rateUSD: Decimal?
+    @Published var pricePlaceholder: String?
+    
     var amount: Decimal {
         Decimal(string: amountText) ?? 0
     }
@@ -221,4 +224,22 @@ class TradeTransactionViewModel: ObservableObject {
         }
     }
     
+    @MainActor
+    func getRate(currency: String) {
+        ExchangeRateService.getRate(currency: currency) { [weak self] result in
+            Task { @MainActor in
+                switch result {
+                case .success(let res):
+                    self?.rateUSD = res.data
+                    if self?.asset.currency == Currency.usd && self?.rateUSD != nil{
+                        self?.priceText = formatDecimal((self?.asset.lastPrice ?? 1) * (self?.rateUSD! ?? 1)) ?? "0"
+                    }
+                    
+                    print("Rate:", res.data)
+                case .failure(let err):
+                    print("Error:", err)
+                }
+            }
+        }
+    }
 }

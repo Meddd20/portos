@@ -23,41 +23,11 @@ struct SearchAssetView: View {
     }
     
     var body: some View {
-//        ScrollView {
-//            VStack(alignment: .leading) {
-////                if viewModel.searchTerms.isEmpty {
-////                    holdingsContent
-////                } else {
-////                    searchResultsContent
-////                }
-//            }
-//            .padding(.leading, 20)
-//            .padding(.trailing, 26)
-//        }
-//        .navigationTitle("Choose asset to add")
-//        .onAppear {
-//            viewModel.getAllHoldings()
-//            viewModel.getAllAssets()
-//        }
-//        .searchable(text: $viewModel.searchTerms, prompt: "Search")
-//        .navigationBarBackButtonHidden(true)
-//        .toolbar {
-//            ToolbarItem (placement: .topBarLeading) {
-//                Button (action: {
-//                    dismiss()
-//                }) {
-//                    Image(systemName: "arrow.left")
-//                        .foregroundColor(.black)
-//                }
-//            }
-//        }
-        
-        
-        
-        
-        
         VStack {
             if viewModel.searchTerms.isEmpty {
+                Spacer()
+                    .frame(height: 30)
+                
                 ForEach (Array(viewModel.assetPosition.enumerated()), id: \.element.id) { index, assetPosition in
                     Text("\(assetPosition.group)")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -122,6 +92,13 @@ struct SearchAssetView: View {
                                 
                                 Spacer()
                                 
+                                // DEBUG
+//                                if (asset.currency == Currency.usd) {
+//                                    Text("\(asset.lastPrice * viewModel.rateUsdToIdr)") // error in this line
+//                                } else {
+//                                    Text("\(asset.lastPrice)")
+//                                }
+                                
                                 Text(asset.name)
                                     .font(.system(size: 14))
                                     .lineLimit(1)
@@ -141,12 +118,14 @@ struct SearchAssetView: View {
                 Spacer()
             }
         }
+        .frame(maxWidth: .infinity)
         .padding(.leading, 20)
         .padding(.trailing, 26)
         .navigationTitle("Choose asset to add")
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.getAllHoldings()
-            viewModel.getAllAssets()
+            viewModel.loadAssets()
         }
         .searchable(text: $viewModel.searchTerms, prompt: "Search")
         .navigationBarBackButtonHidden(true)
