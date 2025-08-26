@@ -44,6 +44,8 @@ struct PortfolioScreen: View {
     let sampleData = createSampleData()
     
     var body: some View {
+        @State var expandedGroups: Set<UUID> = []
+        
         VStack(alignment: .center) {
             PickerSegmented(
                 selectedIndex: $selectedIndex,
@@ -148,7 +150,10 @@ struct PortfolioScreen: View {
                             .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
                             .padding(.top, 16)
                         
-                        ForEach(item.assets, id: \.id) { asset in
+                        let isExpanded = expandedGroups.contains(item.id)
+                        let assetsToShow = isExpanded ? item.assets : Array(item.assets.prefix(3))
+                        
+                        ForEach(assetsToShow, id: \.id) { asset in
                             VStack {
                                 HStack {
                                     Text(asset.name!)
@@ -184,13 +189,22 @@ struct PortfolioScreen: View {
                                     .padding(.top, 10)
                             }
                         }
-                        
-                        HStack() {
-                            Spacer()
-                            Text("View More")
-                                .font(.system(size: 15, weight: .semibold))
-                            Image(systemName: "chevron.down")
-                        }.padding(.top, 16)
+                        if item.assets.count > 3 {
+                            Button {
+                                withAnimation(.easeInOut) {
+                                    if isExpanded { expandedGroups.remove(item.id) }
+                                    else { expandedGroups.insert(item.id) }
+                                }
+                            } label: {
+                                HStack {
+                                    Spacer()
+                                    Text(isExpanded ? "View Less" : "View More")
+                                        .font(.system(size: 15, weight: .semibold))
+                                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                }
+                                .padding(.top, 16)
+                            }
+                        }
                     }
                 }
             }.scrollIndicators(.hidden)

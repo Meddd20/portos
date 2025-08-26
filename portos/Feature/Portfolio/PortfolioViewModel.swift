@@ -40,8 +40,6 @@ final class PortfolioViewModel: ObservableObject {
             } else {
                 portfolioOverview = try service.getPortfolioOverviewByGoal(portfolioName!)
             }
-            
-            print("portfolioOverview: ------- \(portfolioOverview)")
         }
         catch {
             self.error = error.localizedDescription
