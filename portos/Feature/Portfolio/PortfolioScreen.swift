@@ -55,33 +55,38 @@ struct PortfolioScreen: View {
             )
             
             ScrollView {
-                VStack(alignment: .center) {
-                    Text("Rp \(viewModel.portfolioOverview.portfolioValue!)")
-                        .font(.system(size: 28, weight: .bold))
-                        .kerning(0.38)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.black)
-                        .padding(.top, 32)
-                    HStack(alignment: .center) {
-                        Image(systemName: "triangle.fill")
-                            .font(.system(size: 15))
-                        
-                        Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
-                            .font(.system(size: 15, weight: .bold))
-                            .padding(.trailing, 14)
-                        
-                        Text("Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)")
-                            .font(.system(size: 15, weight: .bold))
+                if selectedIndex == 0 {
+                    AssetAllocationAllChart(overview: viewModel.portfolioOverview)
+                        .padding(.top, 39)
+                } else {
+                    VStack(alignment: .center) {
+                        Text("Rp \(viewModel.portfolioOverview.portfolioValue!)")
+                            .font(.system(size: 28, weight: .bold))
+                            .kerning(0.38)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.black)
+                            .padding(.top, 32)
+                        HStack(alignment: .center) {
+                            Image(systemName: "triangle.fill")
+                                .font(.system(size: 15))
+                            
+                            Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
+                                .font(.system(size: 15, weight: .bold))
+                                .padding(.trailing, 14)
+                            
+                            Text("Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)")
+                                .font(.system(size: 15, weight: .bold))
+                        }
+                        .foregroundStyle(Color.greenApp)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .background(Color.greenAppLight)
+                        .cornerRadius(14)
+                        .padding(.bottom, 32)
                     }
-                    .foregroundStyle(Color.greenApp)
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 8)
-                    .background(Color.greenAppLight)
-                    .cornerRadius(14)
-                    .padding(.bottom, 32)
+                    
+                    InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
                 }
-                
-                InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
                 
                 HStack {
                     
@@ -180,8 +185,8 @@ struct PortfolioScreen: View {
                                             .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
                                     }
                                 }
-                                    .padding(.top, 16)
-                                    .onTapGesture { selectedHolding =  asset.holding }
+                                .padding(.top, 8)
+                                .onTapGesture { selectedHolding =  asset.holding }
                                 
                                 Divider()
                                     .frame(height: 0)
