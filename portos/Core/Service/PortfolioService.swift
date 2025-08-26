@@ -110,8 +110,6 @@ class PortfolioService {
                     holdingsByType["Options"]?.append(holding)
                 case .ETF:
                     holdingsByType["ETFs"]?.append(holding)
-                default:
-                    print("error here")
                 }
             }
             
