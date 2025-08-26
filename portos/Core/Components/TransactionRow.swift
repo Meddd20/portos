@@ -35,7 +35,7 @@ struct TransactionRow: View {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
                     if let amt = transaction.amount {
-                        Text(cashFormatter(Double(amt))).font(.body.weight(.semibold))
+//                        Text(cashFormatter(Double(amt))).font(.body.weight(.semibold))
                     } else {
                         Text("")
                     }

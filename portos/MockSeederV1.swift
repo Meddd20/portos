@@ -37,7 +37,7 @@ struct MockSeederV1 {
         let appCoinbase = AppSource(name: "Coinbase")
         
         let asset1 = Asset(
-            assetType: .Stocks,
+            assetType: .StocksId,
             symbol: "BBCA",
             name: "Bank Central Asia Tbk PT",
             currency: .idr,
@@ -47,7 +47,7 @@ struct MockSeederV1 {
         )
 
         let asset2 = Asset(
-            assetType: .Stocks,
+            assetType: .StocksId,
             symbol: "PANI",
             name: "Pantai Indah Kapuk Dua Tbk PT",
             currency: .idr,

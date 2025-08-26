@@ -9,13 +9,16 @@ import Foundation
 import SwiftUI
 
 struct TransferTile: View {
-    let transferTransaction: TransferTransaction
+    let outTransaction: Transaction
+    let inTransaction: Transaction
+    let isInOutHistory: Bool
+    let isAllOrHolding: Bool
     let onDelete: () -> Void
-//    let onEdit: () -> Void
+    let onEdit: () -> Void
     
     var body: some View {
         HStack(alignment: .top) {
-            Image(systemName: "arrow.right")
+            Image(systemName: isInOutHistory ? "arrow.right" : "arrow.left")
                 .font(.system(size: 20))
                 .fontWeight(.thin)
                 .foregroundStyle(.black)
@@ -32,45 +35,80 @@ struct TransferTile: View {
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text(transferTransaction.fromTransaction.asset.name)
+                Text(outTransaction.asset.name)
                     .font(.system(size: 16))
                     .fontWeight(.semibold)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: 140, alignment: .leading)
                 
-                HStack{
-                    Text("\(transferTransaction.fromTransaction.portfolio.name)")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.black.opacity(0.5))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    
-                    Image(systemName: "arrow.forward")
-                    
-                    Text("\(transferTransaction.toTransaction.portfolio.name)")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.black.opacity(0.5))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
+                if isInOutHistory {
+                    if isAllOrHolding {
+                        HStack {
+                            Text("\(outTransaction.portfolio.name)")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.black.opacity(0.5))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+
+                            Image(systemName: "arrow.right")
+                            
+                            Text("\(inTransaction.portfolio.name)")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.black.opacity(0.5))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
+                    } else {
+                        Text("To \(inTransaction.portfolio.name)")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.black.opacity(0.5))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                } else {
+                    if isAllOrHolding {
+                        HStack {
+                            Text("\(outTransaction.portfolio.name)")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.black.opacity(0.5))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+
+                            Image(systemName: "arrow.right")
+                            
+                            Text("\(inTransaction.portfolio.name)")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.black.opacity(0.5))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
+                    } else {
+                        Text("From \(outTransaction.portfolio.name)")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.black.opacity(0.5))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
                 }
             }
+            
             
             Spacer()
             
             VStack(alignment: .trailing, spacing: 8) {
                 
                 HStack(spacing: 4) {
-                    Text("\(transferTransaction.amount)")
+                    Text("\(outTransaction.quantity)")
                         .font(.system(size: 16))
                         .fontWeight(.semibold)
                     
-                    Text(transferTransaction.fromTransaction.asset.assetType.unit)
+                    Text(outTransaction.asset.assetType.unit)
                         .font(.system(size: 14))
                         .fontWeight(.regular)
                 }
                 
-                Text(transferTransaction.fromTransaction.app.name)
+                Text(outTransaction.app.name)
                     .font(.system(size: 13))
                     .foregroundStyle(.black.opacity(0.5))
                 
@@ -87,7 +125,7 @@ struct TransferTile: View {
             })
             
             Button {
-//                onEdit()
+                onEdit()
             } label: {
                 Label("Edit", systemImage: "pencil")
             }

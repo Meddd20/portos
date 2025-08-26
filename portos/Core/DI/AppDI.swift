@@ -32,7 +32,6 @@ struct AppDI {
     let transactionRepository: TransactionRepository
     let assetRepository: AssetRepository
     let appSourceRepository: AppSourceRepository
-    let transferTransactionRepository: TransferTransactionRepository
     
     let holdingService: HoldingService
     let portfolioService: PortfolioService
@@ -46,7 +45,6 @@ struct AppDI {
         let transactionRepo = TransactionRepository(modelContext: modelContext)
         let assetRepo = AssetRepository(modelContext: modelContext)
         let appSourceRepo = AppSourceRepository(modelContext: modelContext)
-        let transferTransactionRepo = TransferTransactionRepository(modelContext: modelContext)
         
         let holdingService = HoldingService(
             holdingRepository: holdingRepo,
@@ -63,8 +61,9 @@ struct AppDI {
             transactionRepository: transactionRepo,
             holdingRepository: holdingRepo,
             portfolioRepository: portfolioRepo,
-            transferTransactionRepository: transferTransactionRepo,
-            holdingService: holdingService
+            holdingService: holdingService,
+            appSourceRepository: appSourceRepo,
+            assetRepository: assetRepo
         )
 
         return AppDI(
@@ -73,7 +72,6 @@ struct AppDI {
             transactionRepository: transactionRepo,
             assetRepository: assetRepo,
             appSourceRepository: appSourceRepo,
-            transferTransactionRepository: transferTransactionRepo,
             holdingService: holdingService,
             portfolioService: portfolioService,
             transactionService: transactionService
@@ -87,7 +85,7 @@ struct AppDI {
 extension AppDI {
     static var preview: AppDI {
         let schema = Schema([AppSource.self, Asset.self, Portfolio.self, Holding.self, Transaction.self])
-        let cfg = ModelConfiguration(isStoredInMemoryOnly: true)
+        let cfg = ModelConfiguration(isStoredInMemoryOnly: false)
         let container = try! ModelContainer(for: schema, configurations: cfg)
         let ctx = ModelContext(container)
         return .live(modelContext: ctx)

@@ -92,6 +92,8 @@ class PortfolioService {
                     holdingsByType["Bonds"]?.append(holding)
                 case .Stocks:
                     holdingsByType["Stocks"]?.append(holding)
+                case .StocksId:
+                    holdingsByType["StocksId"]?.append(holding)
                 case .Crypto:
                     holdingsByType["Cryptos"]?.append(holding)
                 case .MutualFunds:

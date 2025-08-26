@@ -137,7 +137,8 @@ struct PortfolioScreen: View {
             viewModel.getPortfolioOverview(portfolioName: name)
         }
         .navigationDestination(item: $selectedHolding) {holding in
-            DetailHoldingView(holding: holding)
+            DetailHoldingView(di: di, holding: holding)
+//            DetailHoldingView(holding: holding)
         }
     }
 
