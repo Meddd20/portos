@@ -29,6 +29,15 @@ struct PortfolioRepository : PortfolioRepositoryProtocol {
         return try ctx.fetch(d)
     }
     
+    func getPortfolio(id: UUID) throws -> Portfolio? {
+        var d = FetchDescriptor<Portfolio>(
+            predicate: #Predicate { $0.id == id },
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
+        d.fetchLimit = 1
+        return try ctx.fetch(d).first
+    }
+    
     func createPortfolio(p: Portfolio) throws {
         ctx.insert(p)
         try ctx.save()

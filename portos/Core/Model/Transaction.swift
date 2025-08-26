@@ -15,10 +15,8 @@ final class Transaction {
     @Relationship var asset: Asset
     @Relationship var portfolio: Portfolio
     @Relationship var holding: Holding
-    
-    @Relationship(deleteRule: .cascade, inverse: \TransferTransaction.fromTransaction)
-    var transferTransaction: TransferTransaction?
-        
+            
+    var transferGroupId: UUID?
     var transactionType: TransactionType
     var quantity: Decimal
     var price: Decimal
@@ -29,12 +27,13 @@ final class Transaction {
     var createdAt: Date
     var updatedAt: Date
     
-    init(app: AppSource, asset: Asset, portfolio: Portfolio, holding:Holding, transactionType: TransactionType, quantity: Decimal, price: Decimal, costBasisPerUnit: Decimal? = nil, date: Date, tradeCurrency: Currency, exchangeRate: Decimal, createdAt: Date, updatedAt: Date) {
+    init(app: AppSource, asset: Asset, portfolio: Portfolio, holding:Holding, transferGroupId: UUID? = nil, transactionType: TransactionType, quantity: Decimal, price: Decimal, costBasisPerUnit: Decimal? = nil, date: Date, tradeCurrency: Currency, exchangeRate: Decimal, createdAt: Date, updatedAt: Date) {
         self.id = UUID()
         self.app = app
         self.asset = asset
         self.portfolio = portfolio
         self.holding = holding
+        self.transferGroupId = transferGroupId
         self.transactionType = transactionType
         self.quantity = quantity
         self.price = price

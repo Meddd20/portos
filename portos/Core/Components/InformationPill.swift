@@ -10,7 +10,7 @@ import SwiftUI
 struct InformationPill: View {
     var trailingText: String?
     var additionalText: String?
-    var backgrounColor = Color(.systemGray5)
+    var backgroundColor = Color(.systemGray5)
     var fontColor = Color(.systemGray)
     var showBackground = true
     
@@ -22,17 +22,11 @@ struct InformationPill: View {
                 .foregroundStyle(fontColor)
             
             HStack(spacing: 0) {
-                Text("10")
+                Text("\(trailingText ?? "-") %")
                     .font(.caption)
                     .fontWeight(.bold)
                     .foregroundStyle(fontColor)
                 
-                if let trailing = trailingText {
-                    Text(trailing)
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .foregroundStyle(fontColor)
-                }
             }
             
             if let backText = additionalText {
@@ -45,7 +39,7 @@ struct InformationPill: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background( showBackground ?
-                     Color(backgrounColor)
+                     Color(backgroundColor)
                      : Color.clear
         )
         .clipShape(
@@ -58,7 +52,7 @@ struct InformationPill: View {
     InformationPill(
         trailingText: "%",
         additionalText: "Rp 10,682,813",
-        backgrounColor: Color(.systemGray5),
+        backgroundColor: Color(.systemGray5),
         fontColor: Color(.systemGray),
         showBackground: true
     )

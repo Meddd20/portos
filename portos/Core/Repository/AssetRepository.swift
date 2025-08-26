@@ -20,5 +20,13 @@ class AssetRepository {
         return try modelContext.fetch(descriptor)
     }
     
+    func getAsset(id: UUID) throws -> Asset? {
+        var d = FetchDescriptor<Asset>(
+            predicate: #Predicate { $0.id == id }
+        )
+        d.fetchLimit = 1
+        return try modelContext.fetch(d).first
+    }
+    
     
 }

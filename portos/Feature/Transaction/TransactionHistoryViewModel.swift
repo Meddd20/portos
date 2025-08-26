@@ -11,12 +11,10 @@ class TransactionHistoryViewModel: ObservableObject {
     @Published var transactionSectionedByDate: [TransactionSection] = []
     @Published var historyOf: String = "All"
     private var transactionService: TransactionService
-    private var transferTransactionRepository: TransferTransactionRepository
     let portfolio: Portfolio?
     
     init(di: AppDI, portfolio: Portfolio? = nil) {
         self.transactionService = di.transactionService
-        self.transferTransactionRepository = di.transferTransactionRepository
         self.portfolio = portfolio
         
         if portfolio != nil {
@@ -27,13 +25,12 @@ class TransactionHistoryViewModel: ObservableObject {
     func getTransactions() {
         do {
             let transactions = try transactionService.getAllTransactions(portfolioId: portfolio?.id)
-            print("transaction has \(transactions.count)")
             transactionSectionedByDate = groupTransactionsByDate(transactions: transactions)
         } catch {
             return
         }
     }
-    
+            
     private func groupTransactionsByDate(transactions: [Transaction]) -> [TransactionSection] {
         let grouped = Dictionary(grouping: transactions) { tsx in
             Calendar.current.startOfDay(for: tsx.date)
@@ -51,10 +48,6 @@ class TransactionHistoryViewModel: ObservableObject {
         } catch {
             print(error.localizedDescription)
         }
-    }
-    
-    @MainActor func deleteTransfer(transactionId: UUID) {
-        try? transferTransactionRepository.deleteTransferTransaction(id: transactionId)
     }
 }
 

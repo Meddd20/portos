@@ -54,37 +54,11 @@ struct TransactionTile: View {
                 Text("\(transaction.app.name) • Rp \(transaction.price)")
                     .font(.system(size: 13))
                     .foregroundStyle(.black.opacity(0.5))
-//                if transaction.transactionType == .buy || transaction.transactionType == .sell {
-//                        
-//
-//                } else {
-//                    if let transferTransaction = transaction.transferTransaction {
-//                        let portfolioFrom = transferTransaction.fromTransaction.portfolio.name
-//                        let portfolioTo = transferTransaction.toTransaction.portfolio.name
-//                        
-//                        HStack{
-//                            Text("\(portfolioFrom)")
-//                                .font(.system(size: 13))
-//                                .foregroundStyle(.black.opacity(0.5))
-//                                .lineLimit(1)
-//                                .truncationMode(.tail)
-//                            
-//                            Image(systemName: "arrow.forward")
-//                            
-//                            Text("\(portfolioTo)")
-//                                .font(.system(size: 13))
-//                                .foregroundStyle(.black.opacity(0.5))
-//                                .lineLimit(1)
-//                                .truncationMode(.tail)
-//                        }
-//                    }
-//                }
             }
             
             Spacer()
             
             VStack(alignment: .trailing, spacing: 8) {
-                
                 HStack(spacing: 4) {
                     Text("\(transaction.quantity)")
                         .font(.system(size: 16))
@@ -95,15 +69,9 @@ struct TransactionTile: View {
                         .fontWeight(.regular)
                 }
                 
-//                if transaction.transactionType == .buy || transaction.transactionType == .sell {
-                    Text("Rp \(transactionAmount)")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.black.opacity(0.5))
-//                } else {
-//                    Text(transaction.app.name)
-//                        .font(.system(size: 13))
-//                        .foregroundStyle(.black.opacity(0.5))
-//                }
+                Text("Rp \(transactionAmount)")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.black.opacity(0.5))
                 
             }
             .padding(.trailing, 3)

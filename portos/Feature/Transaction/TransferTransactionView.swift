@@ -14,16 +14,19 @@ struct TransferTransactionView: View {
     @StateObject private var viewModel: TransferTransactionViewModel
     let asset: Asset
     let holding: Holding
+    let transaction: Transaction?
     
-    init(di: AppDI, asset: Asset, transferMode: TransferMode, holding: Holding) {
+    init(di: AppDI, asset: Asset, transferMode: TransferMode, holding: Holding, transaction: Transaction? = nil) {
         self.asset = asset
         self.holding = holding
+        self.transaction = transaction
         _viewModel = StateObject(
             wrappedValue: TransferTransactionViewModel(
                 di: di,
                 asset: asset,
                 transferMode: transferMode,
-                holding: holding
+                holding: holding,
+                transaction: transaction
             )
         )
     }
