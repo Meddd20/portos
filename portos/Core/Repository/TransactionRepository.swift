@@ -41,12 +41,21 @@ class TransactionRepository {
         return try modelContext.fetch(descriptor).first
     }
     
+    func getDetailTransferTransaction(transferGroupId: UUID, transactionType: TransactionType) throws -> Transaction? {
+        var descriptor = FetchDescriptor<Transaction>(
+            predicate: #Predicate<Transaction> { $0.transactionType == transactionType && $0.transferGroupId == transferGroupId }
+        )
+        descriptor.fetchLimit = 1
+        
+        return try modelContext.fetch(descriptor).first
+    }
+    
     func addTransaction(_ transaction: Transaction) {
         modelContext.insert(transaction)
         try? modelContext.save()
     }
     
-    func editTransaction(id: UUID, apply changes: (Transaction) -> Void) throws {
+    func editTransaction(id: UUID, apply changes: (Transaction) throws -> Void) throws {
         var descriptor = FetchDescriptor<Transaction>(
             predicate: #Predicate<Transaction> { $0.id == id}
         )
@@ -55,7 +64,7 @@ class TransactionRepository {
         
         guard let transaction = try modelContext.fetch(descriptor).first else { return }
         
-        changes(transaction)
+        try changes(transaction)
         transaction.updatedAt = .now
         try modelContext.save()
     }

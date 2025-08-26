@@ -107,13 +107,11 @@ class TradeTransactionViewModel: ObservableObject {
     
     func proceedTransaction() {
         guard isDataFilled else { return }
-//        print(isDataFilled)
-        
+
         switch transactionMode {
         case .buy:
             addBuyTransaction()
         case .liquidate:
-            print("this right?")
             addLiquidateTransaction()
         case .editBuy, .editLiquidate:
             editTransaction()

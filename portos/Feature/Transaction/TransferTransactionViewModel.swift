@@ -25,36 +25,41 @@ class TransferTransactionViewModel: ObservableObject {
     @Published var portfolios: [Portfolio] = []
     @Published var maxAmountPerAccount: Decimal? = 0
     
+    private let transactionRepository: TransactionRepository
     private let transactionService: TransactionService
-    private let transferTransactionRepository: TransferTransactionRepository
     private let holdingService: HoldingService
     let portfolioService: PortfolioService
-    private var transferTransaction: TransferTransaction?
     
     let asset: Asset
     let transferMode: TransferMode
     let holding: Holding?
+    let transaction: Transaction?
     
-    init(di: AppDI, asset: Asset, transferMode: TransferMode, holding: Holding? = nil, transferTransaction: TransferTransaction? = nil) {
+    init(di: AppDI, asset: Asset, transferMode: TransferMode, holding: Holding? = nil, transaction: Transaction? = nil) {
         self.holdingService = di.holdingService
         self.transactionService = di.transactionService
         self.portfolioService = di.portfolioService
-        self.transferTransactionRepository = di.transferTransactionRepository
+        self.transactionRepository = di.transactionRepository
         self.asset = asset
         self.transferMode = transferMode
         self.holding = holding
-        self.transferTransaction = transferTransaction
+        self.transaction = transaction
         
         guard let holding else { return }
         let recap = try? holdingService.getHoldingAssetDetail(holdingId: holding.id)
         accountPositions = recap?.accounts ?? []
         portfolioTransferFrom = holding.portfolio
         
-        if transferTransaction != nil {
-            amountText = transferTransaction?.amount.description ?? ""
-            portfolioTransferFrom = transferTransaction?.fromTransaction.portfolio
-            portfolioTransferTo = transferTransaction?.toTransaction.portfolio
-            platform = transferTransaction?.platform
+        if transaction != nil {
+            amountText = transaction?.quantity.description ?? ""
+            platform = transaction?.app
+            
+            guard let transferGroupId = transaction?.transferGroupId else { return }
+
+            var transactionTo = try? self.transactionRepository.getDetailTransferTransaction(transferGroupId: transferGroupId, transactionType: TransactionType.allocateIn)
+            
+            portfolioTransferTo = transactionTo?.portfolio
+            isDataFilled = false
         }
     }
     
@@ -75,9 +80,8 @@ class TransferTransactionViewModel: ObservableObject {
         }
     }
     
-    func proceedTransaction() {
+    @MainActor func proceedTransaction() {
         guard isDataFilled else { return }
-        
         if transferMode == .transferToPortfolio {
             addTransferTransaction()
         } else {
@@ -85,7 +89,7 @@ class TransferTransactionViewModel: ObservableObject {
         }
     }
     
-    func addTransferTransaction() {
+    @MainActor func addTransferTransaction() {
         do {
             guard isDataFilled, let platform = platform, let amount = amount, let portfolioTransferFrom = portfolioTransferFrom, let holding = holding, let portfolioTransferTo = portfolioTransferTo else { return }
             
@@ -108,21 +112,34 @@ class TransferTransactionViewModel: ObservableObject {
         }
     }
     
+    @MainActor
     func editTransferTransaction() {
-        guard transferTransaction != nil, let portfolioTransferTo = portfolioTransferTo, let platform = platform else { return }
-        
         do {
+            guard transaction?.id != nil, isDataFilled, let platform = platform, let amount = amount, let portfolioTransferTo = portfolioTransferTo else { return }
+            
+            print("lewat?")
+            
             try transactionService.editTransferTransaction(
-                transferTransactionId: transferTransaction?.id ?? UUID(),
-                amount: amount ?? 0,
+                transferTransactionId: transaction?.id ?? UUID(),
+                amount: amount,
                 portfolioDestination: portfolioTransferTo,
                 platform: platform,
                 asset: asset
             )
             
+//            try transactionService.debugEditTransferTransaction(
+//                transferTransactionId: transaction?.id ?? UUID(),
+//                amount: amount,
+//                portfolioDestination: portfolioTransferTo,
+//                platform: platform,
+//                asset: asset
+//            )
+            
+            print("masuk?")
+            
             didFinishTransaction = true
         } catch {
-            print("Error editing transfer transaction: \(error)")
+            print(error.localizedDescription)
             return
         }
     }
@@ -139,11 +156,10 @@ class TransferTransactionViewModel: ObservableObject {
             isDataFilled = platform != nil && amountText != "" && portfolioTransferTo != nil
         
         case .editTransferTransaction:
-            let amountChange = amount == transferTransaction?.amount
-            let portfolioDestinationChange = portfolioTransferTo != transferTransaction?.toTransaction.portfolio
-            let platformChange = platform == transferTransaction?.toTransaction.app
-            
-            isDataFilled = amountChange || portfolioDestinationChange || platformChange
+            let amountChange = amount == transaction?.quantity
+            let platformChange = platform == transaction?.app
+            let portfolioChange = portfolioTransferTo == transaction?.portfolio
+            isDataFilled = amountChange || platformChange || portfolioChange
         }
     }
     

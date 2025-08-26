@@ -11,10 +11,11 @@ struct HoldingSummaryCard: View {
     // MARK: Formatting
     private var maskedIDR: String { "••••••••" }
     let platform: String
-    let totalValue: Double
+    let totalValue: Decimal
     let quantityLabel: String
-    let currentPrice: Double
-    let averagePrice: Double
+    let currentPrice: Decimal
+    let averagePrice: Decimal
+    let unit: String
     
     // Mark: Local UI State
     @Binding var showAmounts: Bool
@@ -25,7 +26,6 @@ struct HoldingSummaryCard: View {
             Text(platform)
                 .font(.body)
             
-            
             VStack(alignment: .leading){
                 // Amount
                 Text(showAmounts ? cashAmount(totalValue) : maskedIDR)
@@ -35,7 +35,7 @@ struct HoldingSummaryCard: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                 // Quantity
-                Text(quantityLabel)
+                Text("\(quantityLabel) \(unit)")
                     .font(.body)
                     .fontWeight(.regular)
             }
@@ -62,8 +62,8 @@ struct HoldingSummaryCard: View {
                 }
             }
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 25)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 24)
         .frame(width: 300)
         .background(
             Color.blue.opacity(0.1)
@@ -76,12 +76,13 @@ struct HoldingSummaryCard: View {
 }
 
 #Preview {
-    HoldingSummaryCard(
-        platform: "Bibit",
-        totalValue: 8_000_000.0,
-        quantityLabel: "8 Lot",
-        currentPrice: 3_800.0,
-        averagePrice: 3_800.0,
-        showAmounts: .constant(true)
-    )
+//    HoldingSummaryCard(
+//        platform: "Bibit",
+//        totalValue: 8_000_000.0,
+//        quantityLabel: "8 Lot",
+//        currentPrice: 3_800.0,
+//        averagePrice: 3_800.0,
+//        unit:
+//        showAmounts: .constant(true)
+//    )
 }

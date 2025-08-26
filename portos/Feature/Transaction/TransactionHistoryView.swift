@@ -13,7 +13,7 @@ struct TransactionHistoryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: TransactionHistoryViewModel
     @State private var selectedTransactionForEdit: Transaction?
-    @State private var selectedTransferForEdit: TransferTransaction?
+    @State private var selectedTransferForEdit: Transaction?
     
     let portfolio: Portfolio?
     let today = Calendar.current.startOfDay(for: Date())
@@ -35,27 +35,16 @@ struct TransactionHistoryView: View {
                     ForEach(viewModel.transactionSectionedByDate, id: \.id) { section in
                         Section {
                             ForEach(section.transactions, id: \.id) { transaction in
-                                if let tt = transaction.transferTransaction {
-                                    if tt.fromTransaction.id == transaction.id {
-                                        TransferTile(
-                                            transferTransaction: tt,
-                                            onDelete: { viewModel.deleteTransfer(transactionId: tt.id )}
-//                                            onEdit: { viewModel.selectedTransferForEdit = tt }
-                                        )
-                                        .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 20))
-                                        .listRowSeparator(.hidden)
-                                    } else {
-                                        EmptyView()
-                                    }
-                                } else {
-                                    TransactionTile(
-                                        transaction: transaction,
-                                        onDelete: { viewModel.deleteTransaction(transactionId: transaction.id) },
-                                        onEdit: { selectedTransactionForEdit = transaction }
-                                    )
-                                    .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 20))
-                                    .listRowSeparator(.hidden)
-                                }
+                                TransactionRowView(
+                                    transaction: transaction,
+                                    portfolio: portfolio,
+                                    section: section,
+                                    isAllOrHolding: portfolio == nil,
+                                    onDeleteTransaction: { viewModel.deleteTransaction(transactionId: transaction.id) },
+                                    onEditTransaction: { selectedTransactionForEdit = transaction },
+                                    onEditTransfer: { selectedTransferForEdit = transaction }
+                                )
+                                .listRowSeparator(.hidden)
                             }
                         } header: {
                             sectionHeader(for: section)
@@ -118,12 +107,13 @@ struct TransactionHistoryView: View {
                 currentPortfolioAt: transaction.portfolio
             )
         }
-        .navigationDestination(item: $selectedTransferForEdit) { transfer in
+        .navigationDestination(item: $selectedTransferForEdit) { transaction in
             TransferTransactionView(
                 di: di,
-                asset: transfer.fromTransaction.asset,
+                asset: transaction.asset,
                 transferMode: .editTransferTransaction,
-                holding: transfer.fromTransaction.holding
+                holding: transaction.holding,
+                transaction: transaction
             )
         }
     }
@@ -144,5 +134,78 @@ struct TransactionHistoryView: View {
         }
         .padding(.bottom, 8)
         .background(Color.clear)
+    }
+}
+
+struct TransactionRowView: View {
+    let transaction: Transaction
+    let portfolio: Portfolio?
+    let section: TransactionSection
+    let isAllOrHolding: Bool
+    let onDeleteTransaction: () -> Void
+    let onEditTransaction: () -> Void
+    let onEditTransfer: () -> Void
+    
+    var body: some View {
+        switch transaction.transactionType {
+        case .allocateOut:
+            TransferRowView(
+                transaction: transaction,
+                portfolio: portfolio,
+                sectionTransactions: section.transactions,
+                isAllOrHolding: isAllOrHolding,
+                onDelete: onDeleteTransaction,
+                onEdit: onEditTransfer
+            )
+            
+        case .allocateIn:
+            if isAllOrHolding {
+                EmptyView()
+            } else {
+                TransferRowView(
+                    transaction: transaction,
+                    portfolio: portfolio,
+                    sectionTransactions: section.transactions,
+                    isAllOrHolding: isAllOrHolding,
+                    onDelete: onDeleteTransaction,
+                    onEdit: onEditTransfer
+                )                
+            }
+            
+        default:
+            TransactionTile(
+                transaction: transaction,
+                onDelete: onDeleteTransaction,
+                onEdit: onEditTransaction
+            )
+        }
+    }
+}
+
+struct TransferRowView: View {
+    let transaction: Transaction
+    let portfolio: Portfolio?
+    let sectionTransactions: [Transaction]
+    let isAllOrHolding: Bool
+    let onDelete: () -> Void
+    let onEdit: () -> Void
+    
+    private var isInOutHistory: Bool {
+        transaction.transactionType == .allocateOut
+    }
+    
+    private var inTransaction: Transaction {
+        sectionTransactions.first { $0.transferGroupId == transaction.transferGroupId && isInOutHistory ? $0.transactionType == .allocateIn : $0.transactionType == .allocateOut } ?? transaction
+    }
+    
+    var body: some View {
+        TransferTile(
+            outTransaction: isInOutHistory ? transaction : inTransaction,
+            inTransaction: isInOutHistory ? inTransaction : transaction,
+            isInOutHistory: isInOutHistory,
+            isAllOrHolding: isAllOrHolding,
+            onDelete: onDelete,
+            onEdit: onEdit
+        )
     }
 }

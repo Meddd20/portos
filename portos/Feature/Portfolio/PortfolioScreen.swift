@@ -249,7 +249,8 @@ struct PortfolioScreen: View {
                 .font(.system(size: 13))
         }
         .navigationDestination(item: $selectedHolding) {holding in
-            DetailHoldingView(holding: holding)
+            DetailHoldingView(di: di, holding: holding)
+//            DetailHoldingView(holding: holding)
         }
     }
         func onPickerChange() {
