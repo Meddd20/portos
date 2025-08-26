@@ -152,7 +152,7 @@ struct TransferTransactionView: View {
                     Text("Confirm")
                         .buttonStyle(.borderedProminent)
                         .frame(width: 306, height: 53)
-                        .background(viewModel.isDataFilled ? .blue : Color(red: 0.7, green: 0.7, blue: 0.7))
+                        .background(viewModel.isDataFilled ? Color.primaryApp : Color.secondaryApp)
                         .tint(.white)
                         .cornerRadius(24)
                 })
@@ -179,5 +179,12 @@ struct TransferTransactionView: View {
                 }
             }
         }
+        .background(
+            LinearGradient(
+            stops: [
+                Gradient.Stop(color: .white, location: 0.13),
+                Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
+            startPoint: UnitPoint(x: 0.5, y: 0),
+            endPoint: UnitPoint(x: 0.5, y: 1) ))
     }
 }

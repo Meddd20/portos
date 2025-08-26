@@ -39,7 +39,7 @@ struct TransactionHistoryView: View {
                                     if tt.fromTransaction.id == transaction.id {
                                         TransferTile(
                                             transferTransaction: tt,
-                                            onDelete: { viewModel.deleteTransfer(transactionId: tt.id )},
+                                            onDelete: { viewModel.deleteTransfer(transactionId: tt.id )}
 //                                            onEdit: { viewModel.selectedTransferForEdit = tt }
                                         )
                                         .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 20))

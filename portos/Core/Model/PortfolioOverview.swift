@@ -28,7 +28,7 @@ struct AssetItem : Identifiable {
     let holding: Holding?
     let name: String?
     let value: String?
-    let growthRate: String?
+    let growthRate: Decimal?
     let profitAmount: String?
     let quantity: String?
 }

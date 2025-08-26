@@ -71,7 +71,7 @@ struct TradeTransactionView: View {
                 transaction: transaction,
                 holding: holding,
                 asset: asset,
-                currentPortfolioAt: currentPortfolioAt,
+                currentPortfolioAt: currentPortfolioAt
             )
         )
     }
@@ -224,7 +224,7 @@ struct TradeTransactionView: View {
                     Text("Confirm")
                         .buttonStyle(.borderedProminent)
                         .frame(width: 306, height: 53)
-                        .background(viewModel.isDataFilled ? .blue : Color(red: 0.7, green: 0.7, blue: 0.7))
+                        .background(viewModel.isDataFilled ? Color.primaryApp : Color.secondaryApp)
                         .tint(.white)
                         .cornerRadius(24)
                 })
@@ -234,6 +234,13 @@ struct TradeTransactionView: View {
         .onAppear {
             viewModel.loadData()
         }
+        .background(
+            LinearGradient(
+            stops: [
+                Gradient.Stop(color: .white, location: 0.13),
+                Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
+            startPoint: UnitPoint(x: 0.5, y: 0),
+            endPoint: UnitPoint(x: 0.5, y: 1) ))
         .navigationBarTitle(transactionMode.fullTitle ?? "\(transactionMode.titlePrefix!) \(asset.assetType.displayName)")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

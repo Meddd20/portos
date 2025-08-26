@@ -160,6 +160,13 @@ struct SearchAssetView: View {
                 }
             }
         }
+        .background(
+            LinearGradient(
+            stops: [
+                Gradient.Stop(color: .white, location: 0.13),
+                Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
+            startPoint: UnitPoint(x: 0.5, y: 0),
+            endPoint: UnitPoint(x: 0.5, y: 1) ))
     }
     @ViewBuilder
     private var holdingsContent: some View {
@@ -178,7 +185,7 @@ struct SearchAssetView: View {
     
     @ViewBuilder
     private func assetPositionSection(assetPosition: AssetPosition, isFirst: Bool) -> some View {
-//        sectionHeader(title: assetPosition.assetType.displayName, isFirst: isFirst)
+        sectionHeader(title: assetPosition.group, isFirst: isFirst)
         
         ForEach(assetPosition.holdings, id: \.persistentModelID) { holding in
             assetRow(

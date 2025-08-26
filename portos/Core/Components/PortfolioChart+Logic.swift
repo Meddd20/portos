@@ -90,8 +90,8 @@ struct RangeTabs: View {
                     withAnimation(.easeInOut(duration: 0.15)) { selection = opt }
                 } label: {
                     Text(opt.label)
-                        .font(.system(size: 14, weight: selection == opt ? .semibold : .regular))
-                        .foregroundColor(selection == opt ? .primary : .gray)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(selection == opt ? .black : Color(red: 0.7, green: 0.7, blue: 0.7))
                 }
                 .buttonStyle(.plain)
             }
