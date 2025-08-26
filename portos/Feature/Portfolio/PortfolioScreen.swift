@@ -20,7 +20,6 @@ struct PortfolioScreen: View {
     }
     
     @StateObject private var viewModel: PortfolioViewModel
-    @State private var path = NavigationPath()
     
     init(service: PortfolioService) {
         _viewModel = StateObject(wrappedValue: PortfolioViewModel(service: service))
@@ -36,6 +35,9 @@ struct PortfolioScreen: View {
     @State private var showTrade = false
     @State private var showTransactionHistory = false
     @State private var selectedHolding: Holding? = nil
+    @State private var isExpanded = false
+    @State private var expandedGroupID: UUID? = nil
+    private let collapsedCount = 3
     
     @State private var showMore: Bool = false
     
@@ -82,7 +84,6 @@ struct PortfolioScreen: View {
                 InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
                 
                 HStack {
-                    
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
                         showTransactionHistory = true
                     }
@@ -134,68 +135,12 @@ struct PortfolioScreen: View {
                         .padding(.top, 10)
                         .multilineTextAlignment(.center)
                 } else {
-                    ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
-                        HStack {
-                            Text(item.name!)
-                                .font(.system(size: 20, weight: .semibold))
-                            Spacer()
-                            Text("Rp \(item.value!)")
-                                .font(.system(size: 20, weight: .semibold))
-                        }.padding(.top, 32)
-                        
-                        Divider()
-                            .frame(height: 0)
-                            .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
-                            .padding(.top, 16)
-                        
-                        ForEach(item.assets, id: \.id) { asset in
-                            VStack {
-                                HStack {
-                                    Text(asset.name!)
-                                        .font(.system(size: 17))
-                                        .lineLimit(1)
-                                        .truncationMode(.tail)
-                                    Spacer()
-                                    Text("Rp \(asset.value!)")
-                                        .font(.system(size: 17))
-                                }
-                                .padding(.top, 10)
-                                HStack {
-                                    if (selectedIndex != 0) {
-                                        Text(asset.quantity!)
-                                            .font(.system(size: 15)) }
-                                    Spacer()
-                                    if asset.growthRate! >= 0 {
-                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
-                                            .font(.system(size: 15))
-                                            .foregroundStyle(Color.greenApp)
-                                    } else {
-                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
-                                            .font(.system(size: 15))
-                                            .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
-                                    }
-                                }
-                                    .padding(.top, 16)
-                                    .onTapGesture { selectedHolding =  asset.holding }
-                                
-                                Divider()
-                                    .frame(height: 0)
-                                    .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
-                                    .padding(.top, 10)
-                            }
-                        }
-                        
-                        HStack() {
-                            Spacer()
-                            Text("View More")
-                                .font(.system(size: 15, weight: .semibold))
-                            Image(systemName: "chevron.down")
-                        }.padding(.top, 16)
-                    }
+                    assetGroupsList
                 }
             }.scrollIndicators(.hidden)
                 .padding()
         }
+        .navigationBarBackButtonHidden()
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .background(
@@ -236,13 +181,123 @@ struct PortfolioScreen: View {
         }
         .navigationDestination(item: $selectedHolding) {holding in
             DetailHoldingView(di: di, holding: holding)
-//            DetailHoldingView(holding: holding)
         }
     }
-        func onPickerChange() {
-            let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-            viewModel.getPortfolioOverview(portfolioName: name)
+    
+    @ViewBuilder
+    private var assetGroupsList: some View {
+        ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { group in
+            assetGroupSection(group: group)
         }
+    }
+
+    @ViewBuilder
+    private func assetGroupSection(group: AssetGroup) -> some View {
+        let isExpanded = expandedGroupID == group.id
+        HStack {
+            Text(group.name!)
+                .font(.system(size: 20, weight: .semibold))
+            Spacer()
+            Text("Rp \(group.value!)")
+                .font(.system(size: 20, weight: .semibold))
+        }
+        .padding(.top, 32)
+        
+        Divider()
+            .frame(height: 0)
+            .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+            .padding(.top, 16)
+        
+        ForEach(displayedAssets(for: group, isExpanded: isExpanded), id: \.id) { asset in
+                assetItemRow(asset: asset)
+            }
+        
+        if group.assets.count > collapsedCount {
+            Button {
+                withAnimation {
+                    toggleGroup(group)
+                }
+            } label: {
+                HStack {
+                    Spacer()
+                    Text(isExpanded ? "View Less" : "View More")
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                }
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .padding(.top, 4)
+            }
+        }
+    }
+    
+    private func displayedAssets(for group: AssetGroup, isExpanded: Bool) -> [AssetItem] {
+        if isExpanded { return group.assets }
+        return Array(group.assets.prefix(collapsedCount))
+    }
+    
+    private func toggleGroup(_ group: AssetGroup) {
+        let id = group.id
+        if expandedGroupID == id {
+            expandedGroupID = nil
+        } else {
+            expandedGroupID = id
+        }
+    }
+
+    @ViewBuilder
+    private func assetItemRow(asset: AssetItem) -> some View {
+        VStack {
+            HStack {
+                Text(asset.name!)
+                    .font(.body)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                Spacer()
+                
+                Text("Rp \(asset.value!)")
+                    .font(.body)
+            }
+            .padding(.top, 10)
+            
+            HStack {
+                if selectedIndex != 0 {
+                    Text(asset.quantity!)
+                        .font(.system(size: 15))
+                }
+                Spacer()
+                growthRateLabel(for: asset.growthRate!)
+            }
+            .padding(.top, 8)
+            
+            Divider()
+                .frame(height: 0)
+                .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                .padding(.top, 10)
+        }
+        .onTapGesture {
+            selectedHolding = asset.holding
+        }
+    }
+
+    @ViewBuilder
+    private func growthRateLabel(for growthRate: Decimal) -> some View {
+        if growthRate >= 0 {
+            Label("\(growthRate)%", systemImage: "arrowtriangle.up.fill")
+                .font(.system(size: 15))
+                .foregroundStyle(Color.greenApp)
+        } else {
+            Label("\(growthRate)%", systemImage: "arrowtriangle.down.fill")
+                .font(.system(size: 15))
+                .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+        }
+    }
+    
+    func onPickerChange() {
+        let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
+        viewModel.getPortfolioOverview(portfolioName: name)
+    }
     
     // Projection: tren halus + gelombang
     func makeProjection(months: Int = 72, start: Double = 100) -> [DataPoint] {

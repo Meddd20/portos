@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class DetailHoldingViewModel: ObservableObject {
     @Published var holdingAssetDetail: PortfolioAssetPosition?
     @Published var accountPosition: [AccountPosition] = []
@@ -40,7 +41,8 @@ class DetailHoldingViewModel: ObservableObject {
     func deleteTransaction(transactionId: UUID) {
         do {
             try transactionService.deleteTransaction(transactionId: transactionId)
-            print("succeed")
+            getHoldingAssetDetail()
+            getTransactions()
         } catch {
             print(error.localizedDescription)
         }

@@ -10,12 +10,12 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @State private var path = NavigationPath()
     
     var body: some View {
         let di = AppDI.live(modelContext: modelContext)
-        NavigationStack {
+        NavigationStack(path: $path) {
             PortfolioScreen(service: di.portfolioService)
-//            TradeTransactionView(di: di, transactionMode: .buy)
         }
 
     }
@@ -42,4 +42,9 @@ extension AppSource {
     static var dummy: AppSource {
         AppSource(name: "Bibit")
     }
+}
+
+enum Route: Hashable {
+    case trade
+    case holding(Holding)
 }

@@ -15,6 +15,7 @@ final class PortfolioViewModel: ObservableObject {
     @Published var portfolioValue: Int = 0
     @Published var profitAmount: Int = 0
     @Published var growthRate: String = ""
+    @Published var assets: [AssetGroup] = []
     
     @Published var portfolioOverview: PortfolioOverview = PortfolioOverview(portfolioValue: "default", portfolioGrowthRate: "default", portfolioProfitAmount: "default", groupItems: [])
     
@@ -28,7 +29,6 @@ final class PortfolioViewModel: ObservableObject {
     func load() {
         do {
             portfolios = try service.getAllPortfolios()
-            print(portfolios.count)
         }
         catch { self.error = error.localizedDescription }
     }
@@ -37,6 +37,8 @@ final class PortfolioViewModel: ObservableObject {
         do {
             if portfolioName == nil {
                 portfolioOverview = try service.getPortfolioOverview()
+                assets = portfolioOverview.groupItems
+                print(assets.count)
             } else {
                 portfolioOverview = try service.getPortfolioOverviewByGoal(portfolioName!)
             }

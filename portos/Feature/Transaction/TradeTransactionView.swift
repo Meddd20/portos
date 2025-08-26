@@ -44,6 +44,7 @@ enum TransactionMode {
 struct TradeTransactionView: View {
     @Environment(\.di) private var di
     @Environment(\.dismiss) var dismiss
+    @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel: TradeTransactionViewModel
     let transactionMode: TransactionMode
     let asset: Asset
@@ -56,7 +57,7 @@ struct TradeTransactionView: View {
          transaction: Transaction? = nil,
          holding: Holding? = nil,
          asset: Asset,
-         currentPortfolioAt: Portfolio?
+         currentPortfolioAt: Portfolio?,
     ) {
         self.transactionMode = transactionMode
         self.asset = asset
@@ -245,13 +246,13 @@ struct TradeTransactionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .padding(.bottom, 26)
-        .navigationDestination(isPresented: $viewModel.didFinishTransaction) {
-            PortfolioScreen(service: viewModel.portfolioService)
+        .onChange(of: viewModel.didFinishTransaction) { finished in
+            dismiss()
         }
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
-                    dismiss()
+                    presentationMode.wrappedValue.dismiss()
                 }) {
                     Image(systemName: "arrow.left")
                         .foregroundColor(.black)

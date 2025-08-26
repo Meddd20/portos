@@ -96,6 +96,26 @@ struct MockSeederV1 {
             asOf: Date()
         )
         
+        let asset7 = Asset(
+            assetType: .Stocks,
+            symbol: "AAPL",
+            name: "Apple Inc.",
+            currency: .usd,
+            country: "United States",
+            lastPrice: 225, // contoh harga AAPL (USD)
+            asOf: Date()
+        )
+
+        let asset8 = Asset(
+            assetType: .Stocks,
+            symbol: "NVDA",
+            name: "NVIDIA Corporation",
+            currency: .usd,
+            country: "United States",
+            lastPrice: 1150, // contoh harga NVDA (USD)
+            asOf: Date()
+        )
+        
 //        let portfolio1 = Portfolio(
 //            name: "Retirement",
 //            targetAmount: Decimal(12_000_000_000),

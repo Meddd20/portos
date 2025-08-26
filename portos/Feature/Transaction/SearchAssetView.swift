@@ -23,39 +23,6 @@ struct SearchAssetView: View {
     }
     
     var body: some View {
-//        ScrollView {
-//            VStack(alignment: .leading) {
-////                if viewModel.searchTerms.isEmpty {
-////                    holdingsContent
-////                } else {
-////                    searchResultsContent
-////                }
-//            }
-//            .padding(.leading, 20)
-//            .padding(.trailing, 26)
-//        }
-//        .navigationTitle("Choose asset to add")
-//        .onAppear {
-//            viewModel.getAllHoldings()
-//            viewModel.getAllAssets()
-//        }
-//        .searchable(text: $viewModel.searchTerms, prompt: "Search")
-//        .navigationBarBackButtonHidden(true)
-//        .toolbar {
-//            ToolbarItem (placement: .topBarLeading) {
-//                Button (action: {
-//                    dismiss()
-//                }) {
-//                    Image(systemName: "arrow.left")
-//                        .foregroundColor(.black)
-//                }
-//            }
-//        }
-        
-        
-        
-        
-        
         VStack {
             if viewModel.searchTerms.isEmpty {
                 ForEach (Array(viewModel.assetPosition.enumerated()), id: \.element.id) { index, assetPosition in
