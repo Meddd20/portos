@@ -34,7 +34,7 @@ final class AddPortfolioViewModel: ObservableObject {
         
         if screenMode == .edit {
             let currentTerm = Calendar.current.dateComponents([.year], from: .now, to: portfolio!.targetDate).year ?? 0
-            self.years = currentTerm
+            self.years = currentTerm + 1
         }
     }
     
