@@ -37,9 +37,9 @@ enum RangeOption: CaseIterable, Hashable {
 }
 
 struct InvestmentChartWithRange: View {
-    let projection: [DataPoint]
+    let projection: [DataPoint]?
     let actual: [DataPoint]
-
+    
     @State private var range: RangeOption = .y1
 
     private var lastActualDate: Date? { actual.last?.date }
@@ -50,8 +50,12 @@ struct InvestmentChartWithRange: View {
 
     private var endDate: Date {
         let lastActual = actual.last?.date ?? .now
-        let lastProj   = projection.last?.date ?? lastActual
-        return max(lastActual, lastProj)
+        if projection != nil {
+            let lastProj   = projection?.last?.date ?? lastActual
+            return max(lastActual, lastProj)
+        } else {
+            return lastActual
+        }
     }
 
     private var actualFiltered: [DataPoint] {
@@ -60,7 +64,7 @@ struct InvestmentChartWithRange: View {
     }
 
     private var projectionFiltered: [DataPoint] {
-        projection.filter { $0.date >= startDate && $0.date <= endDate }
+        projection?.filter { $0.date >= startDate && $0.date <= endDate } ?? []
     }
 
     var body: some View {

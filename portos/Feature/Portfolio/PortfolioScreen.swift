@@ -96,7 +96,7 @@ struct PortfolioScreen: View {
                         .onTapGesture {viewModel.refreshMarketValues()}
                         .frame(maxWidth: .infinity, alignment: .trailing)
                         .foregroundStyle(.black.opacity(0.3))
-                    InvestmentChartWithRange(projection: viewModel.projectionSeries, actual: viewModel.actualSeries)
+                    InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
                                         .frame(height: 184)
                 }
                 

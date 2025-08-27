@@ -2,11 +2,11 @@ import SwiftUI
 import Charts
 
 struct InvestmentChart: View {
-    let projection: [DataPoint]
+    let projection: [DataPoint]?
     let actual: [DataPoint]
 
     var lastActual: DataPoint? { actual.last }
-    var lastProjection: DataPoint? { projection.last }
+    var lastProjection: DataPoint? { projection?.last }
 
     var body: some View {
         VStack {
@@ -32,7 +32,7 @@ struct InvestmentChart: View {
                     .lineStyle(StrokeStyle(lineWidth: 2))
                 }
                 
-                ForEach(projection) { p in
+                ForEach(projection ?? []) { p in
                     LineMark(
                         x: .value("Date", p.date),
                         y: .value("Value", p.value),
