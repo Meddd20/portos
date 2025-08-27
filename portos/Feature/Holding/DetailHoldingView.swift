@@ -136,7 +136,9 @@ struct DetailHoldingView: View {
                                     SimpleTransactionRow(
                                         transaction: tx,
                                         section: section,
+                                        allTransactions: viewModel.allTransactions,
                                         isAllOrHolding: true,
+                                        portfolio: nil,
                                         onDelete: { viewModel.deleteTransaction(transactionId: tx.id) },
                                         onEdit: { selectedTransactionForEdit = tx },
                                         onTransfer: { selectedTransferForEdit = tx }
@@ -217,7 +219,9 @@ struct DetailHoldingView: View {
 struct SimpleTransactionRow: View {
     let transaction: Transaction
     let section: TransactionSection
+    let allTransactions: [Transaction]
     let isAllOrHolding: Bool
+    let portfolio: Portfolio?
     let onDelete: () -> Void
     let onEdit: () -> Void
     let onTransfer: () -> Void
@@ -225,9 +229,10 @@ struct SimpleTransactionRow: View {
     var body: some View {
         TransactionRowView(
             transaction: transaction,
-            portfolio: transaction.portfolio,
+            portfolio: portfolio,
             section: section,
-            isAllOrHolding: isAllOrHolding,
+            allTransactions: allTransactions,
+            isAllOrHolding: true,
             onDeleteTransaction: onDelete,
             onEditTransaction: onEdit,
             onEditTransfer: onEdit
