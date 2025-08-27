@@ -16,6 +16,7 @@ struct AssetAllocationAllChart: View {
     var spacing: CGFloat = 28
     var topN: Int? = nil
 
+    private let horizontalPadding: CGFloat = 8
     private let topColor  = Color.secondaryApp // beige
     private let fillColor = Color.primaryApp
 
@@ -27,9 +28,7 @@ struct AssetAllocationAllChart: View {
     }
 
     private var allocations: [Allocation] {
-        // 1) Agregasi nilai per nama AssetItem di semua group
         var sumByAsset: [String: Double] = [:]
-
         for group in overview.groupItems {
             for item in group.assets {
                 let key = (item.name ?? "-").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -37,22 +36,24 @@ struct AssetAllocationAllChart: View {
                 sumByAsset[key, default: 0] += v
             }
         }
-
-        // 2) Normalisasi ke persen
         let total = sumByAsset.values.reduce(0, +)
-        let base: [Allocation] = sumByAsset.map { (name, value) in
+        let base = sumByAsset.map { (name, value) in
             Allocation(name: name, value: value, percent: total > 0 ? value / total : 0)
         }
         .sorted { $0.percent > $1.percent }
-
-        // 3) Optional: ambil top N
         if let n = topN { return Array(base.prefix(n)) }
         return base
     }
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: spacing) {
+        GeometryReader { geo in
+            let count = allocations.count
+            let contentWidth =
+                CGFloat(count) * barWidth
+                + CGFloat(max(count - 1, 0)) * spacing
+                + horizontalPadding * 2
+
+            let content = HStack(spacing: spacing) {
                 ForEach(allocations) { a in
                     AllocationBarView(
                         title: a.name,
@@ -64,27 +65,41 @@ struct AssetAllocationAllChart: View {
                     )
                 }
             }
-            .padding(.horizontal, 8)
+
+            Group {
+                if contentWidth > geo.size.width {
+                    // > layar → scroll
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        content
+                            .padding(.horizontal, horizontalPadding)
+                    }
+                } else {
+                    // muat → center tanpa scroll
+                    HStack {
+                        Spacer(minLength: 0)
+                        content
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, horizontalPadding)
+                }
+            }
+            .frame(height: maxBarHeight)
         }
+        .frame(height: maxBarHeight) // batasi tinggi GeometryReader
     }
 
     // MARK: - parser
     private static func parseNumber(_ text: String?) -> Double? {
         guard var s = text?.trimmingCharacters(in: .whitespacesAndNewlines), !s.isEmpty else { return nil }
-
         s = s.unicodeScalars
             .filter { CharacterSet(charactersIn: "0123456789.,").contains($0) }
             .map(String.init).joined()
-
         let hasComma = s.contains(",")
         let hasDot   = s.contains(".")
-
         let thousandsID = try! NSRegularExpression(pattern: #"^\d{1,3}(\.\d{3})+$"#)
-
         func matches(_ regex: NSRegularExpression, _ str: String) -> Bool {
             regex.firstMatch(in: str, range: NSRange(location: 0, length: str.utf16.count)) != nil
         }
-
         let normalized: String
         switch (hasComma, hasDot) {
         case (true, true):
@@ -92,18 +107,12 @@ struct AssetAllocationAllChart: View {
         case (true, false):
             normalized = s.replacingOccurrences(of: ",", with: ".")
         case (false, true):
-            if matches(thousandsID, s) {
-                normalized = s.replacingOccurrences(of: ".", with: "")
-            } else {
-                normalized = s
-            }
+            normalized = matches(thousandsID, s) ? s.replacingOccurrences(of: ".", with: "") : s
         default:
             normalized = s
         }
-
         return Double(normalized)
     }
-
 }
 
 // MARK: - Single Bar
