@@ -107,7 +107,6 @@ struct AssetAllocationAllChart: View {
 }
 
 // MARK: - Single Bar
-
 private struct AllocationBarView: View {
     let title: String
     let percent: Double
@@ -119,29 +118,40 @@ private struct AllocationBarView: View {
 
     var body: some View {
         let p = min(max(percent, 0), 1)
+        let barHeight = maxHeight * p
+
+        let displayPercent: String = {
+            if Int(round(p * 100)) == 0 && p > 0 { return "0.01%" }
+            return "\(Int(round(p * 100)))%"
+        }()
+
         ZStack(alignment: .bottom) {
+            // BACK: container light brown
             RoundedRectangle(cornerRadius: corner)
                 .fill(topColor)
 
-            RoundedRectangle(cornerRadius: corner)
+            // FILL: gunakan Rectangle (bukan RoundedRectangle) + align bottom
+            Rectangle()
                 .fill(fillColor)
-                .frame(height: maxHeight * p)
-                .overlay(
-                    VStack(spacing: 4) {
-                        Text("\(Int(round(p * 100)))%")
-                            .font(.system(size: 22, weight: .bold))
-                        Text(title)
-                            .font(.system(size: 12))
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    }
-                    .foregroundStyle(Color.backgroundApp)
-                )
+                .frame(height: barHeight)
+
+            // LABEL
+            VStack(spacing: 4) {
+                Text(displayPercent)
+                    .font(.system(size: 22, weight: .bold))
+                Text(title)
+                    .font(.system(size: 12))
+                    .multilineTextAlignment(.center)
+            }
+            .foregroundStyle(barHeight > 56 ? Color.backgroundApp : Color.primaryApp)
+            .padding(.bottom, barHeight > 56 ? 8 : (barHeight + 8))
         }
         .frame(width: barWidth, height: maxHeight)
+        // 🔑 MASK di PALING LUAR → semua isi dipotong sesuai rounded container
+        .mask(RoundedRectangle(cornerRadius: corner))
         .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title) \(Int(round(p*100))) persen")
+        .accessibilityLabel("\(title) \(displayPercent)")
     }
 }
 
