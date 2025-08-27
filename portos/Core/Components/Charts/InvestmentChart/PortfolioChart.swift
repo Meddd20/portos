@@ -72,7 +72,6 @@ struct InvestmentChart: View {
             .chartYAxis(.hidden)
             .chartPlotStyle { $0.background(.clear) }
             .frame(height: 184)
-            .padding(.horizontal, 4)
         }
     }
 }

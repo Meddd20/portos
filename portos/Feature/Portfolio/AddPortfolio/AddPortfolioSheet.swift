@@ -64,10 +64,22 @@ struct AddPortfolio: View {
                     }
                     
                     row("Target Amount") {
-                        TextField("", text: $viewModel.targetAmountText, prompt: Text("Type Amount...").foregroundStyle(Color.textPlaceholderApp))
+                        HStack {
+                            if viewModel.targetAmountText != "" {
+                                Text("Rp")
+                                    .font(.system(size: 15))
+                                    .foregroundStyle(.black)
+                            }
+                            TextField(
+                                "",
+                                text: $viewModel.targetAmountText,
+                                prompt: Text("Type Amount...")
+                                    .foregroundStyle(Color.textPlaceholderApp)
+                            )
                             .font(.system(size: 15))
                             .foregroundStyle(.black)
                             .keyboardType(.numberPad)
+                        }
                     }
                     
                     row("Term") {
