@@ -12,6 +12,7 @@ struct SearchAssetView: View {
     @Environment(\.di) private var di
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: SearchAssetViewModel
+    @EnvironmentObject private var navigationManager: NavigationManager
     @State private var navigateToAddView = false
     let portfolio: Portfolio?
     
@@ -85,8 +86,8 @@ struct SearchAssetView: View {
                             .frame(maxWidth: .infinity)
                         
                         ForEach(section.assets, id: \.id) { asset in
-                            NavigationLink {
-                                TradeTransactionView(di: di, transactionMode: .buy, asset: asset, currentPortfolioAt: portfolio ?? nil)
+                            Button {
+                                navigationManager.push(.buyAsset(asset: asset, portfolio: portfolio), back: .popToRoot)
                             } label: {
                                 HStack {
                                     Text(asset.symbol)
@@ -94,14 +95,7 @@ struct SearchAssetView: View {
                                         .frame(width: 106, alignment: .leading)
                                     
                                     Spacer()
-                                    
-                                    // DEBUG
-    //                                if (asset.currency == Currency.usd) {
-    //                                    Text("\(asset.lastPrice * viewModel.rateUsdToIdr)") // error in this line
-    //                                } else {
-    //                                    Text("\(asset.lastPrice)")
-    //                                }
-                                    
+                                                                        
                                     Text(asset.name)
                                         .font(.system(size: 14))
                                         .lineLimit(1)
@@ -130,7 +124,6 @@ struct SearchAssetView: View {
                 viewModel.getAllHoldings()
                 viewModel.loadAssets()
             }
-            
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem (placement: .topBarLeading) {

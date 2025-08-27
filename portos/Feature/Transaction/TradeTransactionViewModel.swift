@@ -198,9 +198,9 @@ class TradeTransactionViewModel: ObservableObject {
                 
         switch transactionMode {
         case .buy:
-            isDataFilled = amount > 0 && price > 0 && platform != nil && portfolio != nil
+            isDataFilled = amount != 0 && price != 0 && platform != nil && portfolio != nil
         case .liquidate:
-            isDataFilled = amount > 0 && price > 0 && platform != nil
+            isDataFilled = amount != 0 && price > 0 && platform != nil
         case .editBuy, .editLiquidate:
             let amountChange = amount == transaction?.quantity
             let priceChange = price == transaction?.price

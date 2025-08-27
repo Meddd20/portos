@@ -32,20 +32,20 @@ final class PortfolioViewModel: ObservableObject {
             return d
         }()
 
+    @Published var assets: [AssetGroup] = []
     
     @Published var portfolioOverview: PortfolioOverview = PortfolioOverview(portfolioValue: "default", portfolioGrowthRate: "default", portfolioProfitAmount: "default", groupItems: [])
     
     private let service: PortfolioService
 
-    init(service: PortfolioService) {
-        self.service = service
-        self.getPortfolioOverview()
+    init(di: AppDI) {
+        self.service = di.portfolioService
+        getPortfolioOverview()
     }
 
     func load() {
         do {
             portfolios = try service.getAllPortfolios()
-            print(portfolios.count)
         }
         catch { self.error = error.localizedDescription }
     }
@@ -54,6 +54,8 @@ final class PortfolioViewModel: ObservableObject {
         do {
             if portfolioName == nil {
                 portfolioOverview = try service.getPortfolioOverview()
+                assets = portfolioOverview.groupItems
+                print(assets.count)
             } else {
                 portfolioOverview = try service.getPortfolioOverviewByGoal(portfolioName!)
             }

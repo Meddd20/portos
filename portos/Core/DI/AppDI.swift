@@ -85,9 +85,9 @@ struct AppDI {
 extension AppDI {
     static var preview: AppDI {
         let schema = Schema([AppSource.self, Asset.self, Portfolio.self, Holding.self, Transaction.self])
-        let cfg = ModelConfiguration(isStoredInMemoryOnly: false)
-        let container = try! ModelContainer(for: schema, configurations: cfg)
-        let ctx = ModelContext(container)
-        return .live(modelContext: ctx)
+            let cfg = ModelConfiguration(isStoredInMemoryOnly: true) // <- key change
+            let container = try! ModelContainer(for: schema, configurations: cfg)
+            let ctx = ModelContext(container)
+            return .live(modelContext: ctx)
     }
 }

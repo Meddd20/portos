@@ -30,11 +30,9 @@ struct TransactionItem: Identifiable {
 struct DetailHoldingView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.di) private var di
+    @EnvironmentObject private var navigationManager: NavigationManager
     
     @State private var rowHeight: CGFloat = 0
-    @State private var navigateToBuyAsset: Bool = false
-    @State private var navigateToLiquidateAsset: Bool = false
-    @State private var navigateToTransferTransaction: Bool = false
     @State private var selectedTransactionForEdit: Transaction?
     @State private var selectedTransferForEdit: Transaction?
     
@@ -110,21 +108,21 @@ struct DetailHoldingView: View {
                         systemName: "plus",
                         title: "Add",
                         action: {
-                            navigateToBuyAsset = true
+                            navigationManager.push(.buyAsset(asset: holding.asset, portfolio: holding.portfolio), back: .popOnce)
                         }
                     )
                     CircleButton(
                         systemName: "minus",
                         title: "Liquidate",
                         action: {
-                            navigateToLiquidateAsset = true
+                            navigationManager.push(.sellAsset(asset: holding.asset, portfolio: holding.portfolio), back: .popOnce)
                         }
                     )
                     CircleButton(
                         systemName: "arrow.right",
                         title: "Add",
                         action: {
-                            navigateToTransferTransaction = true
+                            navigationManager.push(.transferAsset(asset: holding.asset, holding: holding, transferMode: .transferToPortfolio), back: .popOnce)
                         }
                     )
                 }
@@ -140,7 +138,7 @@ struct DetailHoldingView: View {
                                         section: section,
                                         isAllOrHolding: true,
                                         onDelete: { viewModel.deleteTransaction(transactionId: tx.id) },
-                                        onEdit:   { selectedTransactionForEdit = tx },
+                                        onEdit: { selectedTransactionForEdit = tx },
                                         onTransfer: { selectedTransferForEdit = tx }
                                     )
                                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 20, trailing: 16))
@@ -153,8 +151,6 @@ struct DetailHoldingView: View {
                     .scrollContentBackground(.hidden)
                     .scrollDisabled(true)
                     .frame(height: calculateListHeight())
-                    
-                    
                 }
             }
             .navigationTitle(viewModel.holding.asset.symbol)
@@ -173,15 +169,6 @@ struct DetailHoldingView: View {
             .onAppear {
                 viewModel.getHoldingAssetDetail()
                 viewModel.getTransactions()
-            }
-            .navigationDestination(isPresented: $navigateToBuyAsset){
-                TradeTransactionView(di: di, transactionMode: .buy, asset: holding.asset, currentPortfolioAt: holding.portfolio)
-            }
-            .navigationDestination(isPresented: $navigateToLiquidateAsset) {
-                TradeTransactionView(di: di, transactionMode: .liquidate, holding: holding, asset: holding.asset,  currentPortfolioAt: holding.portfolio)
-            }
-            .navigationDestination(isPresented: $navigateToTransferTransaction) {
-                TransferTransactionView(di: di, asset: holding.asset, transferMode: .transferToPortfolio, holding: holding)
             }
             .navigationDestination(item: $selectedTransactionForEdit) { transaction in
                 TradeTransactionView(

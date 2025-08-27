@@ -20,10 +20,10 @@ struct PortfolioScreen: View {
     }
     
     @StateObject private var viewModel: PortfolioViewModel
-    @State private var path = NavigationPath()
+    @EnvironmentObject private var navigationManager: NavigationManager
     
-    init(service: PortfolioService) {
-        _viewModel = StateObject(wrappedValue: PortfolioViewModel(service: service))
+    init(di: AppDI) {
+        _viewModel = StateObject(wrappedValue: PortfolioViewModel(di: di))
     }
 
     @State private var selection: Portfolio?
@@ -36,6 +36,9 @@ struct PortfolioScreen: View {
     @State private var showTrade = false
     @State private var showTransactionHistory = false
     @State private var selectedHolding: Holding? = nil
+    @State private var isExpanded = false
+    @State private var expandedGroupID: UUID? = nil
+    private let collapsedCount = 3
     
     @State private var showMore: Bool = false
     
@@ -98,27 +101,14 @@ struct PortfolioScreen: View {
                 }
                 
                 HStack {
-                    
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
-                        showTransactionHistory = true
-                    }
-                    .navigationDestination(isPresented: $showTransactionHistory) {
-                        if selectedIndex == 0 {
-                            TransactionHistoryView(di: di)
-                        } else {
-                            TransactionHistoryView(di: di, portfolio: portfolios[selectedIndex - 1])
-                        }
+                        let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
+                        navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )
                     }
                     
                     CircleButton(systemName: "plus", title: "Add") {
-                        showTrade = true
-                    }
-                    .navigationDestination(isPresented: $showTrade) {
-                        if selectedIndex == 0 {
-                            SearchAssetView(di: di, currentPortfolioAt: nil)
-                        } else {
-                            SearchAssetView(di: di, currentPortfolioAt: portfolios[selectedIndex - 1])
-                        }
+                        let portfolio = (selectedIndex == 0) ? nil : portfolios[selectedIndex - 1]
+                        navigationManager.push(.searchAsset(currentPortfolio: portfolio), back: BackAction.popOnce)
                     }
                     
                     Menu {
@@ -150,83 +140,13 @@ struct PortfolioScreen: View {
                         .padding(.top, 10)
                         .multilineTextAlignment(.center)
                 } else {
-                    ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { item in
-                        HStack {
-                            Text(item.name!)
-                                .font(.system(size: 20, weight: .semibold))
-                            Spacer()
-                            Text("Rp \(item.value!)")
-                                .font(.system(size: 20, weight: .semibold))
-                        }.padding(.top, 32)
-                        
-                        Divider()
-                            .frame(height: 0)
-                            .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
-                            .padding(.top, 16)
-                        
-                        let isExpanded = expandedGroups.contains(item.id)
-                        let assetsToShow = isExpanded ? item.assets : Array(item.assets.prefix(3))
-                        
-                        ForEach(assetsToShow, id: \.id) { asset in
-                            VStack {
-                                Group {
-                                    HStack {
-                                        Text(asset.name!)
-                                            .font(.system(size: 17))
-                                            .lineLimit(1)
-                                            .truncationMode(.tail)
-                                        Spacer()
-                                        Text("Rp \(asset.value!)")
-                                            .font(.system(size: 17))
-                                    }
-                                    .padding(.top, 10)
-                                    HStack {
-                                        if (selectedIndex != 0) {
-                                            Text(asset.quantity!)
-                                                .font(.system(size: 15)) }
-                                        Spacer()
-                                        if asset.growthRate! >= 0 {
-                                            Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
-                                                .font(.system(size: 15))
-                                                .foregroundStyle(Color.greenApp)
-                                        } else {
-                                            Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
-                                                .font(.system(size: 15))
-                                                .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
-                                        }
-                                    }
-                                    .padding(.top, 8)
-                                }
-                                .onTapGesture { selectedHolding =  asset.holding }
-                                
-                                Divider()
-                                    .frame(height: 0)
-                                    .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
-                                    .padding(.top, 10)
-                            }
-                        }
-                        if item.assets.count > 3 {
-                            Button {
-                                withAnimation(.easeInOut) {
-                                    if isExpanded { expandedGroups.remove(item.id) }
-                                    else { expandedGroups.insert(item.id) }
-                                }
-                            } label: {
-                                HStack {
-                                    Spacer()
-                                    Text(isExpanded ? "View Less" : "View More")
-                                        .font(.system(size: 15, weight: .semibold))
-                                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                                }
-                                .padding(.top, 16)
-                            }
-                        }
-                    }
+                    assetGroupsList
                 }
             }.scrollIndicators(.hidden)
                 .padding()
         }
         .task { await viewModel.loadChartData() }
+        .navigationBarBackButtonHidden()
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .background(
@@ -266,12 +186,145 @@ struct PortfolioScreen: View {
             Text("This action cannot be undone, are you sure to delete this portfolio?")
                 .font(.system(size: 13))
         }
-        .navigationDestination(item: $selectedHolding) {holding in
-            DetailHoldingView(di: di, holding: holding)
+    }
+    
+    @ViewBuilder
+    private var assetGroupsList: some View {
+        ForEach(viewModel.portfolioOverview.groupItems, id: \.id) { group in
+            assetGroupSection(group: group)
         }
     }
-        func onPickerChange() {
-            let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-            viewModel.getPortfolioOverview(portfolioName: name)
+
+    @ViewBuilder
+    private func assetGroupSection(group: AssetGroup) -> some View {
+        let isExpanded = expandedGroupID == group.id
+        HStack {
+            Text(group.name!)
+                .font(.system(size: 20, weight: .semibold))
+            Spacer()
+            Text("Rp \(group.value!)")
+                .font(.system(size: 20, weight: .semibold))
         }
+        .padding(.top, 32)
+        
+        Divider()
+            .frame(height: 0)
+            .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+            .padding(.top, 16)
+        
+        ForEach(displayedAssets(for: group, isExpanded: isExpanded), id: \.id) { asset in
+            assetItemRow(asset: asset)
+        }
+        
+        if group.assets.count > collapsedCount {
+            Button {
+                withAnimation {
+                    toggleGroup(group)
+                }
+            } label: {
+                HStack {
+                    Spacer()
+                    Text(isExpanded ? "View Less" : "View More")
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                }
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .padding(.top, 4)
+            }
+        }
+    }
+    
+    private func displayedAssets(for group: AssetGroup, isExpanded: Bool) -> [AssetItem] {
+        if isExpanded { return group.assets }
+        return Array(group.assets.prefix(collapsedCount))
+    }
+    
+    private func toggleGroup(_ group: AssetGroup) {
+        let id = group.id
+        if expandedGroupID == id {
+            expandedGroupID = nil
+        } else {
+            expandedGroupID = id
+        }
+    }
+
+    @ViewBuilder
+    private func assetItemRow(asset: AssetItem) -> some View {
+        VStack {
+            HStack {
+                Text(asset.name!)
+                    .font(.body)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                Spacer()
+                
+                Text("Rp \(asset.value!)")
+                    .font(.body)
+            }
+            .padding(.top, 10)
+            
+            HStack {
+                if selectedIndex != 0 {
+                    Text(asset.quantity!)
+                        .font(.system(size: 15))
+                }
+                Spacer()
+                growthRateLabel(for: asset.growthRate!)
+            }
+            .padding(.top, 8)
+            
+            Divider()
+                .frame(height: 0)
+                .foregroundStyle(Color(red: 0.73, green: 0.73, blue: 0.73).opacity(0.2))
+                .padding(.top, 10)
+        }
+        .onTapGesture {
+            if let holding = asset.holding {
+                navigationManager.push(.detailHolding(holding: holding), back: .popOnce)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func growthRateLabel(for growthRate: Decimal) -> some View {
+        if growthRate >= 0 {
+            Label("\(growthRate)%", systemImage: "arrowtriangle.up.fill")
+                .font(.system(size: 15))
+                .foregroundStyle(Color.greenApp)
+        } else {
+            Label("\(growthRate)%", systemImage: "arrowtriangle.down.fill")
+                .font(.system(size: 15))
+                .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+        }
+    }
+    
+    func onPickerChange() {
+        let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
+        viewModel.getPortfolioOverview(portfolioName: name)
+    }
+    
+    // Projection: tren halus + gelombang
+    func makeProjection(months: Int = 72, start: Double = 100) -> [DataPoint] {
+        let startDate = Calendar.current.date(byAdding: .month, value: -(months-1), to: Date())!
+        return (0..<months).map { i in
+            let date = Calendar.current.date(byAdding: .month, value: i, to: startDate)!
+            let trend  = Double(i) * 1.7
+            let wave1  = sin(Double(i) * 0.45) * 6
+            let wave2  = sin(Double(i) * 0.12 + 1.1) * 3
+            let step   = (i % 9 == 0) ? 5.0 : 0.0
+            return DataPoint(date: date, value: max(1, start + trend + wave1 + wave2 + step))
+        }
+    }
+
+    // Actual: ambil subset dari projection + noise kecil
+    func makeActual(from projection: [DataPoint], upToMonths count: Int) -> [DataPoint] {
+        let capped = max(1, min(count, projection.count))
+        return projection.prefix(capped).enumerated().map { (idx, p) in
+            // noise ±3% dari nilai untuk “real-life wobble”
+            let noise = p.value * Double.random(in: -0.03...0.03)
+            return DataPoint(date: p.date, value: max(1, p.value + noise))
+        }
+    }
 }
