@@ -91,14 +91,15 @@ struct PortfolioScreen: View {
                         .background(Color.greenAppLight)
                         .cornerRadius(14)
                     }
-                    Image(systemName: "arrow.clockwise")
-                        .onTapGesture {viewModel.refreshMarketValues()}
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .foregroundStyle(.black.opacity(0.3))
-                        .padding(.bottom, 32)
-                        .padding(.horizontal, 8)
-                    InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
-                                        .frame(height: 184)
+                    if viewModel.actualSeries.isEmpty {
+                        EmptyInvestmentChart()
+                            .frame(height: 184)
+                            .padding(.top, 32)
+                    } else {
+                        InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
+                                            .frame(height: 184)
+                                            .padding(.top, 32)
+                    }
                 }
                 
                 HStack {
@@ -312,6 +313,7 @@ struct PortfolioScreen: View {
     func onPickerChange() {
         let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
         viewModel.getPortfolioOverview(portfolioName: name)
+        viewModel.refreshMarketValues()
     }
     
     // Projection: tren halus + gelombang

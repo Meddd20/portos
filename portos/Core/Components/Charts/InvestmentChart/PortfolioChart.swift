@@ -76,6 +76,57 @@ struct InvestmentChart: View {
     }
 }
 
+struct EmptyInvestmentChart: View {
+    private var placeholder: [DataPoint] {
+        let start = Calendar.current.date(byAdding: .year, value: -5, to: Date()) ?? Date()
+        let end   = Date()
+        return [
+            DataPoint(date: start, value: 0),
+            DataPoint(date: end,   value: 1)
+        ]
+    }
+
+    var body: some View {
+        Chart {
+            ForEach(placeholder) { p in
+                LineMark(
+                    x: .value("Date", p.date),
+                    y: .value("Value", p.value)
+                )
+                .interpolationMethod(.linear)
+                .lineStyle(StrokeStyle(lineWidth: 2, dash: [6]))
+                .foregroundStyle(Color.greyApp)
+            }
+
+            if let first = placeholder.first {
+                PointMark(
+                    x: .value("Date", first.date),
+                    y: .value("Value", first.value)
+                )
+                .foregroundStyle(Color.greyApp)
+                .symbolSize(80)
+            }
+
+            if let last = placeholder.last {
+                PointMark(
+                    x: .value("Date", last.date),
+                    y: .value("Value", last.value)
+                )
+                .foregroundStyle(Color.greyApp)
+                .symbolSize(80)
+            }
+        }
+        .padding(.horizontal, 6)
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartPlotStyle { $0.background(.clear) }
+        .frame(height: 184)
+    }
+}
+
+#Preview() {
+    EmptyInvestmentChart()
+}
 
 //#Preview() {
 //    let march  = Calendar.current.date(from: DateComponents(year: 2025, month: 3, day: 1))!
