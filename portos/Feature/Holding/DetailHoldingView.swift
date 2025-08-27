@@ -80,8 +80,7 @@ struct DetailHoldingView: View {
                             currentPrice: account.avgCost,
                             averagePrice: account.avgCost,
                             unit: viewModel.holding.asset.assetType.unit,
-                            showAmounts: .constant(true),
-                            
+                            showAmounts: .constant(true)
                         )
                     }
                     .padding(.leading, 16)

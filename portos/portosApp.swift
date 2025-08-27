@@ -34,8 +34,9 @@ struct portosApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.di, di)
+//            ContentView()
+//                .environment(\.di, di)
+            UserSettingView().environment(\.di, di)
         }
         .modelContainer(container)
     }
