@@ -167,7 +167,7 @@ final class PortfolioViewModel: ObservableObject {
         }
         
         let symbol: String = h.asset.yTicker ?? ""
-        let range: String = "1y"
+        let range: String = "5y"
         
         print("qty: \(qty)")
         
@@ -181,7 +181,6 @@ final class PortfolioViewModel: ObservableObject {
                         let dateStr = self.stringToDate(p.date)
                         let key = self.startOfMonth(dateStr ?? Date())
                         let v   = p.close * qtyDouble
-                        let vInt = Int(v)
                         acc2[key, default: 0] += v
                     }
 

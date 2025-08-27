@@ -90,12 +90,13 @@ struct PortfolioScreen: View {
                         .padding(.horizontal, 8)
                         .background(Color.greenAppLight)
                         .cornerRadius(14)
-                        .padding(.bottom, 32)
                     }
                     Image(systemName: "arrow.clockwise")
                         .onTapGesture {viewModel.refreshMarketValues()}
                         .frame(maxWidth: .infinity, alignment: .trailing)
                         .foregroundStyle(.black.opacity(0.3))
+                        .padding(.bottom, 32)
+                        .padding(.horizontal, 8)
                     InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
                                         .frame(height: 184)
                 }
