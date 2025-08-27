@@ -51,21 +51,28 @@ struct AssetAllocationAllChart: View {
     }
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        if (allocations.isEmpty) {
+            HStack {
+                EmptyAssetAllocationView()
+            }
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: spacing) {
-                ForEach(allocations) { a in
-                    AllocationBarView(
-                        title: a.name,
-                        percent: a.percent,
-                        barWidth: barWidth,
-                        maxHeight: maxBarHeight,
-                        topColor: topColor,
-                        fillColor: fillColor
-                    )
-                }
+                    ForEach(allocations) { a in
+                        AllocationBarView(
+                            title: a.name,
+                            percent: a.percent,
+                            barWidth: barWidth,
+                            maxHeight: maxBarHeight,
+                            topColor: topColor,
+                            fillColor: fillColor
+                        )
+                    }
             }
             .padding(.horizontal, 8)
         }
+        }
+        
     }
 
     // MARK: - parser
@@ -104,6 +111,41 @@ struct AssetAllocationAllChart: View {
         return Double(normalized)
     }
 
+}
+
+// MARK: - Empty State View
+
+private struct EmptyAssetAllocationView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            // Icon container with background
+            ZStack {
+                Circle()
+                    .fill(Color.primaryApp.opacity(0.1))
+                    .frame(width: 80, height: 80)
+                
+                Image(systemName: "chart.pie.fill")
+                    .font(.system(size: 32, weight: .medium))
+                    .foregroundStyle(Color.primaryApp)
+            }
+            
+            // Text content
+            VStack(spacing: 8) {
+                Text("No Assets Yet")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color.primaryApp)
+                
+                Text("Start building your portfolio by adding your first asset")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.secondaryApp)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 241)
+        .padding(.vertical, 20)
+        .padding(.horizontal, 16)
+    }
 }
 
 // MARK: - Single Bar
@@ -154,17 +196,17 @@ struct AssetAllocationAllChart_Previews: PreviewProvider {
             portfolioGrowthRate: "12.3%",
             portfolioProfitAmount: "Rp 6.500.000",
             groupItems: [
-                AssetGroup(name: "Retirement", value: nil, assets: [
-                    AssetItem(holding: nil, name: "Bonds",  value: "12", growthRate: nil, profitAmount: nil, quantity: nil),
-                    AssetItem(holding: nil, name: "Crypto", value: "20", growthRate: nil, profitAmount: nil, quantity: nil),
-                ]),
-                AssetGroup(name: "Having Fun", value: nil, assets: [
-                    AssetItem(holding: nil, name: "Stocks", value: "30", growthRate: nil, profitAmount: nil, quantity: nil),
-                ]),
-                AssetGroup(name: "House", value: nil, assets: [
-                    AssetItem(holding: nil, name: "Crypto", value: "40", growthRate: nil, profitAmount: nil, quantity: nil),
-                    AssetItem(holding: nil, name: "Bonds",  value: "0",  growthRate: nil, profitAmount: nil, quantity: nil),
-                ])
+//                AssetGroup(name: "Retirement", value: nil, assets: [
+//                    AssetItem(holding: nil, name: "Bonds",  value: "12", growthRate: nil, profitAmount: nil, quantity: nil),
+//                    AssetItem(holding: nil, name: "Crypto", value: "20", growthRate: nil, profitAmount: nil, quantity: nil),
+//                ]),
+//                AssetGroup(name: "Having Fun", value: nil, assets: [
+//                    AssetItem(holding: nil, name: "Stocks", value: "30", growthRate: nil, profitAmount: nil, quantity: nil),
+//                ]),
+//                AssetGroup(name: "House", value: nil, assets: [
+//                    AssetItem(holding: nil, name: "Crypto", value: "40", growthRate: nil, profitAmount: nil, quantity: nil),
+//                    AssetItem(holding: nil, name: "Bonds",  value: "0",  growthRate: nil, profitAmount: nil, quantity: nil),
+//                ])
             ]
         )
 
