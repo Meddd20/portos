@@ -68,7 +68,6 @@ extension Currency {
         switch apiString.uppercased() {
         case "USD": self = .usd
         case "IDR": self = .idr
-        case "EUR": self = .eur
         default: return nil
         }
     }

@@ -58,7 +58,7 @@ struct TradeTransactionView: View {
          transaction: Transaction? = nil,
          holding: Holding? = nil,
          asset: Asset,
-         currentPortfolioAt: Portfolio?,
+         currentPortfolioAt: Portfolio?
     ) {
         self.transactionMode = transactionMode
         self.asset = asset
