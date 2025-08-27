@@ -84,7 +84,11 @@ struct AddPortfolio: View {
                     
                     row("Term") {
                         HStack {
-                            Text("\(viewModel.years)")
+                            TextField("",
+                                      text: Binding(
+                                              get: { String(viewModel.years) },
+                                              set: { viewModel.years = Int($0) ?? 0 }
+                                          ))
                                 .font(.system(size: 15))
                             Text("Years")
                                 .font(.system(size: 15))
