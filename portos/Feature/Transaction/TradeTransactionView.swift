@@ -125,7 +125,7 @@ struct TradeTransactionView: View {
                                 
                 FormRow(label: "Platform") {
                     Menu {
-                        ForEach(viewModel.platforms, id: \.persistentModelID) { platform in
+                        ForEach(viewModel.platforms, id: \.id) { platform in
                             Button(platform.name) {
                                 viewModel.platform = platform
                             }

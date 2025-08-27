@@ -115,7 +115,7 @@ struct DetailHoldingView: View {
                         systemName: "minus",
                         title: "Liquidate",
                         action: {
-                            navigationManager.push(.sellAsset(asset: holding.asset, portfolio: holding.portfolio), back: .popOnce)
+                            navigationManager.push(.sellAsset(asset: holding.asset, portfolio: holding.portfolio, holding: holding), back: .popOnce)
                         }
                     )
                     CircleButton(
