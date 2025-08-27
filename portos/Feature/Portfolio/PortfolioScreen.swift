@@ -91,7 +91,7 @@ struct PortfolioScreen: View {
                     InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
                 }
                 
-                HStack {
+                HStack (spacing: 42) {
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
                         let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
                         navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )

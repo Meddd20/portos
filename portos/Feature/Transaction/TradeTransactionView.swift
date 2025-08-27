@@ -112,6 +112,7 @@ struct TradeTransactionView: View {
                     HStack {
                         Text("Rp")
                         .foregroundStyle(.secondary)
+                        
                         TextField(viewModel.pricePlaceholder ?? "0", text: $viewModel.priceText)
                             .keyboardType(.decimalPad)
                     }
@@ -258,7 +259,15 @@ struct TradeTransactionView: View {
                         .foregroundColor(.black)
                 }
             }
+            
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    hideKeyboard()
+                }
+            }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 

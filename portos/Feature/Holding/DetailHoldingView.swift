@@ -120,7 +120,7 @@ struct DetailHoldingView: View {
                     )
                     CircleButton(
                         systemName: "arrow.right",
-                        title: "Add",
+                        title: "Transfer",
                         action: {
                             navigationManager.push(.transferAsset(asset: holding.asset, holding: holding, transferMode: .transferToPortfolio), back: .popOnce)
                         }
