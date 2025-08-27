@@ -271,7 +271,8 @@ struct TradeTransactionView: View {
         currency: .usd,
         country: "Outside Indonesia",
         lastPrice: 65000, // harga BTC dalam USD
-        asOf: Date()
+        asOf: Date(),
+        assetId: "kcndksl"
     )
     
 //    TradeTransactionView(

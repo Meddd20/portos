@@ -9,15 +9,13 @@ import SwiftUI
 import Charts
 
 enum RangeOption: CaseIterable, Hashable {
-    case oneY, threeY, sixY, nineY, twelveY, ytd
+    case m3, y1, y5, ytd
 
     var label: String {
         switch self {
-        case .oneY: return "1Y"
-        case .threeY: return "3Y"
-        case .sixY: return "6Y"
-        case .nineY: return "9Y"
-        case .twelveY: return "12Y"
+        case .m3:  return "3M"
+        case .y1:  return "1Y"
+        case .y5:  return "5Y"
         case .ytd: return "YTD"
         }
     }
@@ -25,11 +23,12 @@ enum RangeOption: CaseIterable, Hashable {
     func startDate(from lastActual: Date) -> Date {
         let cal = Calendar.current
         switch self {
-        case .oneY:     return cal.date(byAdding: .year, value: -1, to: lastActual) ?? lastActual
-        case .threeY:   return cal.date(byAdding: .year, value: -3, to: lastActual) ?? lastActual
-        case .sixY:     return cal.date(byAdding: .year, value: -6, to: lastActual) ?? lastActual
-        case .nineY:    return cal.date(byAdding: .year, value: -9, to: lastActual) ?? lastActual
-        case .twelveY:  return cal.date(byAdding: .year, value: -12, to: lastActual) ?? lastActual
+        case .m3:
+            return cal.date(byAdding: .month, value: -3, to: lastActual) ?? lastActual
+        case .y1:
+            return cal.date(byAdding: .year, value: -1, to: lastActual) ?? lastActual
+        case .y5:
+            return cal.date(byAdding: .year, value: -5, to: lastActual) ?? lastActual
         case .ytd:
             let comps = cal.dateComponents([.year], from: lastActual)
             return cal.date(from: DateComponents(year: comps.year, month: 1, day: 1)) ?? lastActual
@@ -41,7 +40,7 @@ struct InvestmentChartWithRange: View {
     let projection: [DataPoint]
     let actual: [DataPoint]
 
-    @State private var range: RangeOption = .sixY
+    @State private var range: RangeOption = .y1
 
     private var lastActualDate: Date? { actual.last?.date }
     private var startDate: Date {
@@ -64,8 +63,6 @@ struct InvestmentChartWithRange: View {
         projection.filter { $0.date >= startDate && $0.date <= endDate }
     }
 
-
-
     var body: some View {
         VStack(alignment: .center, spacing: 8) {
             InvestmentChart(
@@ -73,7 +70,7 @@ struct InvestmentChartWithRange: View {
                 actual: actualFiltered
             )
             .chartXScale(domain: startDate...endDate)
-            
+
             RangeTabs(selection: $range)
         }
         .padding(.horizontal)
@@ -98,4 +95,26 @@ struct RangeTabs: View {
         }
         .padding(.top, 4)
     }
+}
+
+func sumSeries(_ seriesList: [[DataPoint]]) -> [DataPoint] {
+    var sumByDate: [Date: Double] = [:]
+    let cal = Calendar.current
+
+    for series in seriesList {
+        for p in series {
+            let key = startOfMonth(p.date, cal)   // tanggal diseragamkan ke awal bulan
+            sumByDate[key, default: 0] += p.value
+        }
+    }
+
+    // Balik jadi array urut tanggal naik
+    return sumByDate
+        .map { DataPoint(date: $0.key, value: $0.value) }
+        .sorted { $0.date < $1.date }
+}
+
+private func startOfMonth(_ date: Date, _ cal: Calendar = .current) -> Date {
+    let comp = cal.dateComponents([.year, .month], from: date)
+    return cal.date(from: comp) ?? date
 }

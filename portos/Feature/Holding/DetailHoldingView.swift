@@ -192,14 +192,14 @@ struct DetailHoldingView: View {
                     currentPortfolioAt: transaction.portfolio
                 )
             }
-            .background(
+        }
+        .background(
             LinearGradient(
             stops: [
                 Gradient.Stop(color: .white, location: 0.13),
                 Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
-        }
     }
     
     @ViewBuilder

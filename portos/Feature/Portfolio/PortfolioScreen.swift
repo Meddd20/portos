@@ -41,8 +41,6 @@ struct PortfolioScreen: View {
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
-    let sampleData = createSampleData()
-    
     var body: some View {
         @State var expandedGroups: Set<UUID> = []
         
@@ -53,6 +51,13 @@ struct PortfolioScreen: View {
                 onChange: onPickerChange,
                 onAdd: { showingAdd = true }
             )
+            
+            // for debug
+//            Button("print ACTUAL Series for chart", action: {print("fnkcdsjfn cjdn fkjndjknfck \n \(viewModel.actualSeries)")})
+//            Button("print PROJECTION Series for chart", action: {print("PROJECTION: \(viewModel.projectionSeries)")})
+//            Button("???", action: {print(viewModel.actualSeries == viewModel.projectionSeries)})
+//            Button("refresh api", action: {viewModel.refreshMarketValues()})
+//            Button("generate projection", action: {viewModel.calculateProjection()})
             
             ScrollView {
                 if selectedIndex == 0 {
@@ -84,8 +89,12 @@ struct PortfolioScreen: View {
                         .cornerRadius(14)
                         .padding(.bottom, 32)
                     }
-                    
-                    InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
+                    Image(systemName: "arrow.clockwise")
+                        .onTapGesture {viewModel.refreshMarketValues()}
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .foregroundStyle(.black.opacity(0.3))
+                    InvestmentChartWithRange(projection: viewModel.projectionSeries, actual: viewModel.actualSeries)
+                                        .frame(height: 184)
                 }
                 
                 HStack {
@@ -160,32 +169,34 @@ struct PortfolioScreen: View {
                         
                         ForEach(assetsToShow, id: \.id) { asset in
                             VStack {
-                                HStack {
-                                    Text(asset.name!)
-                                        .font(.system(size: 17))
-                                        .lineLimit(1)
-                                        .truncationMode(.tail)
-                                    Spacer()
-                                    Text("Rp \(asset.value!)")
-                                        .font(.system(size: 17))
-                                }
-                                .padding(.top, 10)
-                                HStack {
-                                    if (selectedIndex != 0) {
-                                        Text(asset.quantity!)
-                                            .font(.system(size: 15)) }
-                                    Spacer()
-                                    if asset.growthRate! >= 0 {
-                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
-                                            .font(.system(size: 15))
-                                            .foregroundStyle(Color.greenApp)
-                                    } else {
-                                        Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
-                                            .font(.system(size: 15))
-                                            .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+                                Group {
+                                    HStack {
+                                        Text(asset.name!)
+                                            .font(.system(size: 17))
+                                            .lineLimit(1)
+                                            .truncationMode(.tail)
+                                        Spacer()
+                                        Text("Rp \(asset.value!)")
+                                            .font(.system(size: 17))
                                     }
+                                    .padding(.top, 10)
+                                    HStack {
+                                        if (selectedIndex != 0) {
+                                            Text(asset.quantity!)
+                                                .font(.system(size: 15)) }
+                                        Spacer()
+                                        if asset.growthRate! >= 0 {
+                                            Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.up.fill")
+                                                .font(.system(size: 15))
+                                                .foregroundStyle(Color.greenApp)
+                                        } else {
+                                            Label("\(asset.growthRate!)%", systemImage: "arrowtriangle.down.fill")
+                                                .font(.system(size: 15))
+                                                .foregroundStyle(Color(red: 0.8, green: 0.14, blue: 0.15))
+                                        }
+                                    }
+                                    .padding(.top, 8)
                                 }
-                                .padding(.top, 8)
                                 .onTapGesture { selectedHolding =  asset.holding }
                                 
                                 Divider()
@@ -215,6 +226,7 @@ struct PortfolioScreen: View {
             }.scrollIndicators(.hidden)
                 .padding()
         }
+        .task { await viewModel.loadChartData() }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .background(
@@ -242,6 +254,7 @@ struct PortfolioScreen: View {
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
+            viewModel.refreshMarketValues()
         }
         .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
             Button("Delete", role: .destructive) {
@@ -255,34 +268,10 @@ struct PortfolioScreen: View {
         }
         .navigationDestination(item: $selectedHolding) {holding in
             DetailHoldingView(di: di, holding: holding)
-//            DetailHoldingView(holding: holding)
         }
     }
         func onPickerChange() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
         }
-    
-    // Projection: tren halus + gelombang
-    func makeProjection(months: Int = 72, start: Double = 100) -> [DataPoint] {
-        let startDate = Calendar.current.date(byAdding: .month, value: -(months-1), to: Date())!
-        return (0..<months).map { i in
-            let date = Calendar.current.date(byAdding: .month, value: i, to: startDate)!
-            let trend  = Double(i) * 1.7
-            let wave1  = sin(Double(i) * 0.45) * 6
-            let wave2  = sin(Double(i) * 0.12 + 1.1) * 3
-            let step   = (i % 9 == 0) ? 5.0 : 0.0
-            return DataPoint(date: date, value: max(1, start + trend + wave1 + wave2 + step))
-        }
-    }
-
-    // Actual: ambil subset dari projection + noise kecil
-    func makeActual(from projection: [DataPoint], upToMonths count: Int) -> [DataPoint] {
-        let capped = max(1, min(count, projection.count))
-        return projection.prefix(capped).enumerated().map { (idx, p) in
-            // noise ±3% dari nilai untuk “real-life wobble”
-            let noise = p.value * Double.random(in: -0.03...0.03)
-            return DataPoint(date: p.date, value: max(1, p.value + noise))
-        }
-    }
 }
