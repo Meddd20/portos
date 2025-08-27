@@ -20,9 +20,10 @@ struct PortfolioScreen: View {
     }
     
     @StateObject private var viewModel: PortfolioViewModel
+    @EnvironmentObject private var navigationManager: NavigationManager
     
-    init(service: PortfolioService) {
-        _viewModel = StateObject(wrappedValue: PortfolioViewModel(service: service))
+    init(di: AppDI) {
+        _viewModel = StateObject(wrappedValue: PortfolioViewModel(di: di))
     }
 
     @State private var selection: Portfolio?
@@ -92,25 +93,13 @@ struct PortfolioScreen: View {
                 
                 HStack {
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
-                        showTransactionHistory = true
-                    }
-                    .navigationDestination(isPresented: $showTransactionHistory) {
-                        if selectedIndex == 0 {
-                            TransactionHistoryView(di: di)
-                        } else {
-                            TransactionHistoryView(di: di, portfolio: portfolios[selectedIndex - 1])
-                        }
+                        let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
+                        navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )
                     }
                     
                     CircleButton(systemName: "plus", title: "Add") {
-                        showTrade = true
-                    }
-                    .navigationDestination(isPresented: $showTrade) {
-                        if selectedIndex == 0 {
-                            SearchAssetView(di: di, currentPortfolioAt: nil)
-                        } else {
-                            SearchAssetView(di: di, currentPortfolioAt: portfolios[selectedIndex - 1])
-                        }
+                        let portfolio = (selectedIndex == 0) ? nil : portfolios[selectedIndex - 1]
+                        navigationManager.push(.searchAsset(currentPortfolio: portfolio), back: BackAction.popOnce)
                     }
                     
                     Menu {
@@ -186,9 +175,6 @@ struct PortfolioScreen: View {
             Text("This action cannot be undone, are you sure to delete this portfolio?")
                 .font(.system(size: 13))
         }
-        .navigationDestination(item: $selectedHolding) {holding in
-            DetailHoldingView(di: di, holding: holding)
-        }
     }
     
     @ViewBuilder
@@ -216,8 +202,8 @@ struct PortfolioScreen: View {
             .padding(.top, 16)
         
         ForEach(displayedAssets(for: group, isExpanded: isExpanded), id: \.id) { asset in
-                assetItemRow(asset: asset)
-            }
+            assetItemRow(asset: asset)
+        }
         
         if group.assets.count > collapsedCount {
             Button {
@@ -284,7 +270,9 @@ struct PortfolioScreen: View {
                 .padding(.top, 10)
         }
         .onTapGesture {
-            selectedHolding = asset.holding
+            if let holding = asset.holding {
+                navigationManager.push(.detailHolding(holding: holding), back: .popOnce)
+            }
         }
     }
 

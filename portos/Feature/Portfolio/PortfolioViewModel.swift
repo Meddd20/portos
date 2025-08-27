@@ -21,8 +21,8 @@ final class PortfolioViewModel: ObservableObject {
     
     private let service: PortfolioService
 
-    init(service: PortfolioService) {
-        self.service = service
+    init(di: AppDI) {
+        self.service = di.portfolioService
         getPortfolioOverview()
     }
 

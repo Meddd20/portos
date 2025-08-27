@@ -46,6 +46,7 @@ struct TradeTransactionView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel: TradeTransactionViewModel
+    @EnvironmentObject private var navigationManager: NavigationManager
     let transactionMode: TransactionMode
     let asset: Asset
     let portfolio: Portfolio?
@@ -221,6 +222,7 @@ struct TradeTransactionView: View {
             if (viewModel.transactionMode == .buy || viewModel.transactionMode == .liquidate) || ( [.editBuy, .editLiquidate].contains(viewModel.transactionMode) && viewModel.isDataFilled ) {
                 Button(action: {
                     viewModel.proceedTransaction()
+                    navigationManager.back()
                 }, label: {
                     Text("Confirm")
                         .buttonStyle(.borderedProminent)
@@ -247,9 +249,6 @@ struct TradeTransactionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .padding(.bottom, 26)
-        .onChange(of: viewModel.didFinishTransaction) { finished in
-            dismiss()
-        }
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
