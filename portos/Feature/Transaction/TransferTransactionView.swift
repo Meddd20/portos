@@ -11,6 +11,7 @@ import SwiftUI
 struct TransferTransactionView: View {
     @Environment(\.di) private var di
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var viewModel: TransferTransactionViewModel
     let asset: Asset
     let holding: Holding
@@ -151,6 +152,7 @@ struct TransferTransactionView: View {
             if viewModel.transferMode == .transferToPortfolio || (viewModel.transferMode == .editTransferTransaction && viewModel.isDataFilled) {
                 Button(action: {
                     viewModel.proceedTransaction()
+                    navigationManager.back()
                 }, label: {
                     Text("Confirm")
                         .buttonStyle(.borderedProminent)
@@ -165,9 +167,6 @@ struct TransferTransactionView: View {
         .navigationBarBackButtonHidden()
         .navigationTitle(Text("Transferring \(viewModel.asset.assetType.displayName)"))
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(isPresented: $viewModel.didFinishTransaction) {
-            PortfolioScreen(service: viewModel.portfolioService)
-        }
         .padding(EdgeInsets(top: 0, leading: 42, bottom: 0, trailing: 36))
         .onAppear {
             viewModel.loadData()

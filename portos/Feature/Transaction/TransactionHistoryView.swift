@@ -11,6 +11,7 @@ import SwiftUI
 struct TransactionHistoryView: View {
     @Environment(\.di) private var di
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var viewModel: TransactionHistoryViewModel
     @State private var selectedTransactionForEdit: Transaction?
     @State private var selectedTransferForEdit: Transaction?
@@ -98,23 +99,27 @@ struct TransactionHistoryView: View {
         }
         .navigationBarTitle("\(viewModel.historyOf) History")
         .navigationBarBackButtonHidden()
-        .navigationDestination(item: $selectedTransactionForEdit) { transaction in
-            TradeTransactionView(
-                di: di,
-                transactionMode: .editBuy,
-                transaction: transaction,
-                asset: transaction.asset,
-                currentPortfolioAt: transaction.portfolio
-            )
+        .onChange(of: selectedTransferForEdit) { newValue in
+            guard let tx = newValue else { return }
+            
+            let route: NavigationRoute = .editTransfer(transaction: tx, asset: tx.asset, holding: tx.holding, transferMode: .editTransferTransaction)
+            
+            navigationManager.push(route, back: BackAction.popOnce)
+            selectedTransferForEdit = nil
+            
         }
-        .navigationDestination(item: $selectedTransferForEdit) { transaction in
-            TransferTransactionView(
-                di: di,
-                asset: transaction.asset,
-                transferMode: .editTransferTransaction,
-                holding: transaction.holding,
-                transaction: transaction
+        .onChange(of: selectedTransactionForEdit) { newValue in
+            guard let tx = newValue else { return }
+            
+            let route: NavigationRoute = .editTransaction(
+                transaction: tx,
+                transactionMode: .editBuy,
+                asset: tx.asset,
+                portfolio: tx.portfolio
             )
+
+            navigationManager.push(route, back: BackAction.popOnce)
+            selectedTransactionForEdit = nil
         }
     }
     

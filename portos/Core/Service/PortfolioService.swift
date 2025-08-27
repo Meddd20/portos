@@ -86,8 +86,9 @@ class PortfolioService {
             var holdingsByType: [String: [Holding]] = [
                 "Bonds": [],
                 "Stocks": [],
+                "Indonesian Stocks": [],
                 "Cryptos": [],
-                "MutualFunds": [],
+                "Mutual Funds": [],
                 "Options": [],
                 "ETFs": []
             ]
@@ -101,15 +102,16 @@ class PortfolioService {
                 case .Stocks:
                     holdingsByType["Stocks"]?.append(holding)
                 case .StocksId:
-                    holdingsByType["StocksId"]?.append(holding)
+                    holdingsByType["Indonesian Stocks"]?.append(holding)
                 case .Crypto:
                     holdingsByType["Cryptos"]?.append(holding)
                 case .MutualFunds:
-                    holdingsByType["MutualFunds"]?.append(holding)
+                    holdingsByType["Mutual Funds"]?.append(holding)
                 case .Options:
                     holdingsByType["Options"]?.append(holding)
                 case .ETF:
                     holdingsByType["ETFs"]?.append(holding)
+            
                 }
             }
             
