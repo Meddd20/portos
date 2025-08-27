@@ -143,7 +143,12 @@ struct SearchAssetView: View {
                 startPoint: UnitPoint(x: 0.5, y: 0),
                 endPoint: UnitPoint(x: 0.5, y: 1) ))
         }
-        .searchable(text: $viewModel.searchTerms, prompt: "Search")
+        .searchable(
+            text: $viewModel.searchTerms,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search"
+        )
+        
     }
     @ViewBuilder
     private var holdingsContent: some View {
