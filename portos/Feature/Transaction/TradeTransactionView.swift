@@ -272,7 +272,8 @@ struct TradeTransactionView: View {
         country: "Outside Indonesia",
         lastPrice: 65000, // harga BTC dalam USD
         asOf: Date(),
-        assetId: "kcndksl"
+        assetId: "kcndksl",
+        ticker: "xmdk"
     )
     
 //    TradeTransactionView(

@@ -212,7 +212,11 @@ final class PortfolioViewModel: ObservableObject {
             config: config
         )
     }
-
+    
+    func getPlatforms(transactions: [Transaction]) -> String {
+        let unique = Set(transactions.map { $0.app.name })
+        return unique.sorted().joined(separator: ", ")
+    }
 
     func formatDouble(_ value: Double) -> String {
         let formatter = NumberFormatter()

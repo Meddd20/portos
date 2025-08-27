@@ -270,6 +270,14 @@ struct PortfolioScreen: View {
                 if selectedIndex != 0 {
                     Text(asset.quantity!)
                         .font(.system(size: 15))
+                    Text("•")
+                        .font(.system(size: 15))
+                        .foregroundStyle(Color.textPlaceholderApp)
+                    Text(viewModel.getPlatforms(transactions: asset.holding?.transactions ?? []))
+                        .font(.system(size: 15))
+                        .foregroundStyle(Color.textPlaceholderApp)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
                 Spacer()
                 growthRateLabel(for: asset.growthRate!)
