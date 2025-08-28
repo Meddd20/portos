@@ -35,7 +35,7 @@ class TradeTransactionViewModel: ObservableObject {
     }
     
     var price: Decimal {
-        Decimal(string: priceText) ?? 0
+        return Decimal(string: priceText) ?? 0
     }
     
     let portfolioService: PortfolioService
@@ -99,6 +99,9 @@ class TradeTransactionViewModel: ObservableObject {
 
             portfolios = try portfolioService.getAllPortfolios()
 
+            // populate priceText with asset.lastPrice
+            priceText = String(describing: asset.lastPrice)
+
         } catch {
             print("Error fetching apps: \(error)")
             return
@@ -123,6 +126,11 @@ class TradeTransactionViewModel: ObservableObject {
             guard isDataFilled, let platform = platform, let portfolio = portfolio else { return }
             
             if isDataFilled {
+                // Use asset's currency for trade currency
+                let tradeCurrency = asset.currency
+                // Use exchange rate 1 for IDR, keep existing rate for USD
+                let exchangeRate = tradeCurrency == .idr ? 1 : 16586
+                
                 try transactionService.recordBuyTransaction(
                     appSource: platform,
                     asset: asset,
@@ -130,8 +138,8 @@ class TradeTransactionViewModel: ObservableObject {
                     quantity: amount,
                     price: price,
                     date: purchaseDate,
-                    tradeCurrency: .usd,
-                    exchangeRate: 16586
+                    tradeCurrency: tradeCurrency,
+                    exchangeRate: Decimal(exchangeRate)
                 )
                 
                 didFinishTransaction = true
@@ -148,6 +156,11 @@ class TradeTransactionViewModel: ObservableObject {
             guard let platform = platform else { return }
             guard let portfolio = portfolio else { return }
             guard let holding = holding else { return }
+            
+            // Use asset's currency for trade currency
+            let tradeCurrency = asset.currency
+            // Use exchange rate 1 for IDR, keep existing rate for USD
+            let exchangeRate = tradeCurrency == .idr ? 1 : 16586
                         
             try transactionService.recordSellTransaction(
                 appSource: platform,
@@ -157,8 +170,8 @@ class TradeTransactionViewModel: ObservableObject {
                 quantity: amount,
                 sellPrice: price,
                 date: purchaseDate,
-                tradeCurrency: .usd,
-                exchangeRate: 16586
+                tradeCurrency: tradeCurrency,
+                exchangeRate: Decimal(exchangeRate)
             )
                         
             didFinishTransaction = true

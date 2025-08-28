@@ -93,6 +93,11 @@ class TransferTransactionViewModel: ObservableObject {
         do {
             guard isDataFilled, let platform = platform, let amount = amount, let portfolioTransferFrom = portfolioTransferFrom, let holding = holding, let portfolioTransferTo = portfolioTransferTo else { return }
             
+            // Use asset's currency for trade currency
+            let tradeCurrency = asset.currency
+            // Use exchange rate 1 for IDR, keep existing rate for USD
+            let exchangeRate = tradeCurrency == .idr ? 1 : 16716
+            
             try transactionService.recordTransferTransaction(
                 appSource: platform,
                 asset: asset,
@@ -101,8 +106,8 @@ class TransferTransactionViewModel: ObservableObject {
                 quantity: amount,
                 destinationPortfolio: portfolioTransferTo,
                 date: .now,
-                tradeCurrency: .usd,
-                exchangeRate: 16716
+                tradeCurrency: tradeCurrency,
+                exchangeRate: Decimal(exchangeRate)
             )
             
             didFinishTransaction = true

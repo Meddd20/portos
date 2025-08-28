@@ -54,8 +54,8 @@ struct DetailHoldingView: View {
                         .fontWeight(.none)
                         .padding(.vertical, 1)
                         .foregroundStyle(Color.textPrimary)
-                    
-                    Text((viewModel.holdingAssetDetail?.portfolioMarketValue.formattedCash()) ?? "-")
+
+                    Text("\(viewModel.holding.asset.currency.symbol) \((viewModel.holdingAssetDetail?.portfolioMarketValue.formattedCash()) ?? "-")")
                         .font(.title3)
                         .fontWeight(.bold)
                         .padding(.vertical, 1)
@@ -63,9 +63,10 @@ struct DetailHoldingView: View {
                     
                     InformationPill(
                         trailingText: viewModel.holdingAssetDetail?.unrealizedPnLPercentage.formattedPercentage(),
-                        backgroundColor: Color.green.opacity(0.15),
-                        fontColor: Color(hue: 0.33, saturation: 0.75, brightness: 0.55),
-                        showBackground: true
+                        backgroundColor: getPillBackgroundColor(),
+                        fontColor: getPillFontColor(),
+                        showBackground: true,
+                        iconName: getPillIconName()
                     )
                 }
                 .padding(.horizontal, 16)
@@ -75,11 +76,12 @@ struct DetailHoldingView: View {
                     ForEach(viewModel.accountPosition, id: \.appSource.id) { account in
                         HoldingSummaryCard(
                             platform: account.appSource.name,
-                            totalValue: account.unrealizedPnL,
+                            totalValue: account.unrealizedPnL + (account.avgCost * account.qty * Decimal(viewModel.holding.asset.assetType.multiplier)),
                             quantityLabel: account.qty.description,
                             currentPrice: account.lastPrice,
                             averagePrice: account.avgCost,
                             unit: viewModel.holding.asset.assetType.unit,
+                            asset: viewModel.holding.asset,
                             showAmounts: .constant(true)
                         )
                     }
@@ -91,11 +93,12 @@ struct DetailHoldingView: View {
                             ForEach(viewModel.accountPosition, id: \.appSource.id) { account in
                                 HoldingSummaryCard(
                                     platform: account.appSource.name,
-                                    totalValue: account.unrealizedPnL,
+                                    totalValue: account.unrealizedPnL + (account.avgCost * account.qty * Decimal(viewModel.holding.asset.assetType.multiplier)),
                                     quantityLabel: account.qty.description,
                                     currentPrice: holding.asset.lastPrice,
                                     averagePrice: account.avgCost,
                                     unit: viewModel.holding.asset.assetType.unit,
+                                    asset: viewModel.holding.asset,
                                     showAmounts: .constant(true)
                                 )
                             }
@@ -243,5 +246,38 @@ struct DetailHoldingView: View {
         return CGFloat(sectionsCount) * headerHeight +
                CGFloat(totalTransactions) * rowHeight +
                CGFloat(sectionsCount) * sectionSpacing
+    }
+    
+    private func getPillBackgroundColor() -> Color {
+        let percentage = viewModel.holdingAssetDetail?.unrealizedPnLPercentage ?? 0
+        if percentage < 0 {
+            return Color.redApp.opacity(0.15)
+        } else if percentage > 0 {
+            return Color.greenApp.opacity(0.15)
+        } else {
+            return Color.greyApp.opacity(0.15)
+        }
+    }
+    
+    private func getPillFontColor() -> Color {
+        let percentage = viewModel.holdingAssetDetail?.unrealizedPnLPercentage ?? 0
+        if percentage < 0 {
+            return Color.redApp
+        } else if percentage > 0 {
+            return Color.greenApp
+        } else {
+            return Color.greyApp
+        }
+    }
+    
+    private func getPillIconName() -> String {
+        let percentage = viewModel.holdingAssetDetail?.unrealizedPnLPercentage ?? 0
+        if percentage < 0 {
+            return "arrowtriangle.down.fill" // Down arrow for negative
+        } else if percentage > 0 {
+            return "arrowtriangle.up.fill" // Up arrow for positive
+        } else {
+            return "arrowtriangle.up" // No change for zero
+        }
     }
 }

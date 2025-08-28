@@ -100,13 +100,29 @@ struct TradeTransactionView: View {
                 .foregroundStyle(Color.textSecondary)
             
             Spacer()
+                .frame(height: 9)
+            
+            Text("Traded in \(asset.currency.rawValue)")
+                .frame(maxWidth: .infinity, alignment: .center)
+                .font(.caption)
+                .foregroundStyle(Color.textSecondary)
+            
+            Spacer()
                 .frame(height: 80)
                         
             VStack {
                 FormRow(label: "Amount") {
-                    TextField("0 \(viewModel.asset.assetType.unit)", text: $viewModel.amountText)
-                        .keyboardType(.decimalPad)
-                        .foregroundStyle(Color.textPrimary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextField("0 \(viewModel.asset.assetType.unit)", text: $viewModel.amountText)
+                            .keyboardType(.decimalPad)
+                            .foregroundStyle(Color.textPrimary)
+                        
+                        if asset.assetType == .StocksId {
+                            Text("Note: 1 Lot = 100 Shares")
+                                .font(.caption)
+                                .foregroundStyle(Color.textSecondary)
+                        }
+                    }
                 }
                 
                 Divider()
@@ -116,7 +132,7 @@ struct TradeTransactionView: View {
                 
                 FormRow(label: "Price") {
                     HStack {
-                        Text("Rp")
+                        Text(asset.currency.symbol)
                         .foregroundStyle(.secondary)
                         
                         TextField(viewModel.pricePlaceholder ?? "0", text: $viewModel.priceText)
@@ -248,7 +264,7 @@ struct TradeTransactionView: View {
         }
         .onAppear {
             viewModel.loadData()
-            viewModel.getRate(currency: "USD")
+            // Note: Exchange rates are now handled dynamically based on asset currency
         }
         .background(
             LinearGradient(

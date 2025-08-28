@@ -13,11 +13,32 @@ struct InformationPill: View {
     var backgroundColor = Color(.systemGray5)
     var fontColor = Color(.systemGray)
     var showBackground = true
+    var iconName: String?
     
+    private var dynamicIconName: String {
+        if let iconName = iconName {
+            return iconName
+        }
+        
+        // Default icon logic based on trailing text
+        guard let text = trailingText else { return "arrowtriangle.up" }
+        let cleanText = text.replacingOccurrences(of: "%", with: "").replacingOccurrences(of: "+", with: "")
+        
+        if let percentage = Double(cleanText) {
+            if percentage > 0 {
+                return "arrowtriangle.up.fill"
+            } else if percentage < 0 {
+                return "arrowtriangle.down.fill"
+            } else {
+                return "arrowtriangle.up"
+            }
+        }
+        return "arrowtriangle.up"
+    }
     
     var body: some View {
         HStack {
-            Image(systemName: "triangle.fill")
+            Image(systemName: dynamicIconName)
                 .font(.caption)
                 .foregroundStyle(fontColor)
             

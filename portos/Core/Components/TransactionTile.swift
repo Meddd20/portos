@@ -52,7 +52,7 @@ struct TransactionTile: View {
                     .frame(maxWidth: 140, alignment: .leading)
                     .foregroundStyle(Color.textPrimary)
                 
-                Text("\(transaction.app.name) • Rp \(transaction.price.formattedCash())")
+                Text("\(transaction.app.name) • \(transaction.asset.currency.symbol) \(transaction.price.formattedCash())")
                     .font(.system(size: 13))
                     .foregroundStyle(Color.textSecondary)
             }
@@ -70,7 +70,7 @@ struct TransactionTile: View {
                         .fontWeight(.regular)
                 }
                 
-                Text("Rp \((transactionAmount * Decimal(transaction.asset.assetType.multiplier)).formattedCash())")
+                Text("\(transaction.asset.currency.symbol) \((transactionAmount * Decimal(transaction.asset.assetType.multiplier)).formattedCash())")
                     .font(.system(size: 13))
                     .foregroundStyle(Color.textSecondary)
                 

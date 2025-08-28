@@ -16,6 +16,7 @@ struct HoldingSummaryCard: View {
     let currentPrice: Decimal
     let averagePrice: Decimal
     let unit: String
+    let asset: Asset // Add asset parameter to access currency
     
     // Mark: Local UI State
     @Binding var showAmounts: Bool
@@ -28,12 +29,17 @@ struct HoldingSummaryCard: View {
             
             VStack(alignment: .leading){
                 // Amount
-                Text(showAmounts ? totalValue.formattedCash() : maskedIDR)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                HStack(spacing: 2) {
+                    Text(asset.currency.symbol)
+                        .font(.title)
+                        .foregroundStyle(.secondary)
+                    Text(showAmounts ? totalValue.formattedCash() : maskedIDR)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
                 // Quantity
                 Text("\(quantityLabel) \(unit)")
                     .font(.body)
@@ -45,9 +51,14 @@ struct HoldingSummaryCard: View {
                     Text("Curr. Price")
                         .font(.subheadline)
                         .fontWeight(.light)
-                    Text(currentPrice.formattedCash())
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                    HStack(spacing: 2) {
+                        Text(asset.currency.symbol)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(currentPrice.formattedCash())
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
                 }
                 
                 Spacer()
@@ -56,9 +67,14 @@ struct HoldingSummaryCard: View {
                     Text("Avg. Price")
                         .font(.subheadline)
                         .fontWeight(.light)
-                    Text(averagePrice.formattedCash())
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                    HStack(spacing: 2) {
+                        Text(asset.currency.symbol)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(averagePrice.formattedCash())
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
                 }
             }
         }

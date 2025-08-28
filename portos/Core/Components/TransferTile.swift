@@ -21,13 +21,14 @@ struct TransferTile: View {
             Image(systemName: isInOutHistory ? "arrow.right" : "arrow.left")
                 .font(.system(size: 20))
                 .fontWeight(.thin)
+                .foregroundStyle(Color.primaryApp)
                 .clipShape(Circle())
                 .frame(width: 40, height: 40, alignment: .center)
                 .background(
-                    Circle().foregroundStyle(Color.gray.opacity(0.1))
+                    Circle().foregroundStyle(Color.greyApp.opacity(0.1))
                 )
                 .overlay(
-                    Circle().stroke(.black.opacity(0.2), lineWidth: 0.2)
+                    Circle().stroke(Color.borderColor.opacity(0.2), lineWidth: 0.2)
                 )
             
             Spacer()
@@ -40,6 +41,7 @@ struct TransferTile: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: 140, alignment: .leading)
+                    .foregroundStyle(Color.textPrimary)
                 
                 if isInOutHistory {
                     if isAllOrHolding {
@@ -51,6 +53,7 @@ struct TransferTile: View {
                                 .truncationMode(.tail)
 
                             Image(systemName: "arrow.right")
+                                .foregroundStyle(Color.textSecondary)
                             
                             Text("\(inTransaction.portfolio.name)")
                                 .font(.system(size: 13))
@@ -61,7 +64,7 @@ struct TransferTile: View {
                     } else {
                         Text("To \(inTransaction.portfolio.name)")
                             .font(.system(size: 13))
-                            .foregroundStyle(.black.opacity(0.5))
+                            .foregroundStyle(Color.textSecondary)
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
@@ -70,22 +73,23 @@ struct TransferTile: View {
                         HStack {
                             Text("\(outTransaction.portfolio.name)")
                                 .font(.system(size: 13))
-                                .foregroundStyle(.black.opacity(0.5))
+                                .foregroundStyle(Color.textSecondary)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
 
                             Image(systemName: "arrow.right")
+                                .foregroundStyle(Color.textSecondary)
                             
                             Text("\(inTransaction.portfolio.name)")
                                 .font(.system(size: 13))
-                                .foregroundStyle(.black.opacity(0.5))
+                                .foregroundStyle(Color.textSecondary)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                         }
                     } else {
                         Text("From \(outTransaction.portfolio.name)")
                             .font(.system(size: 13))
-                            .foregroundStyle(.black.opacity(0.5))
+                            .foregroundStyle(Color.textSecondary)
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
@@ -101,15 +105,17 @@ struct TransferTile: View {
                     Text("\(outTransaction.quantity)")
                         .font(.system(size: 16))
                         .fontWeight(.semibold)
+                        .foregroundStyle(Color.textPrimary)
                     
                     Text(outTransaction.asset.assetType.unit)
                         .font(.system(size: 14))
                         .fontWeight(.regular)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 
                 Text(outTransaction.app.name)
                     .font(.system(size: 13))
-                    .foregroundStyle(.black.opacity(0.5))
+                    .foregroundStyle(Color.textSecondary)
                 
             }
             .padding(.trailing, 3)
