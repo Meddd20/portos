@@ -46,6 +46,21 @@ struct PortfolioScreen: View {
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
+    // Computed properties for conditional styling
+    private var isGrowthPositive: Bool {
+        guard let growthRate = viewModel.portfolioOverview.portfolioGrowthRate else { return true }
+        // Remove any non-numeric characters and check if it's negative
+        let cleanRate = growthRate.replacingOccurrences(of: "%", with: "")
+        return !cleanRate.hasPrefix("-") && cleanRate != "0"
+    }
+    
+    private var isProfitPositive: Bool {
+        guard let profitAmount = viewModel.portfolioOverview.portfolioProfitAmount else { return true }
+        // Remove currency symbol and check if it's negative
+        let cleanAmount = profitAmount.replacingOccurrences(of: "Rp ", with: "")
+        return !cleanAmount.hasPrefix("-") && cleanAmount != "0"
+    }
+    
     var body: some View {
         @State var expandedGroups: Set<UUID> = []
         
@@ -127,7 +142,7 @@ struct PortfolioScreen: View {
                     AssetAllocationAllChart(overview: viewModel.portfolioOverview)
                         .padding(.top, 39)
                 } else {
-                    InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
+                    InvestmentChartWithRange(projection: viewModel.projectionSeries, actual: viewModel.actualSeries)
                 }
                 
                 HStack (spacing: 42) {
@@ -187,9 +202,9 @@ struct PortfolioScreen: View {
                 ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
-        // .navigationDestination(isPresented: $showingAdd) {
-        //     AddPortfolio(di: di, screenMode: .add)
-        // }
+         .navigationDestination(isPresented: $showingAdd) {
+             AddPortfolio(di: di, screenMode: .add)
+         }
         .navigationDestination(isPresented: $showingEdit) {
             if selectedIndex != 0 {
                 AddPortfolio(

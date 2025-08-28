@@ -223,7 +223,7 @@ struct TradeTransactionView: View {
             if (viewModel.transactionMode == .buy || viewModel.transactionMode == .liquidate) || ( [.editBuy, .editLiquidate].contains(viewModel.transactionMode) && viewModel.isDataFilled ) {
                 Button(action: {
                     Task {
-                        await viewModel.proceedTransaction()
+                        viewModel.proceedTransaction()
                         navigationManager.back()
                     }
                 }, label: {
