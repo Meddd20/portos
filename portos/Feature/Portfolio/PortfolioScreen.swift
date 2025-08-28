@@ -187,9 +187,9 @@ struct PortfolioScreen: View {
                 ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
-        .navigationDestination(isPresented: $showingAdd) {
-            AddPortfolio(di: di, screenMode: .add)
-        }
+        // .navigationDestination(isPresented: $showingAdd) {
+        //     AddPortfolio(di: di, screenMode: .add)
+        // }
         .navigationDestination(isPresented: $showingEdit) {
             if selectedIndex != 0 {
                 AddPortfolio(
