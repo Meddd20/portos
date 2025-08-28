@@ -28,7 +28,7 @@ struct HoldingSummaryCard: View {
             
             VStack(alignment: .leading){
                 // Amount
-                Text(showAmounts ? cashAmount(totalValue) : maskedIDR)
+                Text(showAmounts ? totalValue.formattedCash() : maskedIDR)
                     .font(.title)
                     .fontWeight(.bold)
                     .monospacedDigit()
@@ -45,7 +45,7 @@ struct HoldingSummaryCard: View {
                     Text("Curr. Price")
                         .font(.subheadline)
                         .fontWeight(.light)
-                    Text(cashAmount(currentPrice))
+                    Text(currentPrice.formattedCash())
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
@@ -56,7 +56,7 @@ struct HoldingSummaryCard: View {
                     Text("Avg. Price")
                         .font(.subheadline)
                         .fontWeight(.light)
-                    Text(cashAmount(averagePrice))
+                    Text(averagePrice.formattedCash())
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
