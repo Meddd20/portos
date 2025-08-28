@@ -16,6 +16,7 @@ enum ActiveSetting: Identifiable {
 class LocalizationManager: ObservableObject {
     @Published var currentLanguage: Language = .indonesia
     @Published var currentCurrency: Currency = .idr
+    @Published var showCash: Bool = true
     
     static let shared = LocalizationManager()
     
@@ -33,6 +34,9 @@ class LocalizationManager: ObservableObject {
         } else {
             currentCurrency = .idr
         }
+        
+        // Load showCash preference from UserDefaults
+        showCash = UserDefaults.standard.bool(forKey: "showCash")
     }
     
     func setLanguage(_ language: Language) {
@@ -43,6 +47,11 @@ class LocalizationManager: ObservableObject {
     func setCurrency(_ currency: Currency) {
         currentCurrency = currency
         UserDefaults.standard.set(currency.rawValue, forKey: "selectedCurrency")
+    }
+    
+    func setShowCash(_ show: Bool) {
+        showCash = show
+        UserDefaults.standard.set(show, forKey: "showCash")
     }
     
     func localizedString(_ key: String) -> String {
