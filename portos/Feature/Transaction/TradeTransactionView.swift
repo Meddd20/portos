@@ -58,7 +58,7 @@ struct TradeTransactionView: View {
          transaction: Transaction? = nil,
          holding: Holding? = nil,
          asset: Asset,
-         currentPortfolioAt: Portfolio?,
+         currentPortfolioAt: Portfolio?
     ) {
         self.transactionMode = transactionMode
         self.asset = asset
@@ -280,7 +280,8 @@ struct TradeTransactionView: View {
         currency: .usd,
         country: "Outside Indonesia",
         lastPrice: 65000, // harga BTC dalam USD
-        asOf: Date()
+        asOf: Date(),
+        assetId: "kcndksl"
     )
     
 //    TradeTransactionView(
