@@ -184,13 +184,13 @@ class PortfolioService {
             let qtyStr: String = {
                 switch assetType {
                 case .Stocks:
-                    return "\(formatDecimal(h.quantity) ?? "") lot"
+                    return "\(formatDecimal(h.quantity) ?? "") Share(s)"
                 case .Bonds:
                     return "Rp \(formatDecimal(h.quantity) ?? "")"
                 case .MutualFunds, .Options, .Crypto, .ETF:
                     return formatDecimal(h.quantity) ?? ""
-                default :
-                    return formatDecimal(h.quantity) ?? ""
+                case .StocksId:
+                    return "\(formatDecimal(h.quantity) ?? "") Lot"
                 }
             }()
 

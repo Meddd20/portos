@@ -44,8 +44,6 @@ struct PortfolioScreen: View {
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
-    let sampleData = createSampleData()
-    
     var body: some View {
         @State var expandedGroups: Set<UUID> = []
         
@@ -56,6 +54,13 @@ struct PortfolioScreen: View {
                 onChange: onPickerChange,
                 onAdd: { showingAdd = true }
             )
+            
+            // for debug
+//            Button("print ACTUAL Series for chart", action: {print("fnkcdsjfn cjdn fkjndjknfck \n \(viewModel.actualSeries)")})
+//            Button("print PROJECTION Series for chart", action: {print("PROJECTION: \(viewModel.projectionSeries)")})
+//            Button("???", action: {print(viewModel.actualSeries == viewModel.projectionSeries)})
+//            Button("refresh api", action: {viewModel.refreshMarketValues()})
+//            Button("generate projection", action: {viewModel.calculateProjection()})
             
             ScrollView {
                 if selectedIndex == 0 {
@@ -85,10 +90,15 @@ struct PortfolioScreen: View {
                         .padding(.horizontal, 8)
                         .background(Color.greenAppLight)
                         .cornerRadius(14)
-                        .padding(.bottom, 32)
                     }
-                    
-                    InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
+                    Image(systemName: "arrow.clockwise")
+                        .onTapGesture {viewModel.refreshMarketValues()}
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .foregroundStyle(.black.opacity(0.3))
+                        .padding(.bottom, 32)
+                        .padding(.horizontal, 8)
+                    InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
+                                        .frame(height: 184)
                 }
                 
                 HStack {
@@ -136,6 +146,7 @@ struct PortfolioScreen: View {
             }.scrollIndicators(.hidden)
                 .padding()
         }
+        .task { await viewModel.loadChartData() }
         .navigationBarBackButtonHidden()
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -164,6 +175,7 @@ struct PortfolioScreen: View {
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
+            viewModel.refreshMarketValues()
         }
         .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
             Button("Delete", role: .destructive) {

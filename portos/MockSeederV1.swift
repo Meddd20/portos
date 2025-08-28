@@ -124,7 +124,7 @@ struct MockSeederV1 {
 //            createdAt: Date(),
 //            updatedAt: Date()
 //        )
-//        
+//
 //        let portfolio2 = Portfolio(
 //            name: "Having Fun",
 //            targetAmount: Decimal(1_000_000_000),
@@ -133,7 +133,7 @@ struct MockSeederV1 {
 //            createdAt: Date(),
 //            updatedAt: Date()
 //        )
-//        
+//
 //        let holding1 = Holding(
 //            asset: asset4,
 //            portfolio: portfolio1,
@@ -142,7 +142,7 @@ struct MockSeederV1 {
 //            createdAt: Date(),
 //            updatedAt: Date()
 //        )
-//        
+//
 //        let holding2 = Holding( // BBCA via Stockbit
 //            asset: asset1,
 //            portfolio: portfolio1,
@@ -160,7 +160,7 @@ struct MockSeederV1 {
 //            createdAt: Date(),
 //            updatedAt: Date()
 //        )
-//        
+//
 //        let holding7 = Holding(
 //            asset: asset2,
 //            portfolio: portfolio1,
