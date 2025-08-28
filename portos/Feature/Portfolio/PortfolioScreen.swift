@@ -32,6 +32,7 @@ struct PortfolioScreen: View {
     @State private var selectedIndex: Int = 0
     @State private var showingAdd = false
     @State private var showingEdit = false
+    @State private var showingSetting = false
     @State private var showingDeleteConfirmation: Bool = false
     @State private var items: [Holding] = []
     @State private var showTrade = false
@@ -195,7 +196,7 @@ struct PortfolioScreen: View {
                     }
                     
                     Menu {
-                        Button("Settings") { print("settings is clicked") }
+                        Button("Settings") { showingSetting = true }
                         if selectedIndex != 0 {
                             Button("Edit Portfolio")  { showingEdit = true }
                             Button("Delete Portfolio") { showingDeleteConfirmation = true }
@@ -240,6 +241,9 @@ struct PortfolioScreen: View {
                 ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
+        .navigationDestination(isPresented: $showingSetting) {
+            UserSettingView()
+        }
          .navigationDestination(isPresented: $showingAdd) {
              AddPortfolio(di: di, screenMode: .add)
          }

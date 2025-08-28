@@ -22,25 +22,20 @@ struct OptionSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
     
-    
-    private var filtered: [SelectOption] {
-        query.isEmpty
-        ? options
-        : options.filter{ $0.title.localizedCaseInsensitiveContains(query) }
-    }
-    
     var body: some View {
         NavigationStack {
             List {
                 ForEach(options) { option in
                     HStack {
                         Text(option.title)
+                            .foregroundStyle(Color.textPrimary)
                         Spacer()
                         if option == selection {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(.tint)
+                                .foregroundStyle(Color.primaryApp)
                         }
                     }
+                    .listRowBackground(Color.clear)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         selection = option
@@ -59,17 +54,23 @@ struct OptionSheet: View {
                     
                 }
             }
-            .searchable(text: $query, prompt: "search".localized)
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(Color.backgroundApp)
             .navigationTitle(navigationTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: { Image(systemName: "xmark") }
+                    Button { dismiss() } label: { 
+                        Image(systemName: "xmark")
+                            .foregroundStyle(Color.textPrimary)
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            
+            .toolbarBackground(Color.backgroundApp, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         }
-        
+        .background(Color.backgroundApp)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
