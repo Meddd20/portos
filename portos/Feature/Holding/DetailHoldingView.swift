@@ -53,11 +53,13 @@ struct DetailHoldingView: View {
                         .font(.title3)
                         .fontWeight(.none)
                         .padding(.vertical, 1)
+                        .foregroundStyle(Color.textPrimary)
                     
                     Text((viewModel.holdingAssetDetail?.portfolioMarketValue.formattedCash()) ?? "-")
                         .font(.title3)
                         .fontWeight(.bold)
                         .padding(.vertical, 1)
+                        .foregroundStyle(Color.textPrimary)
                     
                     InformationPill(
                         trailingText: viewModel.holdingAssetDetail?.unrealizedPnLPercentage.formattedPercentage(),
@@ -111,6 +113,8 @@ struct DetailHoldingView: View {
                             navigationManager.push(.buyAsset(asset: holding.asset, portfolio: holding.portfolio), back: .popOnce)
                         }
                     )
+                    .foregroundStyle(Color.greenApp) // Green for Add
+                    
                     CircleButton(
                         systemName: "minus",
                         title: "Liquidate",
@@ -118,6 +122,8 @@ struct DetailHoldingView: View {
                             navigationManager.push(.sellAsset(asset: holding.asset, portfolio: holding.portfolio, holding: holding), back: .popOnce)
                         }
                     )
+                    .foregroundStyle(Color.redApp) // Red for Liquidate
+                    
                     CircleButton(
                         systemName: "arrow.right",
                         title: "Transfer",
@@ -125,6 +131,7 @@ struct DetailHoldingView: View {
                             navigationManager.push(.transferAsset(asset: holding.asset, holding: holding, transferMode: .transferToPortfolio), back: .popOnce)
                         }
                     )
+                    .foregroundStyle(Color.primaryApp) // Brown for Transfer
                 }
                 .padding(.horizontal, 16)
                                 
@@ -145,55 +152,64 @@ struct DetailHoldingView: View {
                                     )
                                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 20, trailing: 16))
                                     .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
                                 }
                             }
+                            .listSectionSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                         }
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
+                    .background(Color.clear)
                     .scrollDisabled(true)
                     .frame(height: calculateListHeight())
                 }
             }
-            .navigationTitle(viewModel.holding.asset.symbol)
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden()
-            .toolbar {
-                ToolbarItem (placement: .topBarLeading) {
-                    Button (action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .foregroundColor(.black)
-                    }
-                }
-            }
-            .onAppear {
-                viewModel.getHoldingAssetDetail()
-                viewModel.getTransactions()
-            }
-            .onChange(of: selectedTransactionForEdit) { tx in
-                if let transaction = tx {
-                    navigationManager.push(
-                        .editTransaction(
-                            transaction: transaction,
-                            transactionMode: .editBuy,
-                            asset: transaction.asset,
-                            portfolio: transaction.portfolio
-                        ),
-                        back: .popOnce
-                    )
-                    selectedTransactionForEdit = nil
-                }
-            }   
         }
         .background(
             LinearGradient(
             stops: [
-                Gradient.Stop(color: .white, location: 0.13),
+                Gradient.Stop(color: Color.backgroundPrimary, location: 0.13),
                 Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
+        .navigationTitle(viewModel.holding.asset.symbol)
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem (placement: .topBarLeading) {
+                Button (action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(Color.textPrimary)
+                }
+            }
+        }
+        .toolbarBackground(Color.backgroundApp, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .onAppear {
+            viewModel.getHoldingAssetDetail()
+            viewModel.getTransactions()
+        }
+        .onChange(of: selectedTransactionForEdit) { tx in
+            if let transaction = tx {
+                navigationManager.push(
+                    .editTransaction(
+                        transaction: transaction,
+                        transactionMode: .editBuy,
+                        asset: transaction.asset,
+                        portfolio: transaction.portfolio
+                    ),
+                    back: .popOnce
+                )
+                selectedTransactionForEdit = nil
+            }
+        }
+        .safeAreaInset(edge: .top) {
+            Color.clear.frame(height: 8)
+        }
     }
     
     @ViewBuilder
@@ -207,7 +223,7 @@ struct DetailHoldingView: View {
                 Text(sectionTitle)
                     .font(.system(size: 16))
                     .fontWeight(.semibold)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Color.textPrimary)
                 
                 Spacer()
             }

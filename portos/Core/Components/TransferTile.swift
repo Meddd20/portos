@@ -21,7 +21,6 @@ struct TransferTile: View {
             Image(systemName: isInOutHistory ? "arrow.right" : "arrow.left")
                 .font(.system(size: 20))
                 .fontWeight(.thin)
-                .foregroundStyle(.black)
                 .clipShape(Circle())
                 .frame(width: 40, height: 40, alignment: .center)
                 .background(
@@ -47,7 +46,7 @@ struct TransferTile: View {
                         HStack {
                             Text("\(outTransaction.portfolio.name)")
                                 .font(.system(size: 13))
-                                .foregroundStyle(.black.opacity(0.5))
+                                .foregroundStyle(Color.textSecondary)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
 
@@ -55,7 +54,7 @@ struct TransferTile: View {
                             
                             Text("\(inTransaction.portfolio.name)")
                                 .font(.system(size: 13))
-                                .foregroundStyle(.black.opacity(0.5))
+                                .foregroundStyle(Color.textSecondary)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                         }

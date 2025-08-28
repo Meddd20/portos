@@ -45,6 +45,7 @@ struct UserSettingView: View {
                     ValueRow(title: "currency".localized, value: selectedCurrency.title)
                 }
                 .buttonStyle(.plain)
+                .listRowBackground(Color.clear)
                 
                 // Language Row
                 Button {
@@ -53,11 +54,16 @@ struct UserSettingView: View {
                     ValueRow(title: "language".localized, value: selectedLanguage.title)
                 }
                 .buttonStyle(.plain)
+                .listRowBackground(Color.clear)
             }
         }
-        .listStyle(.inset)
+        .listStyle(.plain)
         .listRowSpacing(8)
+        .scrollContentBackground(.hidden)
+        .background(Color.backgroundApp)
         .navigationTitle("settings".localized)
+        .toolbarBackground(Color.backgroundApp, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .currency:
@@ -89,13 +95,15 @@ struct ValueRow: View {
     var body: some View {
         HStack {
             Text(title)
+                .foregroundStyle(Color.textPrimary)
             Spacer()
             if let value {
-                Text(value).foregroundStyle(.secondary)
+                Text(value)
+                    .foregroundStyle(Color.textSecondary)
             }
             Image(systemName: "chevron.right")
                 .font(.footnote)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Color.textTertiary)
         }
         .contentShape(Rectangle())
     }

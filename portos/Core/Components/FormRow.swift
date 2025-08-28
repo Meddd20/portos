@@ -21,8 +21,7 @@ struct FormRow<Content: View>: View {
         HStack {
             Text(label)
                 .font(.body)
-                .foregroundStyle(.primary)
-                .backgroundStyle(.black)
+                .foregroundStyle(Color.textPrimary)
                 .frame(width: 130, height: 30, alignment: .leading)
                             
             content()

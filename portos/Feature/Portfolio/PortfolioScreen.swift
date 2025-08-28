@@ -32,6 +32,7 @@ struct PortfolioScreen: View {
     @State private var selectedIndex: Int = 0
     @State private var showingAdd = false
     @State private var showingEdit = false
+    @State private var showingSetting = false
     @State private var showingDeleteConfirmation: Bool = false
     @State private var items: [Holding] = []
     @State private var showTrade = false
@@ -86,7 +87,7 @@ struct PortfolioScreen: View {
                             .font(.system(size: 28, weight: .bold))
                             .kerning(0.38)
                             .multilineTextAlignment(.center)
-                            .foregroundColor(.black)
+                            .foregroundColor(Color.textPrimary)
                             .transition(.opacity.combined(with: .scale))
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
                             
@@ -113,34 +114,64 @@ struct PortfolioScreen: View {
                         .buttonStyle(.plain)
                     }
                     HStack(alignment: .center) {
-                        Image(systemName: "triangle.fill")
+                       Image(
+                        systemName:
+                            (
+                                viewModel.portfolioOverview.portfolioGrowthRate == nil
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                            )  ? "arrowtriangle.up" : "triangle.fill")
                             .font(.system(size: 15))
                             .rotationEffect(.degrees(isGrowthPositive ? 0 : 180))
-                            .foregroundStyle(isGrowthPositive ? Color.greenApp : Color.redApp)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
                         
-                        Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
+                         Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
                             .font(.system(size: 15, weight: .bold))
                             .padding(.trailing, 14)
-                            .foregroundStyle(isGrowthPositive ? Color.greenApp : Color.redApp)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
                         
-                        Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
+                       Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
                             .font(.system(size: 15, weight: .bold))
                             .transition(.opacity.combined(with: .scale))
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
-                            .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
+                            //  .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil 
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isProfitPositive ? Color.greenApp : Color.redApp))
                     }
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
-                            .fill(isGrowthPositive ? Color.greenAppLight : Color.redAppLight)
+                            // .fill(isGrowthPositive ? Color.greenAppLight : Color.redAppLight)
+                            .fill((
+                                viewModel.portfolioOverview.portfolioGrowthRate == nil
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                            ) ? Color.greyApp.opacity(0.2) : (isGrowthPositive ? Color.greenAppLight : Color.redAppLight))
                     )
                     .padding(.bottom, 32)
                 }
                 
                 if selectedIndex == 0 {
-                    AssetAllocationAllChart(overview: viewModel.portfolioOverview)
-                        .padding(.top, 39)
+                    if viewModel.portfolioOverview.groupItems.isEmpty {
+                        EmptyAssetAllocationChart()
+                            .frame(height: 241)
+                            .padding(.top, 39)
+                    } else {
+                        AssetAllocationAllChart(overview: viewModel.portfolioOverview)
+                            .padding(.top, 39)
+                    }
                 } else {
                     if viewModel.actualSeries.isEmpty {
                         EmptyInvestmentChart()
@@ -165,14 +196,14 @@ struct PortfolioScreen: View {
                     }
                     
                     Menu {
-                        Button("Settings") { print("settings is clicked") }
+                        Button("Settings") { showingSetting = true }
                         if selectedIndex != 0 {
                             Button("Edit Portfolio")  { showingEdit = true }
                             Button("Delete Portfolio") { showingDeleteConfirmation = true }
                         }
                     } label: {
                         CircleButton(systemName: "ellipsis", title: "More") { }
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.textPrimary)
                     }
                 }
                 .padding(.top, 32)
@@ -181,7 +212,7 @@ struct PortfolioScreen: View {
                     Image(systemName: "plus.circle.dashed")
                         .font(.system(size: 58))
                         .padding(.top, 98)
-                        .foregroundColor(Color.primaryApp.opacity(0.75))
+                        .foregroundColor(Color.textSecondary)
                     
                     Text(selectedIndex == 0 ? "No Portfolio" : "No Asset")
                         .font(.system(size: 20, weight: .semibold))
@@ -205,11 +236,14 @@ struct PortfolioScreen: View {
         .background(
             LinearGradient(
             stops: [
-                Gradient.Stop(color: .white, location: 0.31),
+                Gradient.Stop(color: Color.backgroundPrimary, location: 0.31),
                 Gradient.Stop(color: Color.backgroundApp, location: 0.49),
                 ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
+        .navigationDestination(isPresented: $showingSetting) {
+            UserSettingView()
+        }
          .navigationDestination(isPresented: $showingAdd) {
              AddPortfolio(di: di, screenMode: .add)
          }
@@ -284,7 +318,7 @@ struct PortfolioScreen: View {
                 }
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundColor(.black)
+                                        .foregroundColor(Color.textPrimary)
                 .padding(.top, 4)
             }
         }
