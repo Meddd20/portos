@@ -54,15 +54,6 @@ class SearchAssetViewModel: ObservableObject {
         }
     }
     
-//    func getAllAssets() {
-//        do {
-//            assets = try assetRepository.getAllAsset()
-//            print(assets.count)
-//        } catch {
-//            print("")
-//        }
-//    }
-    
     @MainActor
     func loadAssets() {
         ApiService.fetchAssets { [weak self] result in

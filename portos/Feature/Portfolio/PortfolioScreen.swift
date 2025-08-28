@@ -46,23 +46,6 @@ struct PortfolioScreen: View {
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
     
-    let sampleData = createSampleData()
-    
-    // Computed properties for conditional styling
-    private var isGrowthPositive: Bool {
-        guard let growthRate = viewModel.portfolioOverview.portfolioGrowthRate else { return true }
-        // Remove any non-numeric characters and check if it's negative
-        let cleanRate = growthRate.replacingOccurrences(of: "%", with: "")
-        return !cleanRate.hasPrefix("-") && cleanRate != "0"
-    }
-    
-    private var isProfitPositive: Bool {
-        guard let profitAmount = viewModel.portfolioOverview.portfolioProfitAmount else { return true }
-        // Remove currency symbol and check if it's negative
-        let cleanAmount = profitAmount.replacingOccurrences(of: "Rp ", with: "")
-        return !cleanAmount.hasPrefix("-") && cleanAmount != "0"
-    }
-    
     var body: some View {
         @State var expandedGroups: Set<UUID> = []
         
@@ -73,6 +56,13 @@ struct PortfolioScreen: View {
                 onChange: onPickerChange,
                 onAdd: { showingAdd = true }
             )
+            
+            // for debug
+//            Button("print ACTUAL Series for chart", action: {print("fnkcdsjfn cjdn fkjndjknfck \n \(viewModel.actualSeries)")})
+//            Button("print PROJECTION Series for chart", action: {print("PROJECTION: \(viewModel.projectionSeries)")})
+//            Button("???", action: {print(viewModel.actualSeries == viewModel.projectionSeries)})
+//            Button("refresh api", action: {viewModel.refreshMarketValues()})
+//            Button("generate projection", action: {viewModel.calculateProjection()})
             
             ScrollView {
                 VStack(alignment: .center) {
@@ -140,7 +130,7 @@ struct PortfolioScreen: View {
                     InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
                 }
                 
-                HStack {
+                HStack (spacing: 42) {
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
                         let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
                         navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )
@@ -185,6 +175,7 @@ struct PortfolioScreen: View {
             }.scrollIndicators(.hidden)
                 .padding()
         }
+        .task { await viewModel.loadChartData() }
         .navigationBarBackButtonHidden()
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -213,6 +204,7 @@ struct PortfolioScreen: View {
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
+            viewModel.refreshMarketValues()
         }
         .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
             Button("Delete", role: .destructive) {
