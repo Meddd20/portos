@@ -113,27 +113,51 @@ struct PortfolioScreen: View {
                         .buttonStyle(.plain)
                     }
                     HStack(alignment: .center) {
-                        Image(systemName: "triangle.fill")
+                       Image(
+                        systemName:
+                            (
+                                viewModel.portfolioOverview.portfolioGrowthRate == nil
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                            )  ? "arrowtriangle.up" : "triangle.fill")
                             .font(.system(size: 15))
                             .rotationEffect(.degrees(isGrowthPositive ? 0 : 180))
-                            .foregroundStyle(isGrowthPositive ? Color.greenApp : Color.redApp)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
                         
-                        Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
+                         Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
                             .font(.system(size: 15, weight: .bold))
                             .padding(.trailing, 14)
-                            .foregroundStyle(isGrowthPositive ? Color.greenApp : Color.redApp)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
                         
-                        Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
+                       Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
                             .font(.system(size: 15, weight: .bold))
                             .transition(.opacity.combined(with: .scale))
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
-                            .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
+                            //  .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil 
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isProfitPositive ? Color.greenApp : Color.redApp))
                     }
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
-                            .fill(isGrowthPositive ? Color.greenAppLight : Color.redAppLight)
+                            // .fill(isGrowthPositive ? Color.greenAppLight : Color.redAppLight)
+                            .fill((
+                                viewModel.portfolioOverview.portfolioGrowthRate == nil
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                            ) ? Color.greyApp.opacity(0.2) : (isGrowthPositive ? Color.greenAppLight : Color.redAppLight))
                     )
                     .padding(.bottom, 32)
                 }
