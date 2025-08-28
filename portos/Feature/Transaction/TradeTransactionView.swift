@@ -52,19 +52,22 @@ struct TradeTransactionView: View {
     let portfolio: Portfolio?
     let transaction: Transaction?
     let holding: Holding?
+    let fromSearch: Bool
         
     init(di: AppDI,
          transactionMode: TransactionMode,
          transaction: Transaction? = nil,
          holding: Holding? = nil,
          asset: Asset,
-         currentPortfolioAt: Portfolio?
+         currentPortfolioAt: Portfolio?,
+         fromSearch: Bool = false
     ) {
         self.transactionMode = transactionMode
         self.asset = asset
         self.portfolio = currentPortfolioAt
         self.transaction = transaction
         self.holding = holding
+        self.fromSearch = fromSearch
         
         _viewModel = StateObject(
             wrappedValue: TradeTransactionViewModel(
@@ -224,7 +227,11 @@ struct TradeTransactionView: View {
                 Button(action: {
                     Task {
                         viewModel.proceedTransaction()
-                        navigationManager.back()
+                        if (fromSearch) {
+                            navigationManager.back(backStep: 2)
+                        } else {
+                            navigationManager.back()
+                        }
                     }
                 }, label: {
                     Text("Confirm")
