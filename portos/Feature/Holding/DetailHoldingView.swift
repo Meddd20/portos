@@ -132,16 +132,16 @@ struct DetailHoldingView: View {
                     List {
                         ForEach(viewModel.transactionSectionedByDate, id: \.id) { section in
                             Section(header: sectionHeader(for: section)) {
-                                ForEach(section.transactions, id: \.id) { tx in
-                                    SimpleTransactionRow(
-                                        transaction: tx,
+                                ForEach(section.transactions, id: \.id) { transaction in
+                                    TransactionRowView(
+                                        transaction: transaction,
+                                        portfolio: transaction.portfolio,
                                         section: section,
                                         allTransactions: viewModel.allTransactions,
-                                        isAllOrHolding: true,
-                                        portfolio: nil,
-                                        onDelete: { viewModel.deleteTransaction(transactionId: tx.id) },
-                                        onEdit: { selectedTransactionForEdit = tx },
-                                        onTransfer: { selectedTransferForEdit = tx }
+                                        isAllOrHolding: false,
+                                        onDeleteTransaction: { viewModel.deleteTransaction(transactionId: transaction.id) },
+                                        onEditTransaction: { selectedTransactionForEdit = transaction },
+                                        onEditTransfer: { selectedTransferForEdit = transaction }
                                     )
                                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 20, trailing: 16))
                                     .listRowSeparator(.hidden)
@@ -172,15 +172,20 @@ struct DetailHoldingView: View {
                 viewModel.getHoldingAssetDetail()
                 viewModel.getTransactions()
             }
-            .navigationDestination(item: $selectedTransactionForEdit) { transaction in
-                TradeTransactionView(
-                    di: di,
-                    transactionMode: .editBuy,
-                    transaction: transaction,
-                    asset: transaction.asset,
-                    currentPortfolioAt: transaction.portfolio
-                )
-            }
+            .onChange(of: selectedTransactionForEdit) { tx in
+                if let transaction = tx {
+                    navigationManager.push(
+                        .editTransaction(
+                            transaction: transaction,
+                            transactionMode: .editBuy,
+                            asset: transaction.asset,
+                            portfolio: transaction.portfolio
+                        ),
+                        back: .popOnce
+                    )
+                    selectedTransactionForEdit = nil
+                }
+            }   
         }
         .background(
             LinearGradient(
