@@ -139,8 +139,14 @@ struct PortfolioScreen: View {
                 }
                 
                 if selectedIndex == 0 {
-                    AssetAllocationAllChart(overview: viewModel.portfolioOverview)
-                        .padding(.top, 39)
+                    if viewModel.portfolioOverview.groupItems.isEmpty {
+                        EmptyAssetAllocationChart()
+                            .frame(height: 241)
+                            .padding(.top, 39)
+                    } else {
+                        AssetAllocationAllChart(overview: viewModel.portfolioOverview)
+                            .padding(.top, 39)
+                    }
                 } else {
                     if viewModel.actualSeries.isEmpty {
                         EmptyInvestmentChart()
