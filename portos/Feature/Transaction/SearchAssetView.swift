@@ -136,14 +136,11 @@ struct SearchAssetView: View {
                 }
             }
         }
-        .searchable(text: $viewModel.searchTerms, prompt: "Search")
-        .background(
-            LinearGradient(
-            stops: [
-                Gradient.Stop(color: .white, location: 0.13),
-                Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
-            startPoint: UnitPoint(x: 0.5, y: 0),
-            endPoint: UnitPoint(x: 0.5, y: 1) ))
+        .searchable(
+            text: $viewModel.searchTerms,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search"
+        )
     }
     @ViewBuilder
     private var holdingsContent: some View {

@@ -11,6 +11,7 @@ import Foundation
 class DetailHoldingViewModel: ObservableObject {
     @Published var holdingAssetDetail: PortfolioAssetPosition?
     @Published var accountPosition: [AccountPosition] = []
+    @Published var allTransactions: [Transaction] = []
     @Published var historyTransactions: [Transaction] = []
     @Published var transactionSectionedByDate: [TransactionSection] = []
     let holding: Holding
@@ -31,7 +32,21 @@ class DetailHoldingViewModel: ObservableObject {
     func getTransactions() {
         do {
             historyTransactions = try transactionService.getHoldingTransactions(holdingId: holding.id)
-            transactionSectionedByDate = groupTransactionsByDate(transactions: historyTransactions)
+            let portfolio = historyTransactions.first?.portfolio
+            
+            let allTsx = try transactionService.getAllTransactions(portfolioId: nil)
+            let portfolioTsx: [Transaction] = allTsx.filter { $0.portfolio.id == portfolio?.id && $0.holding.id == holding.id }
+            let groupTransferTsx = Set(portfolioTsx.compactMap(\.transferGroupId))
+            let unified = allTsx.filter { tsx in
+                (tsx.portfolio.id == portfolio?.id && tsx.holding.id == holding.id ) ||
+                (tsx.transferGroupId != nil && groupTransferTsx.contains(tsx.transferGroupId!))
+            }
+                .uniqued(by: \.id)
+                .sorted { $0.date > $1.date }
+
+            self.allTransactions = unified
+            self.transactionSectionedByDate = groupTransactionsByDate(transactions: unified)
+
         } catch {
             print(error.localizedDescription)
         }

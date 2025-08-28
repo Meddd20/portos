@@ -40,6 +40,7 @@ struct TransactionHistoryView: View {
                                     transaction: transaction,
                                     portfolio: portfolio,
                                     section: section,
+                                    allTransactions: viewModel.transactions,
                                     isAllOrHolding: portfolio == nil,
                                     onDeleteTransaction: { viewModel.deleteTransaction(transactionId: transaction.id) },
                                     onEditTransaction: { selectedTransactionForEdit = transaction },
@@ -146,43 +147,46 @@ struct TransactionRowView: View {
     let transaction: Transaction
     let portfolio: Portfolio?
     let section: TransactionSection
+    let allTransactions: [Transaction]
     let isAllOrHolding: Bool
     let onDeleteTransaction: () -> Void
     let onEditTransaction: () -> Void
     let onEditTransfer: () -> Void
     
-    var body: some View {
-        switch transaction.transactionType {
-        case .allocateOut:
-            TransferRowView(
-                transaction: transaction,
-                portfolio: portfolio,
-                sectionTransactions: section.transactions,
-                isAllOrHolding: isAllOrHolding,
-                onDelete: onDeleteTransaction,
-                onEdit: onEditTransfer
-            )
-            
-        case .allocateIn:
-            if isAllOrHolding {
-                EmptyView()
+    private var shouldShow: Bool {
+        if portfolio == nil {
+            if transaction.transferGroupId != nil {
+                return transaction.transactionType == .allocateOut
             } else {
+                return true
+            }
+        } else {
+            return transaction.portfolio.id == portfolio?.id
+        }
+    }
+    
+    @ViewBuilder
+    var body: some View {
+        if shouldShow {
+            if transaction.transferGroupId != nil {
                 TransferRowView(
                     transaction: transaction,
                     portfolio: portfolio,
                     sectionTransactions: section.transactions,
+                    allTransactions: allTransactions,
                     isAllOrHolding: isAllOrHolding,
                     onDelete: onDeleteTransaction,
                     onEdit: onEditTransfer
-                )                
+                )
+            } else {
+                TransactionTile(
+                    transaction: transaction,
+                    onDelete: onDeleteTransaction,
+                    onEdit: onEditTransaction
+                )
             }
-            
-        default:
-            TransactionTile(
-                transaction: transaction,
-                onDelete: onDeleteTransaction,
-                onEdit: onEditTransaction
-            )
+        } else {
+            EmptyView()
         }
     }
 }
@@ -191,26 +195,40 @@ struct TransferRowView: View {
     let transaction: Transaction
     let portfolio: Portfolio?
     let sectionTransactions: [Transaction]
+    let allTransactions: [Transaction]
     let isAllOrHolding: Bool
     let onDelete: () -> Void
     let onEdit: () -> Void
-    
-    private var isInOutHistory: Bool {
+        
+    private var isOut: Bool {
         transaction.transactionType == .allocateOut
     }
     
-    private var inTransaction: Transaction {
-        sectionTransactions.first { $0.transferGroupId == transaction.transferGroupId && isInOutHistory ? $0.transactionType == .allocateIn : $0.transactionType == .allocateOut } ?? transaction
+    private var oppositeType: TransactionType {
+        isOut ? .allocateIn : .allocateOut
     }
     
+    private var pairTransaction: Transaction? {
+        allTransactions.first{
+            $0.transferGroupId == transaction.transferGroupId &&
+            $0.transactionType == oppositeType &&
+            $0.id != transaction.id
+        }
+    }
+        
     var body: some View {
-        TransferTile(
-            outTransaction: isInOutHistory ? transaction : inTransaction,
-            inTransaction: isInOutHistory ? inTransaction : transaction,
-            isInOutHistory: isInOutHistory,
-            isAllOrHolding: isAllOrHolding,
-            onDelete: onDelete,
-            onEdit: onEdit
-        )
+        let outTx = isOut ? transaction : pairTransaction
+        let inTx = isOut ? pairTransaction : transaction
+                
+        if let inTx, let outTx {
+            TransferTile(
+                outTransaction: outTx,
+                inTransaction: inTx,
+                isInOutHistory: isOut,
+                isAllOrHolding: isAllOrHolding,
+                onDelete: onDelete,
+                onEdit: onEdit
+            )
+        }
     }
 }

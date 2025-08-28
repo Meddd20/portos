@@ -55,7 +55,7 @@ enum NavigationRoute: Hashable {
     
     // Trade transaction routes
     case buyAsset(asset: Asset, portfolio: Portfolio?)
-    case sellAsset(asset: Asset, portfolio: Portfolio?)
+    case sellAsset(asset: Asset, portfolio: Portfolio?, holding: Holding)
     case editTransaction(transaction: Transaction, transactionMode: TransactionMode, asset: Asset, portfolio: Portfolio?)
     
     // Transfer transaction routes
@@ -88,10 +88,11 @@ extension NavigationRoute {
             hasher.combine("buyAsset")
             hasher.combine(asset.id)
             hasher.combine(portfolio?.id)
-        case .sellAsset(let asset, let portfolio):
+        case .sellAsset(let asset, let portfolio, let holding):
             hasher.combine("sellAsset")
             hasher.combine(asset.id)
             hasher.combine(portfolio?.id)
+            hasher.combine(holding.id)
         case .editTransaction(let transaction, let transactionMode, let asset, let portfolio):
             hasher.combine("editTransaction")
             hasher.combine(transaction.id)
@@ -137,10 +138,11 @@ extension NavigationRoute {
                 asset: asset,
                 currentPortfolioAt: portfolio
             )
-        case .sellAsset(let asset, let portfolio):
+        case .sellAsset(let asset, let portfolio, let holding):
             TradeTransactionView(
                 di: di,
                 transactionMode: .liquidate,
+                holding: holding,
                 asset: asset,
                 currentPortfolioAt: portfolio
             )

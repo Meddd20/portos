@@ -47,7 +47,7 @@ struct HoldingSummaryCard: View {
                         .fontWeight(.light)
                     Text(cashAmount(currentPrice))
                         .font(.subheadline)
-                        .fontWeight(.regular)
+                        .fontWeight(.medium)
                 }
                 
                 Spacer()
@@ -58,7 +58,7 @@ struct HoldingSummaryCard: View {
                         .fontWeight(.light)
                     Text(cashAmount(averagePrice))
                         .font(.subheadline)
-                        .fontWeight(.regular)
+                        .fontWeight(.medium)
                 }
             }
         }
@@ -75,7 +75,7 @@ struct HoldingSummaryCard: View {
     }
 }
 
-#Preview {
+//#Preview {
 //    HoldingSummaryCard(
 //        platform: "Bibit",
 //        totalValue: 8_000_000.0,
@@ -85,4 +85,4 @@ struct HoldingSummaryCard: View {
 //        unit:
 //        showAmounts: .constant(true)
 //    )
-}
+//}
