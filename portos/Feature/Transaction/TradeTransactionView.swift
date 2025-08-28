@@ -112,6 +112,7 @@ struct TradeTransactionView: View {
                     HStack {
                         Text("Rp")
                         .foregroundStyle(.secondary)
+                        
                         TextField(viewModel.pricePlaceholder ?? "0", text: $viewModel.priceText)
                             .keyboardType(.decimalPad)
                     }
@@ -124,7 +125,7 @@ struct TradeTransactionView: View {
                                 
                 FormRow(label: "Platform") {
                     Menu {
-                        ForEach(viewModel.platforms, id: \.persistentModelID) { platform in
+                        ForEach(viewModel.platforms, id: \.id) { platform in
                             Button(platform.name) {
                                 viewModel.platform = platform
                             }
@@ -221,8 +222,10 @@ struct TradeTransactionView: View {
                         
             if (viewModel.transactionMode == .buy || viewModel.transactionMode == .liquidate) || ( [.editBuy, .editLiquidate].contains(viewModel.transactionMode) && viewModel.isDataFilled ) {
                 Button(action: {
-                    viewModel.proceedTransaction()
-                    navigationManager.back()
+                    Task {
+                        await viewModel.proceedTransaction()
+                        navigationManager.back()
+                    }
                 }, label: {
                     Text("Confirm")
                         .buttonStyle(.borderedProminent)
@@ -258,7 +261,15 @@ struct TradeTransactionView: View {
                         .foregroundColor(.black)
                 }
             }
+            
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    hideKeyboard()
+                }
+            }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 

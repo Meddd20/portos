@@ -180,7 +180,15 @@ struct TransferTransactionView: View {
                         .foregroundColor(.black)
                 }
             }
+            
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    hideKeyboard()
+                }
+            }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .background(
             LinearGradient(
             stops: [
