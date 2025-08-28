@@ -27,7 +27,7 @@ struct PickerSegmented: View {
                             VStack {
                                 Text(titles[idx])
                                     .font(.system(size: 15, weight: selectedIndex == idx ? .semibold : .regular))
-                                    .foregroundColor(selectedIndex == idx ? Color.primaryApp : Color.primaryApp.opacity(0.5))
+                                    .foregroundColor(selectedIndex == idx ? Color.primaryApp : Color.textSecondary)
                                     .lineLimit(1)
                                     .truncationMode(.tail)
 
@@ -42,7 +42,7 @@ struct PickerSegmented: View {
             Button(action: onAdd) {
                 Image(systemName: "plus")
                     .font(.system(size: 16))
-                    .foregroundStyle(Color(red: 0.26, green: 0.26, blue: 0.26))
+                    .foregroundStyle(Color.textSecondary)
             }
         }
         .frame(height: 34)

@@ -63,6 +63,7 @@ struct TransactionHistoryView: View {
                         .fontWeight(.regular)
                         .opacity(0.75)
                         .frame(width: 60, height: 60)
+                        .foregroundStyle(Color.textSecondary)
                     
                     Spacer()
                         .frame(height: 15)
@@ -71,6 +72,7 @@ struct TransactionHistoryView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .font(.system(size: 20))
                         .fontWeight(.semibold)
+                        .foregroundStyle(Color.textPrimary)
                     
                     Spacer()
                         .frame(height: 15)
@@ -81,6 +83,7 @@ struct TransactionHistoryView: View {
                         .fontWeight(.regular)
                         .multilineTextAlignment(.center)
                         .lineSpacing(3)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
         }
@@ -91,7 +94,7 @@ struct TransactionHistoryView: View {
                     dismiss()
                 }) {
                     Image(systemName: "arrow.left")
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.textPrimary)
                 }
             }
         }
@@ -100,6 +103,8 @@ struct TransactionHistoryView: View {
         }
         .navigationBarTitle("\(viewModel.historyOf) History")
         .navigationBarBackButtonHidden()
+        .toolbarBackground(Color.backgroundApp, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .onChange(of: selectedTransferForEdit) { newValue in
             guard let tx = newValue else { return }
             
@@ -134,7 +139,7 @@ struct TransactionHistoryView: View {
             Text(sectionTitle)
                 .font(.system(size: 16))
                 .fontWeight(.semibold)
-                .foregroundStyle(.black)
+                .foregroundStyle(Color.textPrimary)
             
             Spacer()
         }

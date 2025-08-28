@@ -22,14 +22,15 @@ struct CircleButton: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 24)
                             .inset(by: 0.1)
-                            .stroke(.black.opacity(0.2), lineWidth: 0.2)
+                            .stroke(Color.borderColor.opacity(0.2), lineWidth: 0.2)
                         )
                     Image(systemName: systemName)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(Color.textPrimary)
                 }
                 Text(title)
                     .font(.system(size: 15, weight: .regular))
                     .multilineTextAlignment(.center)
+                    .foregroundStyle(Color.textPrimary)
             }
         }
         .buttonStyle(.plain)

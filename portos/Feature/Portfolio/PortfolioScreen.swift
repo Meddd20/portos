@@ -86,7 +86,7 @@ struct PortfolioScreen: View {
                             .font(.system(size: 28, weight: .bold))
                             .kerning(0.38)
                             .multilineTextAlignment(.center)
-                            .foregroundColor(.black)
+                            .foregroundColor(Color.textPrimary)
                             .transition(.opacity.combined(with: .scale))
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
                             
@@ -178,7 +178,7 @@ struct PortfolioScreen: View {
                         }
                     } label: {
                         CircleButton(systemName: "ellipsis", title: "More") { }
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.textPrimary)
                     }
                 }
                 .padding(.top, 32)
@@ -187,7 +187,7 @@ struct PortfolioScreen: View {
                     Image(systemName: "plus.circle.dashed")
                         .font(.system(size: 58))
                         .padding(.top, 98)
-                        .foregroundColor(Color.primaryApp.opacity(0.75))
+                        .foregroundColor(Color.textSecondary)
                     
                     Text(selectedIndex == 0 ? "No Portfolio" : "No Asset")
                         .font(.system(size: 20, weight: .semibold))
@@ -211,7 +211,7 @@ struct PortfolioScreen: View {
         .background(
             LinearGradient(
             stops: [
-                Gradient.Stop(color: .white, location: 0.31),
+                Gradient.Stop(color: Color.backgroundPrimary, location: 0.31),
                 Gradient.Stop(color: Color.backgroundApp, location: 0.49),
                 ],
             startPoint: UnitPoint(x: 0.5, y: 0),
@@ -290,7 +290,7 @@ struct PortfolioScreen: View {
                 }
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundColor(.black)
+                                        .foregroundColor(Color.textPrimary)
                 .padding(.top, 4)
             }
         }

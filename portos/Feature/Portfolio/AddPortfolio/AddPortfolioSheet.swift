@@ -60,7 +60,7 @@ struct AddPortfolio: View {
                     row("Title") {
                         TextField("", text: $viewModel.name, prompt: Text("Title").foregroundStyle(Color.textPlaceholderApp))
                             .font(.system(size: 15))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.textPrimary)
                     }
                     
                     row("Target Amount") {
@@ -68,7 +68,7 @@ struct AddPortfolio: View {
                             if viewModel.targetAmountText != "" {
                                 Text("Rp")
                                     .font(.system(size: 15))
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(Color.textPrimary)
                             }
                             TextField(
                                 "",
@@ -77,7 +77,7 @@ struct AddPortfolio: View {
                                     .foregroundStyle(Color.textPlaceholderApp)
                             )
                             .font(.system(size: 15))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.textPrimary)
                             .keyboardType(.numberPad)
                         }
                     }
@@ -114,26 +114,33 @@ struct AddPortfolio: View {
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
-                .foregroundColor(.white)
-                .background(viewModel.name.isEmpty || viewModel.targetAmountText.isEmpty ? Color.secondaryApp : Color.primaryApp)
+                .foregroundColor(Color.ctaEnabledText)
+                .background(
+                    (viewModel.name.isEmpty || viewModel.targetAmountText.isEmpty)
+                    ? Color.ctaDisabledBackground
+                    : Color.ctaEnabledBackground
+                )
                 .clipShape(Capsule())
                 .padding(.horizontal, 40)
+                .opacity((viewModel.name.isEmpty || viewModel.targetAmountText.isEmpty) ? 0.9 : 1.0)
             }
             .background(
                 LinearGradient(
                 stops: [
-                    Gradient.Stop(color: .white, location: 0.13),
+                    Gradient.Stop(color: Color.backgroundPrimary, location: 0.13),
                     Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
                 startPoint: UnitPoint(x: 0.5, y: 0),
                 endPoint: UnitPoint(x: 0.5, y: 1) ))
             .navigationBarBackButtonHidden()
             .navigationTitle(screenMode.navTitle ?? "default")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.backgroundApp, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: {dismiss()}) {
                         Image(systemName: "arrow.backward")
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.textPrimary)
                             .fontWeight(.semibold)
                     }
                 }

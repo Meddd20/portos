@@ -30,14 +30,14 @@ struct TransactionTile: View {
             Image(systemName: transactionIcon)
                 .font(.system(size: 20))
                 .fontWeight(.thin)
-                .foregroundStyle(.black)
+                .foregroundStyle(Color.textPrimary)
                 .clipShape(Circle())
                 .frame(width: 40, height: 40, alignment: .center)
                 .background(
-                    Circle().foregroundStyle(Color.gray.opacity(0.1))
+                    Circle().foregroundStyle(Color.greyApp.opacity(0.1))
                 )
                 .overlay(
-                    Circle().stroke(.black.opacity(0.2), lineWidth: 0.2)
+                    Circle().stroke(Color.borderColor.opacity(0.2), lineWidth: 0.2)
                 )
             
             Spacer()
@@ -50,10 +50,11 @@ struct TransactionTile: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: 140, alignment: .leading)
+                    .foregroundStyle(Color.textPrimary)
                 
                 Text("\(transaction.app.name) • Rp \(transaction.price)")
                     .font(.system(size: 13))
-                    .foregroundStyle(.black.opacity(0.5))
+                    .foregroundStyle(Color.textSecondary)
             }
             
             Spacer()

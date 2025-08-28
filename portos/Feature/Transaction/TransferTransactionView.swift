@@ -41,12 +41,14 @@ struct TransferTransactionView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .font(.title)
                 .fontWeight(.bold)
+                .foregroundStyle(Color.textPrimary)
             
             Spacer()
                 .frame(height: 9)
             
             Text(asset.name)
                 .frame(maxWidth: .infinity, alignment: .center)
+                .foregroundStyle(Color.textSecondary)
             
             Spacer()
                 .frame(height: 44)
@@ -54,6 +56,7 @@ struct TransferTransactionView: View {
             FormRow(label: "Amount") {
                 TextField("0 \(viewModel.asset.assetType.unit)", text: $viewModel.amountText)
                     .keyboardType(.decimalPad)
+                    .foregroundStyle(Color.textPrimary)
             }
             
             Divider()
@@ -67,7 +70,7 @@ struct TransferTransactionView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .tint(.black)
+                    .foregroundStyle(Color.textPrimary)
             }
             
             Divider()
@@ -88,7 +91,7 @@ struct TransferTransactionView: View {
                             Text("Select Portfolio")
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .tint(.black)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     } else {
                         Text(viewModel.portfolioTransferTo?.name ?? "")
@@ -96,7 +99,7 @@ struct TransferTransactionView: View {
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .tint(.black)
+                            .foregroundStyle(Color.textPrimary)
                     }
                     Spacer()
                     Image(systemName: "chevron.down")
@@ -104,8 +107,9 @@ struct TransferTransactionView: View {
                         .scaledToFit()
                         .frame(width: 12, height: 12)
                         .font(.system(size: 12))
-                        .tint(.black)
+                        .foregroundStyle(Color.textSecondary)
                 }
+                .tint(Color.textPrimary)
             }
             
             Divider()
@@ -126,12 +130,12 @@ struct TransferTransactionView: View {
                             Text("Select Platform")
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .tint(.black)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     } else {
                         Text(viewModel.platform?.name ?? "")
                             .font(.system(size: 16))
-                            .tint(.black)
+                            .foregroundStyle(Color.textPrimary)
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -143,8 +147,9 @@ struct TransferTransactionView: View {
                         .scaledToFit()
                         .frame(width: 12, height: 12)
                         .font(.system(size: 12))
-                        .tint(.black)
+                        .foregroundStyle(Color.textSecondary)
                 }
+                .tint(Color.textPrimary)
             }
             
             Spacer()
@@ -155,10 +160,9 @@ struct TransferTransactionView: View {
                     navigationManager.back()
                 }, label: {
                     Text("Confirm")
-                        .buttonStyle(.borderedProminent)
                         .frame(width: 306, height: 53)
-                        .background(viewModel.isDataFilled ? Color.primaryApp : Color.secondaryApp)
-                        .tint(.white)
+                        .background(viewModel.isDataFilled ? Color.ctaEnabledBackground : Color.ctaDisabledBackground)
+                        .foregroundStyle(Color.ctaEnabledText)
                         .cornerRadius(24)
                 })
                 .disabled(viewModel.isDataFilled ? false : true)
@@ -177,7 +181,7 @@ struct TransferTransactionView: View {
                     dismiss()
                 }) {
                     Image(systemName: "arrow.left")
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.textPrimary)
                 }
             }
             
@@ -188,11 +192,13 @@ struct TransferTransactionView: View {
                 }
             }
         }
+        .toolbarBackground(Color.backgroundApp, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .background(
             LinearGradient(
             stops: [
-                Gradient.Stop(color: .white, location: 0.13),
+                Gradient.Stop(color: Color.backgroundPrimary, location: 0.13),
                 Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))

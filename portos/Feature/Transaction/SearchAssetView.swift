@@ -29,12 +29,13 @@ struct SearchAssetView: View {
                 if viewModel.searchTerms.isEmpty {
                     Spacer()
                         .frame(height: 30)
-                    
+                
                     ForEach (Array(viewModel.assetPosition.enumerated()), id: \.element.id) { index, assetPosition in
                         Text("\(assetPosition.group)")
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.top, index == 0 ? 5 : 22)
                             .fontWeight(.semibold)
+                            .foregroundStyle(Color.textPrimary)
                         
                         Divider()
                             .padding(.vertical, 10)
@@ -42,14 +43,6 @@ struct SearchAssetView: View {
                             .frame(maxWidth: .infinity)
                         
                         ForEach (assetPosition.holdings, id: \.persistentModelID) { holding in
-//                            NavigationLink{
-//                                TradeTransactionView(
-//                                    di: di,
-//                                    transactionMode: .buy,
-//                                    asset: holding.asset,
-//                                    currentPortfolioAt: portfolio ?? nil,
-//                                    fromSearch: true
-//                                )}
                             Button {
                                 navigationManager.push(.buyAsset(asset: holding.asset, portfolio: portfolio, fromSearch: true), back: .popToRoot)
                             } label: {
@@ -57,6 +50,7 @@ struct SearchAssetView: View {
                                     Text("\(holding.asset.symbol)")
                                         .font(.system(size: 16))
                                         .frame(width: 106, alignment: .leading)
+                                        .foregroundStyle(Color.textPrimary)
                                     
                                     Spacer()
                                     
@@ -65,12 +59,10 @@ struct SearchAssetView: View {
                                         .lineLimit(1)
                                         .truncationMode(.tail)
                                         .frame(width: 165, alignment: .trailing)
-                                    
-                                    
+                                        .foregroundStyle(Color.textSecondary)
                                 }
                             }
                             .buttonStyle(.plain)
-                            .foregroundColor(.primary)
                             
                             Divider()
                                 .padding(.vertical, 10)
@@ -87,6 +79,7 @@ struct SearchAssetView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.top, 22)
                             .fontWeight(.semibold)
+                            .foregroundStyle(Color.textPrimary)
                         
                         Divider()
                             .padding(.vertical, 10)
@@ -101,6 +94,7 @@ struct SearchAssetView: View {
                                     Text(asset.symbol)
                                         .font(.system(size: 16))
                                         .frame(width: 106, alignment: .leading)
+                                        .foregroundStyle(Color.textPrimary)
                                     
                                     Spacer()
                                                                         
@@ -109,10 +103,10 @@ struct SearchAssetView: View {
                                         .lineLimit(1)
                                         .truncationMode(.tail)
                                         .frame(width: 165, alignment: .trailing)
+                                        .foregroundStyle(Color.textSecondary)
                                 }
                             }
                             .buttonStyle(.plain)
-                            .foregroundColor(.primary)
                             
                             Divider()
                                 .padding(.vertical, 10)
@@ -126,29 +120,39 @@ struct SearchAssetView: View {
             .frame(maxWidth: .infinity)
             .padding(.leading, 20)
             .padding(.trailing, 26)
-            .navigationTitle("Choose asset to add")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                viewModel.getAllHoldings()
-                viewModel.loadAssets()
-            }
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem (placement: .topBarLeading) {
-                    Button (action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .foregroundColor(.black)
-                    }
-                }
-            }
+            .padding(.bottom, 100) // Add bottom padding for search bar
         }
+        .background(
+            LinearGradient(
+            stops: [
+                Gradient.Stop(color: Color.backgroundPrimary, location: 0.13),
+                Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
+            startPoint: UnitPoint(x: 0.5, y: 0),
+            endPoint: UnitPoint(x: 0.5, y: 1) ))
         .searchable(
             text: $viewModel.searchTerms,
             placement: .navigationBarDrawer(displayMode: .always),
             prompt: "Search"
         )
+        .navigationTitle("Choose asset to add")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .onAppear {
+            viewModel.getAllHoldings()
+            viewModel.loadAssets()
+        }
+        .toolbar {
+            ToolbarItem (placement: .topBarLeading) {
+                Button (action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(Color.textPrimary)
+                }
+            }
+        }
+        .toolbarBackground(Color.backgroundApp, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
     }
     @ViewBuilder
     private var holdingsContent: some View {
