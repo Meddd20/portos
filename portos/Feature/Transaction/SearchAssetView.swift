@@ -42,8 +42,16 @@ struct SearchAssetView: View {
                             .frame(maxWidth: .infinity)
                         
                         ForEach (assetPosition.holdings, id: \.persistentModelID) { holding in
-                            NavigationLink{
-                                TradeTransactionView(di: di, transactionMode: .buy, asset: holding.asset, currentPortfolioAt: portfolio ?? nil)
+//                            NavigationLink{
+//                                TradeTransactionView(
+//                                    di: di,
+//                                    transactionMode: .buy,
+//                                    asset: holding.asset,
+//                                    currentPortfolioAt: portfolio ?? nil,
+//                                    fromSearch: true
+//                                )}
+                            Button {
+                                navigationManager.push(.buyAsset(asset: holding.asset, portfolio: portfolio, fromSearch: true), back: .popToRoot)
                             } label: {
                                 HStack {
                                     Text("\(holding.asset.symbol)")
@@ -87,7 +95,7 @@ struct SearchAssetView: View {
                         
                         ForEach(section.assets, id: \.id) { asset in
                             Button {
-                                navigationManager.push(.buyAsset(asset: asset, portfolio: portfolio), back: .popToRoot)
+                                navigationManager.push(.buyAsset(asset: asset, portfolio: portfolio, fromSearch: true), back: .popToRoot)
                             } label: {
                                 HStack {
                                     Text(asset.symbol)
