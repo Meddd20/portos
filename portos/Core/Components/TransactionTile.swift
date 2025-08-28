@@ -72,7 +72,7 @@ struct TransactionTile: View {
                 
                 Text("Rp \(transactionAmount)")
                     .font(.system(size: 13))
-                    .foregroundStyle(.black.opacity(0.5))
+                    .foregroundStyle(Color.textSecondary)
                 
             }
             .padding(.trailing, 3)

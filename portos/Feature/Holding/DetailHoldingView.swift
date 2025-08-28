@@ -152,12 +152,16 @@ struct DetailHoldingView: View {
                                     )
                                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 20, trailing: 16))
                                     .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
                                 }
                             }
+                            .listSectionSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                         }
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
+                    .background(Color.clear)
                     .scrollDisabled(true)
                     .frame(height: calculateListHeight())
                 }
@@ -170,7 +174,6 @@ struct DetailHoldingView: View {
                 Gradient.Stop(color: Color.backgroundApp, location: 0.26), ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
-        // .ignoresSafeArea(.container, edges: .top)
         .navigationTitle(viewModel.holding.asset.symbol)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()

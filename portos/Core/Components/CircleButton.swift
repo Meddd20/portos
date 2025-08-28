@@ -17,13 +17,23 @@ struct CircleButton: View {
             VStack(spacing: 6) {
                 ZStack {
                     Circle()
-                        .fill(Color.greyApp.opacity(0.35))
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.primaryApp.opacity(0.22),
+                                    Color.primaryApp.opacity(0.12)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                         .frame(width: 48, height: 48)
                         .overlay(
                             RoundedRectangle(cornerRadius: 24)
                             .inset(by: 0.1)
-                            .stroke(Color.borderColor.opacity(0.2), lineWidth: 0.2)
+                            .stroke(Color.primaryApp.opacity(0.35), lineWidth: 0.6)
                         )
+                        .shadow(color: Color.shadowColor, radius: 4, y: 2)
                     Image(systemName: systemName)
                         .foregroundStyle(Color.textPrimary)
                 }
