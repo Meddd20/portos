@@ -55,7 +55,7 @@ struct DetailHoldingView: View {
                         .padding(.vertical, 1)
                         .foregroundStyle(Color.textPrimary)
                     
-                    Text((viewModel.holdingAssetDetail?.unrealizedPnLValue.formattedCash()) ?? "-")
+                    Text((viewModel.holdingAssetDetail?.portfolioMarketValue.formattedCash()) ?? "-")
                         .font(.title3)
                         .fontWeight(.bold)
                         .padding(.vertical, 1)
@@ -77,7 +77,7 @@ struct DetailHoldingView: View {
                             platform: account.appSource.name,
                             totalValue: account.unrealizedPnL,
                             quantityLabel: account.qty.description,
-                            currentPrice: account.avgCost,
+                            currentPrice: account.lastPrice,
                             averagePrice: account.avgCost,
                             unit: viewModel.holding.asset.assetType.unit,
                             showAmounts: .constant(true)
@@ -243,29 +243,5 @@ struct DetailHoldingView: View {
         return CGFloat(sectionsCount) * headerHeight +
                CGFloat(totalTransactions) * rowHeight +
                CGFloat(sectionsCount) * sectionSpacing
-    }
-}
-
-struct SimpleTransactionRow: View {
-    let transaction: Transaction
-    let section: TransactionSection
-    let allTransactions: [Transaction]
-    let isAllOrHolding: Bool
-    let portfolio: Portfolio?
-    let onDelete: () -> Void
-    let onEdit: () -> Void
-    let onTransfer: () -> Void
-    
-    var body: some View {
-        TransactionRowView(
-            transaction: transaction,
-            portfolio: portfolio,
-            section: section,
-            allTransactions: allTransactions,
-            isAllOrHolding: true,
-            onDeleteTransaction: onDelete,
-            onEditTransaction: onEdit,
-            onEditTransfer: onEdit
-        )
     }
 }

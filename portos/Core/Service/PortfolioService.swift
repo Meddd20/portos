@@ -71,8 +71,8 @@ class PortfolioService {
         holdings = try holdingRepository.getAllHoldings()
         
         for holding in holdings {
-            portValue += holding.quantity * holding.asset.lastPrice
-            initialCapital += (holding.averagePricePerUnit * holding.quantity)
+            portValue += holding.quantity * holding.asset.lastPrice * Decimal(holding.asset.assetType.multiplier)
+            initialCapital += (holding.averagePricePerUnit * holding.quantity * Decimal(holding.asset.assetType.multiplier))
         }
         portProfit = portValue - initialCapital
         portGrowthRate = portProfit / initialCapital
@@ -94,7 +94,7 @@ class PortfolioService {
             ]
             
             for holding in holdingsForPortfolio {
-                portfolioValue += holding.quantity * holding.asset.lastPrice
+                portfolioValue += holding.quantity * holding.asset.lastPrice * Decimal(holding.asset.assetType.multiplier)
                 
                 switch holding.asset.assetType {
                 case .Bonds:
@@ -123,22 +123,23 @@ class PortfolioService {
             
             for (name, holdings) in holdingsByType {
                 if !holdings.isEmpty {
+                    let multiplier = Decimal(holdings.first!.asset.assetType.multiplier)
                     let profitAmount: Decimal = holdings.reduce(0) { acc, h in
-                        acc + (h.quantity * h.averagePricePerUnit)
-                    }
+                        acc + (h.quantity * h.averagePricePerUnit * multiplier)
+                    }.roundedWithoutFraction()
                     
                     let totalValue: Decimal = holdings.reduce(0) { acc, h in
-                        acc + (h.quantity * h.asset.lastPrice)
-                    }
+                        acc + (h.quantity * h.asset.lastPrice * multiplier)
+                    }.roundedWithoutFraction()
                     
-                    let growthRate: Decimal = (totalValue - profitAmount) / profitAmount
+                    let growthRate: Decimal = (totalValue - profitAmount) / profitAmount * 100
                     
                     let assetAllocation: AssetItem = AssetItem(
                         holding: nil,
                         name: name,
                         value: formatDecimal(totalValue),
                         growthRate: growthRate.rounded(scale: 2),
-                        profitAmount: formatDecimal(profitAmount),
+                        profitAmount: profitAmount.formattedCash(),
                         quantity: "")
                     
                     portfolioItem.assets.append(assetAllocation)
@@ -163,23 +164,23 @@ class PortfolioService {
     func getPortfolioOverviewByGoal(_ portfolio: String) throws -> PortfolioOverview {
         let holdings = try holdingRepository.getHoldings(byPortfolioName: portfolio)
         
-        let portValue: Decimal = holdings.reduce(0) { $0 + $1.quantity * $1.asset.lastPrice }
-        let initialCapital: Decimal = holdings.reduce(0) { $0 + $1.quantity * $1.averagePricePerUnit }
+        let portValue: Decimal = holdings.reduce(0) { $0 + $1.quantity * $1.asset.lastPrice * Decimal($1.asset.assetType.multiplier)}
+        let initialCapital: Decimal = holdings.reduce(0) { $0 + $1.quantity * $1.averagePricePerUnit * Decimal($1.asset.assetType.multiplier) }
         let portProfit: Decimal = portValue - initialCapital
-        let portGrowthRate: Decimal = initialCapital == 0 ? 0 : (portProfit / initialCapital)
+        let portGrowthRate: Decimal = initialCapital == 0 ? 0 : (portProfit / initialCapital) * 100
         
         let grouped = Dictionary(grouping: holdings, by: { $0.asset.assetType })
         
         let groups: [AssetGroup] = grouped.map { (assetType, hs) in
         let groupTotal: Decimal = hs.reduce(0) { acc, h in
-            acc + (h.quantity * h.asset.lastPrice)
+            acc + (h.quantity * h.asset.lastPrice * Decimal(h.asset.assetType.multiplier))
         }
 
         let items: [AssetItem] = hs.map { h in
-            let currentValue = h.quantity * h.asset.lastPrice
-            let cost         = h.quantity * h.averagePricePerUnit
+            let currentValue = h.quantity * h.asset.lastPrice * Decimal(h.asset.assetType.multiplier)
+            let cost         = h.quantity * h.averagePricePerUnit * Decimal(h.asset.assetType.multiplier)
             let profit       = currentValue - cost
-            let growth       = cost == 0 ? 0 : (profit / cost)
+            let growth       = cost == 0 ? 0 : (profit / cost) * 100
 
             let qtyStr: String = {
                 switch assetType {

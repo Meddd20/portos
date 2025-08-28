@@ -20,7 +20,7 @@ final class Asset {
     var asOf: Date
     var assetId: String // id for the api call
     var yTicker: String? // id to call chart api -- yahooticker
-    var ticker: String // the real ticker
+    var ticker: String = "" // the real ticker
     
     @Relationship(deleteRule: .cascade, inverse: \Holding.asset)
     var holdings: [Holding] = []

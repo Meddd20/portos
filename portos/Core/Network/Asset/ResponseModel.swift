@@ -60,10 +60,16 @@ extension APITimestamp {
 
 // MARK: - Enum parsing (contoh)
 extension AssetType {
-    init?(apiString: String) {
-        switch apiString.uppercased() {
+    init?(apiString rawType: String?, currency rawCurrency: String?) {
+        guard let t = rawType?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        else { return nil }
+
+        let c = rawCurrency?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+
+        switch t {
         case "CRYPTO": self = .Crypto
-        case "STOCK", "EQUITY": self = .Stocks
+        case "STOCK", "EQUITY":
+            self = (c == "IDR") ? .StocksId : .Stocks
         case "ETF": self = .ETF
         case "BOND": self = .Bonds
         case "MUTUALFUND", "MUTUAL_FUND", "MF": self = .MutualFunds
@@ -102,13 +108,13 @@ struct AssetMapper {
         guard let name = api.name, !name.isEmpty else {
             throw MappingError.missingRequiredField("name")
         }
-        guard let typeStr = api.type, let assetType = AssetType(apiString: typeStr) else {
-            throw MappingError.invalidEnum(api.type ?? "nil", field: "type")
-        }
         guard let currencyStr = api.currency, let currency = Currency(apiString: currencyStr) else {
             throw MappingError.invalidEnum(api.currency ?? "nil", field: "currency")
         }
-
+        guard let typeStr = api.type, let assetType = AssetType(apiString: typeStr, currency: currencyStr) else {
+            throw MappingError.invalidEnum(api.type ?? "nil", field: "type")
+        }
+        
         let country = api.country ?? ""
         let lastPrice = Decimal(api.price ?? 0)
         let asOf = api.updatedAt.date
