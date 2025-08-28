@@ -12,6 +12,7 @@ struct PortfolioScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.di) var di
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var localizationManager = LocalizationManager.shared
     
     enum Route: Hashable {
         case settings
@@ -39,12 +40,11 @@ struct PortfolioScreen: View {
     @State private var isExpanded = false
     @State private var expandedGroupID: UUID? = nil
     private let collapsedCount = 3
+    private let coveredAmount = "••••••••"
     
     @State private var showMore: Bool = false
     
     @Query(sort: \Portfolio.createdAt) var portfolios: [Portfolio]
-    
-    let sampleData = createSampleData()
     
     var body: some View {
         @State var expandedGroups: Set<UUID> = []
@@ -57,41 +57,80 @@ struct PortfolioScreen: View {
                 onAdd: { showingAdd = true }
             )
             
+            // for debug
+//            Button("print ACTUAL Series for chart", action: {print("fnkcdsjfn cjdn fkjndjknfck \n \(viewModel.actualSeries)")})
+//            Button("print PROJECTION Series for chart", action: {print("PROJECTION: \(viewModel.projectionSeries)")})
+//            Button("???", action: {print(viewModel.actualSeries == viewModel.projectionSeries)})
+//            Button("refresh api", action: {viewModel.refreshMarketValues()})
+//            Button("generate projection", action: {viewModel.calculateProjection()})
+            
             ScrollView {
-                if selectedIndex == 0 {
-                    AssetAllocationAllChart(overview: viewModel.portfolioOverview)
-                        .padding(.top, 39)
-                } else {
-                    VStack(alignment: .center) {
-                        Text("Rp \(viewModel.portfolioOverview.portfolioValue!)")
+                VStack(alignment: .center) {
+                    HStack(alignment: .center, spacing: 12) {
+                        Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioValue!)" : coveredAmount)
                             .font(.system(size: 28, weight: .bold))
                             .kerning(0.38)
                             .multilineTextAlignment(.center)
                             .foregroundColor(.black)
-                            .padding(.top, 32)
-                        HStack(alignment: .center) {
-                            Image(systemName: "triangle.fill")
-                                .font(.system(size: 15))
+                            .transition(.opacity.combined(with: .scale))
+                            .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
                             
-                            Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
-                                .font(.system(size: 15, weight: .bold))
-                                .padding(.trailing, 14)
-                            
-                            Text("Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)")
-                                .font(.system(size: 15, weight: .bold))
+                        
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                localizationManager.setShowCash(!localizationManager.showCash)
+                            }
+                        }) {
+                            Image(systemName: localizationManager.showCash ? "eye" : "eye.slash")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(Color.secondary)
+                                .frame(width: 32, height: 32)
+                                .background(
+                                    Circle()
+                                        .fill(Color.secondary.opacity(0.1))
+                                )
+                                .rotation3DEffect(
+                                    .degrees(localizationManager.showCash ? 0 : 180),
+                                    axis: (x: 0, y: 1, z: 0)
+                                )
+                                .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
                         }
-                        .foregroundStyle(Color.greenApp)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 8)
-                        .background(Color.greenAppLight)
-                        .cornerRadius(14)
-                        .padding(.bottom, 32)
+                        .buttonStyle(.plain)
                     }
-                    
+                    HStack(alignment: .center) {
+                        Image(systemName: "triangle.fill")
+                            .font(.system(size: 15))
+                            .rotationEffect(.degrees(isGrowthPositive ? 0 : 180))
+                            .foregroundStyle(isGrowthPositive ? Color.greenApp : Color.redApp)
+                        
+                        Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
+                            .font(.system(size: 15, weight: .bold))
+                            .padding(.trailing, 14)
+                            .foregroundStyle(isGrowthPositive ? Color.greenApp : Color.redApp)
+                        
+                        Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
+                            .font(.system(size: 15, weight: .bold))
+                            .transition(.opacity.combined(with: .scale))
+                            .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
+                            .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
+                    }
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(isGrowthPositive ? Color.greenAppLight : Color.redAppLight)
+                    )
+                    .padding(.bottom, 32)
+                }
+                
+                if selectedIndex == 0 {
+                    AssetAllocationAllChart(overview: viewModel.portfolioOverview)
+                        .padding(.top, 39)
+                } else {
                     InvestmentChartWithRange(projection: sampleData.projection, actual: sampleData.actual)
                 }
                 
-                HStack {
+                HStack (spacing: 42) {
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
                         let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
                         navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )
@@ -136,6 +175,7 @@ struct PortfolioScreen: View {
             }.scrollIndicators(.hidden)
                 .padding()
         }
+        .task { await viewModel.loadChartData() }
         .navigationBarBackButtonHidden()
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
@@ -147,9 +187,9 @@ struct PortfolioScreen: View {
                 ],
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
-        .navigationDestination(isPresented: $showingAdd) {
-            AddPortfolio(di: di, screenMode: .add)
-        }
+        // .navigationDestination(isPresented: $showingAdd) {
+        //     AddPortfolio(di: di, screenMode: .add)
+        // }
         .navigationDestination(isPresented: $showingEdit) {
             if selectedIndex != 0 {
                 AddPortfolio(
@@ -164,6 +204,7 @@ struct PortfolioScreen: View {
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
             viewModel.getPortfolioOverview(portfolioName: name)
+            viewModel.refreshMarketValues()
         }
         .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
             Button("Delete", role: .destructive) {
@@ -191,8 +232,10 @@ struct PortfolioScreen: View {
             Text(group.name!)
                 .font(.system(size: 20, weight: .semibold))
             Spacer()
-            Text("Rp \(group.value!)")
+            Text(localizationManager.showCash ? "Rp \(group.value!)" : coveredAmount)
                 .font(.system(size: 20, weight: .semibold))
+                .transition(.opacity.combined(with: .scale))
+                .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
         }
         .padding(.top, 32)
         
@@ -249,8 +292,10 @@ struct PortfolioScreen: View {
                 
                 Spacer()
                 
-                Text("Rp \(asset.value!)")
+                Text(localizationManager.showCash ? "Rp \(asset.value!)" : coveredAmount)
                     .font(.body)
+                    .transition(.opacity.combined(with: .scale))
+                    .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
             }
             .padding(.top, 10)
             
@@ -316,4 +361,10 @@ struct PortfolioScreen: View {
             return DataPoint(date: p.date, value: max(1, p.value + noise))
         }
     }
+}
+
+#Preview {
+    @Previewable @Environment(\.modelContext) var modelContext
+    
+    PortfolioScreen(di: AppDI.live(modelContext: modelContext))
 }

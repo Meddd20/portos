@@ -19,4 +19,6 @@ extension Color {
     static let greenApp = Color(red: 0.05, green: 0.6, blue: 0.11)
     static let greenAppLight = Color(red: 0.86, green: 0.92, blue: 0.86)
     
+    static let redApp = Color(red: 0.8, green: 0.14, blue: 0.15)
+    static let redAppLight = Color(red: 0.95, green: 0.9, blue: 0.9)
 }

@@ -15,9 +15,17 @@ struct APIResponse: Codable {
     let status: Int
 }
 
+// MARK: - API Response Get By ID
+struct APIResponseGetByID: Codable {
+    let success: Bool
+    let message: String
+    let data: APIAsset
+    let status: Int
+}
+
 // MARK: - Asset
 struct APIAsset: Codable, Identifiable {
-    let id: String?
+    let id: String
     let symbol: String?
     let yTicker: String?
     let name: String?
@@ -68,7 +76,6 @@ extension Currency {
         switch apiString.uppercased() {
         case "USD": self = .usd
         case "IDR": self = .idr
-        case "EUR": self = .eur
         default: return nil
         }
     }
@@ -88,7 +95,7 @@ enum MappingError: Error, LocalizedError {
 
 struct AssetMapper {
     static func map(_ api: APIAsset) throws -> Asset {
-        guard let symbol = api.symbol, !symbol.isEmpty else {
+        guard let symbol = api.yTicker, !symbol.isEmpty else {
             throw MappingError.missingRequiredField("symbol")
         }
         guard let name = api.name, !name.isEmpty else {
@@ -104,6 +111,8 @@ struct AssetMapper {
         let country = api.country ?? ""
         let lastPrice = Decimal(api.price ?? 0)
         let asOf = api.updatedAt.date
+        let assetId = api.id
+        let yTicker = api.yTicker
 
         return Asset(
             assetType: assetType,
@@ -112,7 +121,9 @@ struct AssetMapper {
             currency: currency,
             country: country,
             lastPrice: lastPrice,
-            asOf: asOf
+            asOf: asOf,
+            assetId: assetId,
+            yTicker: yTicker
         )
     }
 }
