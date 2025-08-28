@@ -129,8 +129,8 @@ struct SearchAssetView: View {
             .navigationTitle("Choose asset to add")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                viewModel.getAllHoldings()
                 viewModel.loadAssets()
+                viewModel.getAllHoldings()
             }
             .navigationBarBackButtonHidden(true)
             .toolbar {
@@ -207,30 +207,25 @@ struct SearchAssetView: View {
     @ViewBuilder
     private func assetRow(symbol: String, name: String, asset: Asset) -> some View {
         VStack(spacing: 10) {
-            NavigationLink {
-                TradeTransactionView(
-                    di: di,
-                    transactionMode: .buy,
-                    asset: asset,
-                    currentPortfolioAt: portfolio
-                )
-            } label: {
-                HStack(alignment: .center) {
-                    Text(symbol)
-                        .font(.system(size: 16))
-                        .frame(width: 106, alignment: .leading)
-                    
-                    Spacer()
-                    
-                    Text(name)
-                        .font(.system(size: 14))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .frame(width: 165, alignment: .trailing)
-                }
+            HStack(alignment: .center) {
+                Text(symbol)
+                    .font(.system(size: 16))
+                    .frame(width: 106, alignment: .leading)
+                
+                Spacer()
+                
+                Text(name)
+                    .font(.system(size: 14))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(width: 165, alignment: .trailing)
             }
             .buttonStyle(.plain)
             .foregroundColor(.primary)
+            .onTapGesture {
+                navigationManager.push(.buyAsset(asset: asset, portfolio: portfolio), back: .popToRoot)
+            }
+            
             
             Divider()
                 .padding(.vertical, 10)

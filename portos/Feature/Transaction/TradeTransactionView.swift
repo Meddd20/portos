@@ -227,11 +227,7 @@ struct TradeTransactionView: View {
                 Button(action: {
                     Task {
                         viewModel.proceedTransaction()
-                        if (fromSearch) {
-                            navigationManager.back(backStep: 2)
-                        } else {
-                            navigationManager.back()
-                        }
+                        navigationManager.back(backStep: nil)
                     }
                 }, label: {
                     Text("Confirm")

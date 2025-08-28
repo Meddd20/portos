@@ -26,11 +26,11 @@ class HoldingService {
         guard let holdingDetail = try? holdingRepository.getHolding(id: holdingId) else {
             return nil
         }
-        
-        let marketValue = holdingDetail.quantity * holdingDetail.asset.lastPrice
-        let costBasis = holdingDetail.quantity * holdingDetail.averagePricePerUnit
+        let multiplier = Decimal(holdingDetail.asset.assetType.multiplier)
+        let marketValue = holdingDetail.quantity * holdingDetail.asset.lastPrice * multiplier
+        let costBasis = holdingDetail.quantity * holdingDetail.averagePricePerUnit * multiplier
         let unrealizedPnLValue = (marketValue - costBasis)
-        let unrealizedPnLPercentage = (unrealizedPnLValue / costBasis)
+        let unrealizedPnLPercentage = (unrealizedPnLValue / costBasis * 100)
                             
         return PortfolioAssetPosition(
             holdingId: holdingId,
@@ -38,12 +38,12 @@ class HoldingService {
             assetSymbol: holdingDetail.asset.symbol,
             currency: holdingDetail.asset.currency,
             totalQty: holdingDetail.quantity,
-            avgCost: holdingDetail.averagePricePerUnit,
-            portfolioMarketValue: marketValue,
-            costBasis: costBasis,
-            unrealizedPnLValue: unrealizedPnLValue,
+            avgCost: holdingDetail.averagePricePerUnit.roundedWithoutFraction(),
+            portfolioMarketValue: marketValue.roundedWithoutFraction(),
+            costBasis: costBasis.roundedWithoutFraction(),
+            unrealizedPnLValue: unrealizedPnLValue.roundedWithoutFraction(),
             unrealizedPnLPercentage: unrealizedPnLPercentage,
-            lastPrice: holdingDetail.asset.lastPrice,
+            lastPrice: holdingDetail.asset.lastPrice.roundedWithoutFraction(),
             asOf: holdingDetail.asset.asOf,
             accounts: AccountHoldingPosition(from: holdingAssetTransactions),
             historyTransactions: holdingAssetTransactions
@@ -62,41 +62,50 @@ class HoldingService {
             
             for transaction in sortedTransaction {
                 let currentAveragePrice: Decimal = (qty == 0) ? 0 : (buyCost / qty)
+                
                 switch transaction.transactionType {
                 case .buy:
                     qty += transaction.quantity
                     buyCost += transaction.quantity * transaction.price
-                    
                 case .sell:
                     qty -= transaction.quantity
                     buyCost -= transaction.quantity * currentAveragePrice
-                    
                 case .allocateIn:
                     qty += transaction.quantity
                     buyCost += transaction.quantity * transaction.price
-                    
                 case .allocateOut:
                     qty -= transaction.quantity
                     buyCost -= transaction.quantity * currentAveragePrice
-                    
                 }
             }
-            
+
+            let multiplier = Decimal(sortedTransaction.last?.asset.assetType.multiplier ?? 1)
             let avgCost = (qty == 0) ? 0 : buyCost / qty
             let lastPrice = sortedTransaction.last?.asset.lastPrice ?? 0
-            let unrealizedPnL = (lastPrice - avgCost) * qty
-            let unrealizedPnLPercentage: Decimal? = avgCost != 0 ? (unrealizedPnL / avgCost) * 100 : nil
+            let marketValue = lastPrice * qty * multiplier
+            let costBasis   = avgCost * qty * multiplier
+            let unrealizedPnL = marketValue
+            let unrealizedPnLPercentage: Decimal? = costBasis != 0 ? (unrealizedPnL / costBasis) * 100 : nil
             
             result.append(AccountPosition(
                 appSource: app,
                 qty: qty,
-                avgCost: avgCost,
-                lastPrice: lastPrice,
-                unrealizedPnL: unrealizedPnL,
+                avgCost: avgCost.roundedWithoutFraction(),
+                lastPrice: lastPrice.roundedWithoutFraction(),
+                unrealizedPnL: unrealizedPnL.roundedWithoutFraction(),
                 unrealizedPnLPercentage: unrealizedPnLPercentage ?? 0
             ))
         }
         return result.filter { $0.qty != 0 }
     }
     
+}
+
+extension Decimal {
+    func roundedWithoutFraction() -> Decimal {
+        var value = self
+        var result = Decimal()
+        NSDecimalRound(&result, &value, 0, .plain)
+        return result
+    }
 }
