@@ -142,7 +142,15 @@ struct PortfolioScreen: View {
                     AssetAllocationAllChart(overview: viewModel.portfolioOverview)
                         .padding(.top, 39)
                 } else {
-                    InvestmentChartWithRange(projection: viewModel.projectionSeries, actual: viewModel.actualSeries)
+                    if viewModel.actualSeries.isEmpty {
+                        EmptyInvestmentChart()
+                            .frame(height: 184)
+                            .padding(.top, 32)
+                    } else {
+                        InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
+                                            .frame(height: 184)
+                                            .padding(.top, 32)
+                    }
                 }
                 
                 HStack (spacing: 42) {
@@ -318,6 +326,14 @@ struct PortfolioScreen: View {
                 if selectedIndex != 0 {
                     Text(asset.quantity!)
                         .font(.system(size: 15))
+                    Text("•")
+                        .font(.system(size: 15))
+                        .foregroundStyle(Color.textPlaceholderApp)
+                    Text(viewModel.getPlatforms(transactions: asset.holding?.transactions ?? []))
+                        .font(.system(size: 15))
+                        .foregroundStyle(Color.textPlaceholderApp)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
                 Spacer()
                 growthRateLabel(for: asset.growthRate!)
@@ -352,6 +368,7 @@ struct PortfolioScreen: View {
     func onPickerChange() {
         let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
         viewModel.getPortfolioOverview(portfolioName: name)
+        viewModel.refreshMarketValues()
     }
     
     // Projection: tren halus + gelombang

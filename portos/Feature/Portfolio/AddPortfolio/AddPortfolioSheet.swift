@@ -64,15 +64,31 @@ struct AddPortfolio: View {
                     }
                     
                     row("Target Amount") {
-                        TextField("", text: $viewModel.targetAmountText, prompt: Text("Type Amount...").foregroundStyle(Color.textPlaceholderApp))
+                        HStack {
+                            if viewModel.targetAmountText != "" {
+                                Text("Rp")
+                                    .font(.system(size: 15))
+                                    .foregroundStyle(.black)
+                            }
+                            TextField(
+                                "",
+                                text: $viewModel.targetAmountText,
+                                prompt: Text("Type Amount...")
+                                    .foregroundStyle(Color.textPlaceholderApp)
+                            )
                             .font(.system(size: 15))
                             .foregroundStyle(.black)
                             .keyboardType(.numberPad)
+                        }
                     }
                     
                     row("Term") {
                         HStack {
-                            Text("\(viewModel.years)")
+                            TextField("",
+                                      text: Binding(
+                                              get: { String(viewModel.years) },
+                                              set: { viewModel.years = Int($0) ?? 0 }
+                                          ))
                                 .font(.system(size: 15))
                             Text("Years")
                                 .font(.system(size: 15))

@@ -187,8 +187,10 @@ class PortfolioService {
                     return "\(formatDecimal(h.quantity) ?? "") Share(s)"
                 case .Bonds:
                     return "Rp \(formatDecimal(h.quantity) ?? "")"
-                case .MutualFunds, .Options, .Crypto, .ETF:
+                case .MutualFunds, .Options, .ETF:
                     return formatDecimal(h.quantity) ?? ""
+                case .Crypto:
+                    return "\(formatDecimal(h.quantity) ?? "") \(h.asset.ticker.lowercased())"
                 case .StocksId:
                     return "\(formatDecimal(h.quantity) ?? "") Lot"
                 }

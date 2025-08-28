@@ -77,7 +77,6 @@ struct InvestmentChartWithRange: View {
 
             RangeTabs(selection: $range)
         }
-        .padding(.horizontal)
     }
 }
 
