@@ -222,8 +222,10 @@ struct TradeTransactionView: View {
                         
             if (viewModel.transactionMode == .buy || viewModel.transactionMode == .liquidate) || ( [.editBuy, .editLiquidate].contains(viewModel.transactionMode) && viewModel.isDataFilled ) {
                 Button(action: {
-                    viewModel.proceedTransaction()
-                    navigationManager.back()
+                    Task {
+                        await viewModel.proceedTransaction()
+                        navigationManager.back()
+                    }
                 }, label: {
                     Text("Confirm")
                         .buttonStyle(.borderedProminent)
