@@ -69,7 +69,7 @@ struct PortfolioScreen: View {
         VStack(alignment: .center) {
             PickerSegmented(
                 selectedIndex: $selectedIndex,
-                titles: ["All"] + portfolios.map { $0.name },
+                titles: ["all".localized] + portfolios.map { $0.name },
                 onChange: onPickerChange,
                 onAdd: { showingAdd = true }
             )
@@ -186,24 +186,24 @@ struct PortfolioScreen: View {
                 }
                 
                 HStack (spacing: 42) {
-                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
+                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "history".localized) {
                         let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
                         navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )
                     }
                     
-                    CircleButton(systemName: "plus", title: "Add") {
+                    CircleButton(systemName: "plus", title: "add".localized) {
                         let portfolio = (selectedIndex == 0) ? nil : portfolios[selectedIndex - 1]
                         navigationManager.push(.searchAsset(currentPortfolio: portfolio), back: BackAction.popOnce)
                     }
                     
                     Menu {
-                        Button("Settings") { showingSetting = true }
+                        Button("settings".localized) { showingSetting = true }
                         if selectedIndex != 0 {
-                            Button("Edit Portfolio")  { showingEdit = true }
-                            Button("Delete Portfolio") { showingDeleteConfirmation = true }
+                            Button("edit_portfolio".localized)  { showingEdit = true }
+                            Button("delete_portfolio".localized) { showingDeleteConfirmation = true }
                         }
                     } label: {
-                        CircleButton(systemName: "ellipsis", title: "More") { }
+                        CircleButton(systemName: "ellipsis", title: "more".localized) { }
                             .foregroundStyle(Color.textPrimary)
                     }
                 }
@@ -215,12 +215,12 @@ struct PortfolioScreen: View {
                         .padding(.top, 98)
                         .foregroundColor(Color.textSecondary)
                     
-                    Text(selectedIndex == 0 ? "No Portfolio" : "No Asset")
+                    Text(selectedIndex == 0 ? "no_portfolio".localized : "no_asset".localized)
                         .font(.system(size: 20, weight: .semibold))
                         .padding(.top, 15)
                         .multilineTextAlignment(.center)
                     
-                    Text(selectedIndex == 0 ? "Create portfolios, and they will be here." : "Try add an asset, and it will be shown here.")
+                    Text(selectedIndex == 0 ? "create_portfolio_message".localized : "try_add_asset_message".localized)
                         .font(.system(size: 17))
                         .padding(.top, 10)
                         .multilineTextAlignment(.center)
@@ -243,7 +243,7 @@ struct PortfolioScreen: View {
             startPoint: UnitPoint(x: 0.5, y: 0),
             endPoint: UnitPoint(x: 0.5, y: 1) ))
         .navigationDestination(isPresented: $showingSetting) {
-            UserSettingView()
+                            UserSettingView()
         }
          .navigationDestination(isPresented: $showingAdd) {
              AddPortfolio(di: di, screenMode: .add)
@@ -269,14 +269,14 @@ struct PortfolioScreen: View {
             viewModel.clearExchangeRateCache() // Clear cache for fresh rates
             viewModel.getPortfolioOverviewWithCurrencyConversion(portfolioName: name)
         }
-        .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
-            Button("Delete", role: .destructive) {
+        .alert("delete_permanently".localized, isPresented: $showingDeleteConfirmation) {
+            Button("delete".localized, role: .destructive) {
                 viewModel.deletePortfolio(id: portfolios[selectedIndex - 1].id)
                 selectedIndex -= 1
             }
-            Button("Cancel", role: .cancel) {}
+            Button("cancel".localized, role: .cancel) {}
         } message: {
-            Text("This action cannot be undone, are you sure to delete this portfolio?")
+            Text("delete_confirmation_message".localized)
                 .font(.system(size: 13))
         }
     }
@@ -319,7 +319,7 @@ struct PortfolioScreen: View {
             } label: {
                 HStack {
                     Spacer()
-                    Text(isExpanded ? "View Less" : "View More")
+                    Text(isExpanded ? "view_less".localized : "view_more".localized)
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                 }
                 .font(.subheadline)
@@ -439,4 +439,5 @@ struct PortfolioScreen: View {
     @Previewable @Environment(\.modelContext) var modelContext
     
     PortfolioScreen(di: AppDI.live(modelContext: modelContext))
+        .environmentObject(LocalizationManager.shared)
 }

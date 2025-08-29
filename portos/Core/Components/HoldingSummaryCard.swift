@@ -48,7 +48,7 @@ struct HoldingSummaryCard: View {
             
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Curr. Price")
+                    Text("current_price".localized)
                         .font(.subheadline)
                         .fontWeight(.light)
                     HStack(spacing: 2) {
@@ -64,7 +64,7 @@ struct HoldingSummaryCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4){
-                    Text("Avg. Price")
+                    Text("average_price".localized)
                         .font(.subheadline)
                         .fontWeight(.light)
                     HStack(spacing: 2) {

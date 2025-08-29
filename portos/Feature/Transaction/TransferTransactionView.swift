@@ -53,7 +53,7 @@ struct TransferTransactionView: View {
             Spacer()
                 .frame(height: 44)
             
-            FormRow(label: "Amount") {
+            FormRow(label: "amount".localized) {
                 TextField("0 \(viewModel.asset.assetType.unit)", text: $viewModel.amountText)
                     .keyboardType(.decimalPad)
                     .foregroundStyle(Color.textPrimary)
@@ -64,7 +64,7 @@ struct TransferTransactionView: View {
                 .ignoresSafeArea(edges: .all)
                 .frame(maxWidth: .infinity)
             
-            FormRow(label: "From") {
+            FormRow(label: "from".localized) {
                 Text(viewModel.portfolioTransferFrom?.name ?? "")
                     .font(.system(size: 16))
                     .lineLimit(1)
@@ -78,7 +78,7 @@ struct TransferTransactionView: View {
                 .ignoresSafeArea(edges: .all)
                 .frame(maxWidth: .infinity)
             
-            FormRow(label: "To") {
+            FormRow(label: "to".localized) {
                 Menu {
                     ForEach(viewModel.portfolios, id: \.id) { portfolio in
                         Button(portfolio.name) {
@@ -88,7 +88,7 @@ struct TransferTransactionView: View {
                 } label: {
                     if viewModel.portfolioTransferTo?.name == nil {
                         HStack {
-                            Text("Select Portfolio")
+                            Text("select_portfolio".localized)
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundStyle(Color.textSecondary)
@@ -117,7 +117,7 @@ struct TransferTransactionView: View {
                 .ignoresSafeArea(edges: .all)
                 .frame(maxWidth: .infinity)
             
-            FormRow(label: "Platform") {
+            FormRow(label: "platform".localized) {
                 Menu {
                     ForEach(viewModel.platforms, id: \.id) { platform in
                         Button(platform.name) {
@@ -127,7 +127,7 @@ struct TransferTransactionView: View {
                 } label: {
                     if viewModel.platform?.name == nil {
                         HStack {
-                            Text("Select Platform")
+                            Text("select_platform".localized)
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundStyle(Color.textSecondary)
@@ -159,7 +159,7 @@ struct TransferTransactionView: View {
                     viewModel.proceedTransaction()
                     navigationManager.back()
                 }, label: {
-                    Text("Confirm")
+                    Text("confirm".localized)
                         .frame(width: 306, height: 53)
                         .background(viewModel.isDataFilled ? Color.ctaEnabledBackground : Color.ctaDisabledBackground)
                         .foregroundStyle(Color.ctaEnabledText)
@@ -169,7 +169,7 @@ struct TransferTransactionView: View {
             }
         }
         .navigationBarBackButtonHidden()
-        .navigationTitle(Text("Transferring \(viewModel.asset.assetType.displayName)"))
+        .navigationTitle(Text("\("transferring".localized) \(viewModel.asset.assetType.displayName)"))
         .navigationBarTitleDisplayMode(.inline)
         .padding(EdgeInsets(top: 0, leading: 42, bottom: 0, trailing: 36))
         .onAppear {
@@ -187,7 +187,7 @@ struct TransferTransactionView: View {
             
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") {
+                Button("done".localized) {
                     hideKeyboard()
                 }
             }

@@ -85,13 +85,13 @@ struct TransactionTile: View {
             Button(role: .destructive, action: {
                 onDelete()
             }, label: {
-                Label("Delete", systemImage: "trash")
+                Label("delete".localized, systemImage: "trash")
             })
             
             Button {
                 onEdit()
             } label: {
-                Label("Edit", systemImage: "pencil")
+                Label("edit".localized, systemImage: "pencil")
             }
             .tint(.blue)
         }

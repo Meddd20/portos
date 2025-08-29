@@ -10,8 +10,8 @@ enum Language: String, CaseIterable {
     case english = "en"
     var displayName: String {
         switch self {
-        case .indonesia: return "Indonesia"
-        case .english: return "English"
+        case .indonesia: return "indonesia".localized
+        case .english: return "english".localized
         }
     }
 }

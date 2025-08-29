@@ -13,15 +13,15 @@ enum ScreenMode {
     
     var navTitle: String? {
         switch self {
-        case .add: return "Create portfolio"
-        case .edit: return "Edit portfolio"
+        case .add: return "create_portfolio".localized
+        case .edit: return "edit_portfolio_title".localized
         }
     }
     
     var buttonText: String {
         switch self {
-        case .add: return "Confirm"
-        case .edit: return "Save"
+        case .add: return "confirm".localized
+        case .edit: return "save".localized
         }
     }
 }
@@ -57,23 +57,23 @@ struct AddPortfolio: View {
         NavigationStack {
             VStack {
                 VStack(spacing: 1) {
-                    row("Title") {
-                        TextField("", text: $viewModel.name, prompt: Text("Title").foregroundStyle(Color.textPlaceholderApp))
+                    row("title".localized) {
+                        TextField("", text: $viewModel.name, prompt: Text("title".localized).foregroundStyle(Color.textPlaceholderApp))
                             .font(.system(size: 15))
                             .foregroundStyle(Color.textPrimary)
                     }
                     
-                    row("Target Amount") {
+                    row("target_amount".localized) {
                         HStack {
                             if viewModel.targetAmountText != "" {
-                                Text("Rp")
+                                Text("currency_idr".localized)
                                     .font(.system(size: 15))
                                     .foregroundStyle(Color.textPrimary)
                             }
                             TextField(
                                 "",
                                 text: $viewModel.targetAmountText,
-                                prompt: Text("Type Amount...")
+                                prompt: Text("type_amount".localized)
                                     .foregroundStyle(Color.textPlaceholderApp)
                             )
                             .font(.system(size: 15))
@@ -82,7 +82,7 @@ struct AddPortfolio: View {
                         }
                     }
                     
-                    row("Term") {
+                    row("term".localized) {
                         HStack {
                             TextField("",
                                       text: Binding(
@@ -90,7 +90,7 @@ struct AddPortfolio: View {
                                               set: { viewModel.years = Int($0) ?? 0 }
                                           ))
                                 .font(.system(size: 15))
-                            Text("Years")
+                            Text("years".localized)
                                 .font(.system(size: 15))
                                 .foregroundColor(.secondary)
                             Stepper("", value: $viewModel.years, in: 0...100)

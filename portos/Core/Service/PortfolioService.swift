@@ -23,7 +23,7 @@ class PortfolioService {
     
     func getHoldings(portfolioName: String) throws -> [AssetPosition] {
         var holdings: [Holding] = []
-        if portfolioName == "All" {
+        if portfolioName == "all".localized {
             holdings = try holdingRepository.getAllHoldings()
         } else {
             holdings = try holdingRepository.getHoldings(byPortfolioName: portfolioName)

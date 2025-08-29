@@ -62,7 +62,7 @@ struct TransferTile: View {
                                 .truncationMode(.tail)
                         }
                     } else {
-                        Text("To \(inTransaction.portfolio.name)")
+                        Text("\("to".localized) \(inTransaction.portfolio.name)")
                             .font(.system(size: 13))
                             .foregroundStyle(Color.textSecondary)
                             .lineLimit(1)
@@ -87,7 +87,7 @@ struct TransferTile: View {
                                 .truncationMode(.tail)
                         }
                     } else {
-                        Text("From \(outTransaction.portfolio.name)")
+                        Text("\("from".localized) \(outTransaction.portfolio.name)")
                             .font(.system(size: 13))
                             .foregroundStyle(Color.textSecondary)
                             .lineLimit(1)
@@ -126,13 +126,13 @@ struct TransferTile: View {
             Button(role: .destructive, action: {
                 onDelete()
             }, label: {
-                Label("Delete", systemImage: "trash")
+                Label("delete".localized, systemImage: "trash")
             })
             
             Button {
                 onEdit()
             } label: {
-                Label("Edit", systemImage: "pencil")
+                Label("edit".localized, systemImage: "pencil")
             }
             .tint(.blue)
         }

@@ -19,7 +19,7 @@ class TransactionHistoryViewModel: ObservableObject {
         self.portfolio = portfolio
         
         if portfolio != nil {
-            historyOf = portfolio?.name ?? "All"
+            historyOf = portfolio?.name ?? "all".localized
         }
     }
     

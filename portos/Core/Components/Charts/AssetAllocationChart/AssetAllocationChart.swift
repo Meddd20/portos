@@ -133,11 +133,11 @@ private struct EmptyAssetAllocationView: View {
             
             // Text content
             VStack(spacing: 8) {
-                Text("No Assets Yet")
+                Text("no_assets_yet".localized)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(Color.primaryApp)
                 
-                Text("Start building your portfolio by adding your first asset")
+                Text("start_building_portfolio".localized)
                     .font(.system(size: 14))
                     .foregroundStyle(Color.secondaryApp)
                     .multilineTextAlignment(.center)

@@ -44,13 +44,13 @@ final class AddPortfolioViewModel: ObservableObject {
     
     func add() {
         guard let target = targetAmount else {
-            self.errorMessage = "Target amount is required"
+            self.errorMessage = "target_amount_required".localized
             print("ERROR: target amount missing")
             return
         }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            self.errorMessage = "Name is required"
+            self.errorMessage = "name_required".localized
             print("ERROR: name empty")
             return
         }
@@ -64,7 +64,7 @@ final class AddPortfolioViewModel: ObservableObject {
             print("add portfolio - save success")
         }
         catch {
-            self.errorMessage = "Save failed: \(error.localizedDescription)"
+            self.errorMessage = "\("save_failed".localized): \(error.localizedDescription)"
             self.didSave = false
             print("add portfolio - error: \(error)")
         }

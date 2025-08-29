@@ -580,7 +580,7 @@ class TransactionService {
             
         case .sell:
             guard let basis = transaction.costBasisPerUnit else {
-                throw TransactionError.repositoryError("Missing costBasisPerUnit on sell")
+                throw TransactionError.repositoryError("missing_cost_basis_per_unit_on_sell".localized)
             }
             
             try holdingRepository.updateHolding(id: holdingId) { holding in

@@ -13,23 +13,23 @@ enum TransactionMode {
     
     var titlePrefix: String? {
         switch self {
-        case .buy: return "Adding"
-        case .liquidate: return "Liquidating"
+        case .buy: return "adding".localized
+        case .liquidate: return "liquidating".localized
         case .editBuy, .editLiquidate: return nil
         }
     }
     
     var fullTitle: String? {
         switch self {
-        case .editBuy, .editLiquidate: return "Edit Transaction"
+        case .editBuy, .editLiquidate: return "edit_transaction".localized
         default: return nil
         }
     }
     
     var dateField: String {
         switch self {
-        case .buy, .editBuy: return "Purchase Date"
-        case .liquidate, .editLiquidate: return "Liquidate Date"
+        case .buy, .editBuy: return "purchase_date".localized
+        case .liquidate, .editLiquidate: return "liquidate_date".localized
         }
     }
     
@@ -102,7 +102,7 @@ struct TradeTransactionView: View {
             Spacer()
                 .frame(height: 9)
             
-            Text("Traded in \(asset.currency.rawValue)")
+            Text("\("traded_in".localized) \(asset.currency.rawValue)")
                 .frame(maxWidth: .infinity, alignment: .center)
                 .font(.caption)
                 .foregroundStyle(Color.textSecondary)
@@ -111,14 +111,14 @@ struct TradeTransactionView: View {
                 .frame(height: 80)
                         
             VStack {
-                FormRow(label: "Amount") {
+                FormRow(label: "amount".localized) {
                     VStack(alignment: .leading, spacing: 4) {
                         TextField("0 \(viewModel.asset.assetType.unit)", text: $viewModel.amountText)
                             .keyboardType(.decimalPad)
                             .foregroundStyle(Color.textPrimary)
                         
                         if asset.assetType == .StocksId {
-                            Text("Note: 1 Lot = 100 Shares")
+                            Text("note_lot_info".localized)
                                 .font(.caption)
                                 .foregroundStyle(Color.textSecondary)
                         }
@@ -130,7 +130,7 @@ struct TradeTransactionView: View {
                     .ignoresSafeArea(edges: .all)
                     .frame(maxWidth: .infinity)
                 
-                FormRow(label: "Price") {
+                FormRow(label: "price".localized) {
                     HStack {
                         Text(asset.currency.symbol)
                         .foregroundStyle(.secondary)
@@ -146,7 +146,7 @@ struct TradeTransactionView: View {
                     .ignoresSafeArea(edges: .all)
                     .frame(maxWidth: .infinity)
                                 
-                FormRow(label: "Platform") {
+                FormRow(label: "platform".localized) {
                     Menu {
                         ForEach(viewModel.platforms, id: \.id) { platform in
                             Button(platform.name) {
@@ -156,7 +156,7 @@ struct TradeTransactionView: View {
                     } label: {
                         if viewModel.platform?.name == nil {
                             HStack {
-                                Text("Select Platform")
+                                Text("select_platform".localized)
                                     .font(.system(size: 15))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundStyle(Color.textSecondary)
@@ -187,7 +187,7 @@ struct TradeTransactionView: View {
                     .ignoresSafeArea(edges: .all)
                     .frame(maxWidth: .infinity)
                 
-                FormRow(label: "Portfolio") {
+                FormRow(label: "portfolio".localized) {
                     Menu {
                         ForEach(viewModel.portfolios, id: \.persistentModelID) { portfolio in
                             Button(portfolio.name) {
@@ -197,7 +197,7 @@ struct TradeTransactionView: View {
                     } label: {
                         if viewModel.portfolio?.name == nil {
                             HStack {
-                                Text("Select Portfolio")
+                                Text("select_portfolio".localized)
                                     .font(.system(size: 15))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundStyle(Color.textSecondary)
@@ -228,7 +228,7 @@ struct TradeTransactionView: View {
                 
                 FormRow(label: transactionMode.dateField) {
                     HStack{
-                        DatePicker("Date", selection: $viewModel.purchaseDate, in: ...Date(), displayedComponents: .date)
+                        DatePicker("date".localized, selection: $viewModel.purchaseDate, in: ...Date(), displayedComponents: .date)
                             .datePickerStyle(.compact)
                             .labelsHidden()
                             .tint(Color.textPrimary)
@@ -253,11 +253,11 @@ struct TradeTransactionView: View {
                         navigationManager.back(backStep: nil)
                     }
                 }, label: {
-                    Text("Confirm")
-                        .frame(width: 306, height: 53)
-                        .background(viewModel.isDataFilled ? Color.ctaEnabledBackground : Color.ctaDisabledBackground)
-                        .foregroundStyle(Color.ctaEnabledText)
-                        .cornerRadius(24)
+                                    Text("confirm".localized)
+                    .frame(width: 306, height: 53)
+                    .background(viewModel.isDataFilled ? Color.ctaEnabledBackground : Color.ctaDisabledBackground)
+                    .foregroundStyle(Color.ctaEnabledText)
+                    .cornerRadius(24)
                 })
                 .disabled(viewModel.isDataFilled ? false : true)
             }
@@ -291,7 +291,7 @@ struct TradeTransactionView: View {
             
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") {
+                Button("done".localized) {
                     hideKeyboard()
                 }
             }

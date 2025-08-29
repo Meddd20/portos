@@ -16,7 +16,7 @@ enum RangeOption: CaseIterable, Hashable {
         case .m3:  return "3M"
         case .y1:  return "1Y"
         case .y5:  return "5Y"
-        case .ytd: return "YTD"
+        case .ytd: return "ytd".localized
         }
     }
 

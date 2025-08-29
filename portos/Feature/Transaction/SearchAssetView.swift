@@ -132,9 +132,9 @@ struct SearchAssetView: View {
         .searchable(
             text: $viewModel.searchTerms,
             placement: .navigationBarDrawer(displayMode: .always),
-            prompt: "Search"
+            prompt: "search".localized
         )
-        .navigationTitle("Choose asset to add")
+        .navigationTitle("choose_asset_to_add".localized)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .onAppear {

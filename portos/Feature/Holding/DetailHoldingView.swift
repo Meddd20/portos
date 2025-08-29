@@ -111,7 +111,7 @@ struct DetailHoldingView: View {
                 HStack(alignment: .center, spacing: 42) {
                     CircleButton(
                         systemName: "plus",
-                        title: "Add",
+                        title: "add".localized,
                         action: {
                             navigationManager.push(.buyAsset(asset: holding.asset, portfolio: holding.portfolio), back: .popOnce)
                         }
@@ -120,7 +120,7 @@ struct DetailHoldingView: View {
                     
                     CircleButton(
                         systemName: "minus",
-                        title: "Liquidate",
+                        title: "liquidating".localized,
                         action: {
                             navigationManager.push(.sellAsset(asset: holding.asset, portfolio: holding.portfolio, holding: holding), back: .popOnce)
                         }
@@ -129,7 +129,7 @@ struct DetailHoldingView: View {
                     
                     CircleButton(
                         systemName: "arrow.right",
-                        title: "Transfer",
+                        title: "transfer".localized,
                         action: {
                             navigationManager.push(.transferAsset(asset: holding.asset, holding: holding, transferMode: .transferToPortfolio), back: .popOnce)
                         }

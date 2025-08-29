@@ -81,10 +81,12 @@ struct LocalizedStrings {
         "create_portfolio_message": "Buat portfolio, dan mereka akan muncul di sini.",
         "try_add_asset_message": "Coba tambahkan aset, dan mereka akan ditampilkan di sini.",
         "view_more": "Lihat Lebih Banyak",
+        "view_less": "Lihat Lebih Sedikit",
         "delete_permanently": "Hapus Permanen",
         "delete_confirmation_message": "Tindakan ini tidak dapat dibatalkan, apakah Anda yakin ingin menghapus portfolio ini?",
         "delete": "Hapus",
         "cancel": "Batal",
+        "edit": "Edit",
         
         // Add Portfolio
         "create_portfolio": "Buat Portfolio",
@@ -131,6 +133,24 @@ struct LocalizedStrings {
         "language": "Bahasa",
         "general": "Umum",
         
+        // Charts and Empty States
+        "no_assets_yet": "Belum Ada Aset",
+        "start_building_portfolio": "Mulai membangun portfolio Anda dengan menambahkan aset pertama",
+        "no_asset_allocation": "Tidak Ada Alokasi Aset",
+        "start_building_portfolio_short": "Mulai membangun portfolio Anda",
+        
+        // Transaction Details
+        "traded_in": "Diperdagangkan dalam",
+        "note_lot_info": "Catatan: 1 Lot = 100 Saham",
+        "select_platform": "Pilih Platform",
+        "select_portfolio": "Pilih Portfolio",
+        "platform": "Platform",
+        "portfolio": "Portfolio",
+        
+        // Price Labels
+        "current_price": "Harga Saat Ini",
+        "average_price": "Harga Rata-rata",
+        
         // Common
         "back": "Kembali",
         "close": "Tutup",
@@ -141,7 +161,29 @@ struct LocalizedStrings {
         "error": "Error",
         "success": "Berhasil",
         "warning": "Peringatan",
-        "info": "Informasi"
+        "info": "Informasi",
+        "done": "Selesai",
+        "no_history": "Tidak Ada Riwayat",
+        "no_history_message": "Ketika Anda menambahkan, melikuidasi, atau mentransfer aset, catatan mereka ada di sini.",
+        "today": "Hari Ini",
+        "currency_idr": "Rp",
+        "transferring": "Mentransfer",
+        "target_amount_required": "Jumlah target diperlukan",
+        "name_required": "Nama diperlukan",
+        "save_failed": "Simpan gagal",
+        "invalid_url": "URL Tidak Valid",
+        "decoding_failed": "Dekoding Gagal",
+        "request_failed": "Permintaan Gagal",
+        "unknown_error": "Error Tidak Diketahui",
+        "http_error": "Error HTTP",
+        "api_failed": "API Gagal",
+        "map_failed_at": "Map gagal pada",
+        "try": "Coba",
+        "ytd": "YTD",
+        "missing_cost_basis_per_unit_on_sell": "Missing costBasisPerUnit on sell",
+        "lot": "lot",
+        "indonesia": "Indonesia",
+        "english": "English"
     ]
     
     private static let englishStrings: [String: String] = [
@@ -158,10 +200,12 @@ struct LocalizedStrings {
         "create_portfolio_message": "Create portfolios, and they will be here.",
         "try_add_asset_message": "Try add an asset, and it will be shown here.",
         "view_more": "View More",
+        "view_less": "View Less",
         "delete_permanently": "Delete Permanently",
         "delete_confirmation_message": "This action cannot be undone, are you sure to delete this portfolio?",
         "delete": "Delete",
         "cancel": "Cancel",
+        "edit": "Edit",
         
         // Add Portfolio
         "create_portfolio": "Create Portfolio",
@@ -208,6 +252,24 @@ struct LocalizedStrings {
         "language": "Language",
         "general": "General",
         
+        // Charts and Empty States
+        "no_assets_yet": "No Assets Yet",
+        "start_building_portfolio": "Start building your portfolio by adding your first asset",
+        "no_asset_allocation": "No Asset Allocation",
+        "start_building_portfolio_short": "Start building your portfolio",
+        
+        // Transaction Details
+        "traded_in": "Traded in",
+        "note_lot_info": "Note: 1 Lot = 100 Shares",
+        "select_platform": "Select Platform",
+        "select_portfolio": "Select Portfolio",
+        "platform": "Platform",
+        "portfolio": "Portfolio",
+        
+        // Price Labels
+        "current_price": "Current Price",
+        "average_price": "Average Price",
+        
         // Common
         "back": "Back",
         "close": "Close",
@@ -218,6 +280,28 @@ struct LocalizedStrings {
         "error": "Error",
         "success": "Success",
         "warning": "Warning",
-        "info": "Info"
+        "info": "Info",
+        "done": "Done",
+        "no_history": "No History",
+        "no_history_message": "When you add, liquidate, or transfer your assets, their records are here.",
+        "today": "Today",
+        "currency_idr": "Rp",
+        "lot": "lot",
+        "transferring": "Transferring",
+        "target_amount_required": "Target amount is required",
+        "name_required": "Name is required",
+        "save_failed": "Save failed",
+        "invalid_url": "Invalid URL",
+        "decoding_failed": "Decoding Failed",
+        "request_failed": "Request Failed",
+        "unknown_error": "Unknown Error",
+        "http_error": "HTTP Error",
+        "api_failed": "API Failed",
+        "map_failed_at": "Map failed at",
+        "try": "Try",
+        "ytd": "YTD",
+        "missing_cost_basis_per_unit_on_sell": "Missing costBasisPerUnit on sell",
+        "indonesia": "Indonesia",
+        "english": "English"
     ]
 }

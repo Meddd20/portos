@@ -52,7 +52,7 @@ struct PickerSegmented: View {
 #Preview {
     PickerSegmented(
         selectedIndex: .constant(0),
-        titles: ["All", "Retirement", "Education", "House"],
+        titles: ["all".localized, "Retirement", "Education", "House"],
         onChange: {print("onChange clicked")},
         onAdd: {print("onAdd clicked")}
     )

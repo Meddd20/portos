@@ -16,7 +16,7 @@ struct EmptyAssetAllocationChart: View {
                     .font(.system(size: 32, weight: .medium))
                     .foregroundStyle(Color.greyApp)
                 
-                Text("No Asset Allocation")
+                Text("no_asset_allocation".localized)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Color.greyApp)
             }
@@ -24,7 +24,7 @@ struct EmptyAssetAllocationChart: View {
             
             // Text content
             VStack(spacing: 8) {
-                Text("Start building your portfolio")
+                Text("start_building_portfolio_short".localized)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color.secondaryApp)
                     .multilineTextAlignment(.center)

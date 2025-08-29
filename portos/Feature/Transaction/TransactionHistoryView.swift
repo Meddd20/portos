@@ -68,7 +68,7 @@ struct TransactionHistoryView: View {
                     Spacer()
                         .frame(height: 15)
 
-                    Text("No History")
+                    Text("no_history".localized)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .font(.system(size: 20))
                         .fontWeight(.semibold)
@@ -77,7 +77,7 @@ struct TransactionHistoryView: View {
                     Spacer()
                         .frame(height: 15)
                     
-                    Text("When you add, liquidate, or transfer your assets, their records are here.")
+                    Text("no_history_message".localized)
                         .frame(maxWidth: 300, alignment: .center)
                         .font(.system(size: 17))
                         .fontWeight(.regular)
@@ -132,7 +132,7 @@ struct TransactionHistoryView: View {
     @ViewBuilder
     private func sectionHeader(for section: TransactionSection) -> some View {
         let sectionTitle: String = section.date == today
-        ? "Today"
+        ? "today".localized
         : section.date.formatted(date: .abbreviated, time: .omitted)
         
         HStack {

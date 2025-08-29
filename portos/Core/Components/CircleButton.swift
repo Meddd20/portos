@@ -48,5 +48,5 @@ struct CircleButton: View {
 }
 
 #Preview {
-    CircleButton(systemName: "square.and.arrow.up", title: "try", action: {})
+            CircleButton(systemName: "square.and.arrow.up", title: "try".localized, action: {})
 }

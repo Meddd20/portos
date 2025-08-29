@@ -27,7 +27,7 @@ struct TransactionRow: View {
                     .overlay(Image(systemName: iconName).font(.subheadline))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(transaction.lots) lot").font(.body.weight(.semibold))
+                    Text("\(transaction.lots) lot".localized).font(.body.weight(.semibold))
                     if let note = transaction.note {
                         Text(note).font(.footnote).foregroundStyle(.secondary)
                     }

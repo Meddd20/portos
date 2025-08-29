@@ -48,7 +48,7 @@ class SearchAssetViewModel: ObservableObject {
     
     func getAllHoldings() {
         do {
-            assetPosition = try portfolioService.getHoldings(portfolioName: "All")
+            assetPosition = try portfolioService.getHoldings(portfolioName: "all".localized)
         } catch {
             print("")
         }
@@ -66,7 +66,7 @@ class SearchAssetViewModel: ObservableObject {
                             return try AssetMapper.map(api)
                         }
                         catch {
-                            print("Map failed at: \(api.symbol ?? "nil"): \(error.localizedDescription)")
+                            print("map_failed_at".localized + " \(api.symbol ?? "nil"): \(error.localizedDescription)")
                             return nil
                         }
                     }
@@ -84,17 +84,17 @@ class SearchAssetViewModel: ObservableObject {
     private func mapError(_ error: APIError) -> String {
         switch error {
         case .invalidURL:
-            return "Invalid URL"
+            return "invalid_url".localized
         case .decodingFailed:
-            return "Decoding Failed"
+            return "decoding_failed".localized
         case .requestFailed:
-            return "Request Failed"
+            return "request_failed".localized
         case .unknown:
-            return "Unknown Error"
+            return "unknown_error".localized
         case .httpError:
-            return "HTTP Error"
+            return "http_error".localized
         case .apiFailed:
-            return "API Failed"
+            return "api_failed".localized
         }
     }
 }
