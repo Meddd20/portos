@@ -20,6 +20,7 @@ struct AssetGroup : Identifiable {
     let id: UUID = UUID()
     let name: String?
     let value: String?
+    let rawValue: Decimal?  // Raw Decimal value for portfolio totals
     var assets: [AssetItem]
 }
 
@@ -28,6 +29,7 @@ struct AssetItem : Identifiable {
     let holding: Holding?
     let name: String?
     let value: String?
+    let rawValue: Decimal?  // Raw Decimal value for currency conversion
     let growthRate: Decimal?
     let profitAmount: String?
     let quantity: String?

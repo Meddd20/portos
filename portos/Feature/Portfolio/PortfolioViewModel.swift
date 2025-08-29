@@ -114,31 +114,10 @@ final class PortfolioViewModel: ObservableObject {
             let convertedGroup = try convertAssetGroupToCurrency(group, targetCurrency: targetCurrency)
             convertedGroupItems.append(convertedGroup)
             
-            // Calculate group total directly from the converted assets
-            var groupTotal: Decimal = Decimal(0)
-            for asset in group.assets {
-                if let holding = asset.holding {
-                    let assetCurrency = holding.asset.currency
-                    let originalValue = asset.value ?? "0"
-                    
-                    if let numericValue = parseFormattedValue(originalValue) {
-                        let conversionRate = getCurrencyRate(from: assetCurrency, to: targetCurrency)
-                        
-                        let convertedValue: Decimal
-                        if assetCurrency == .idr && targetCurrency == .usd {
-                            convertedValue = numericValue / Decimal(conversionRate)
-                        } else if assetCurrency == .usd && targetCurrency == .idr {
-                            convertedValue = numericValue * Decimal(conversionRate)
-                        } else {
-                            convertedValue = numericValue
-                        }
-                        
-                        groupTotal += convertedValue
-                    }
-                }
+            // Use the converted group's rawValue directly
+            if let convertedGroupRawValue = convertedGroup.rawValue {
+                totalConvertedValue += convertedGroupRawValue
             }
-            
-            totalConvertedValue += groupTotal
         }
         
         // Calculate total profit (this is a simplified approach)
@@ -167,27 +146,9 @@ final class PortfolioViewModel: ObservableObject {
             let convertedAsset = try convertAssetItemToCurrency(asset, targetCurrency: targetCurrency)
             convertedAssets.append(convertedAsset)
             
-            // Get the numeric value directly from the converted asset
-            // Don't parse the formatted string back - use the actual converted value
-            if let holding = asset.holding {
-                let assetCurrency = holding.asset.currency
-                let originalValue = asset.value ?? "0"
-                
-                if let numericValue = parseFormattedValue(originalValue) {
-                    let conversionRate = getCurrencyRate(from: assetCurrency, to: targetCurrency)
-                    
-                    // Calculate converted value directly
-                    let convertedValue: Decimal
-                    if assetCurrency == .idr && targetCurrency == .usd {
-                        convertedValue = numericValue / Decimal(conversionRate)
-                    } else if assetCurrency == .usd && targetCurrency == .idr {
-                        convertedValue = numericValue * Decimal(conversionRate)
-                    } else {
-                        convertedValue = numericValue
-                    }
-                    
-                    convertedGroupTotal += convertedValue
-                }
+            // Use the converted asset's rawValue directly for group total
+            if let convertedRawValue = convertedAsset.rawValue {
+                convertedGroupTotal += convertedRawValue
             }
         }
         
@@ -197,6 +158,7 @@ final class PortfolioViewModel: ObservableObject {
         return AssetGroup(
             name: group.name,
             value: formattedTotal,
+            rawValue: convertedGroupTotal,  // Store the converted raw value
             assets: convertedAssets
         )
     }
@@ -207,39 +169,40 @@ final class PortfolioViewModel: ObservableObject {
         }
         
         let assetCurrency = holding.asset.currency
-        let originalValue = asset.value ?? "0"
         
-        // If currencies are the same, no conversion needed
-        if assetCurrency == targetCurrency {
+        // Use rawValue for formatting
+        guard let rawValue = asset.rawValue else {
             return asset
         }
         
-        // Parse the original value
-        guard let numericValue = parseFormattedValue(originalValue) else {
-            return asset
-        }
-        
-        // Get conversion rate
-        let conversionRate = getCurrencyRate(from: assetCurrency, to: targetCurrency)
-        
-        // Convert the value based on conversion direction
         let convertedValue: Decimal
-        if assetCurrency == .idr && targetCurrency == .usd {
-            // IDR to USD: divide by rate (e.g., 16586 IDR / 16586 = 1 USD)
-            convertedValue = numericValue / Decimal(conversionRate)
-        } else if assetCurrency == .usd && targetCurrency == .idr {
-            // USD to IDR: multiply by rate (e.g., 1 USD * 16586 = 16586 IDR)
-            convertedValue = numericValue * Decimal(conversionRate)
+        
+        // If currencies are the same, no conversion needed but still format
+        if assetCurrency == targetCurrency {
+            convertedValue = rawValue
         } else {
-            // Same currency or unexpected combination
-            convertedValue = numericValue
+            // Get conversion rate for different currencies
+            let conversionRate = getCurrencyRate(from: assetCurrency, to: targetCurrency)
+            
+            // Convert the value based on conversion direction
+            if assetCurrency == .idr && targetCurrency == .usd {
+                // IDR to USD: divide by rate (e.g., 818694 IDR / 16586 = 49.36 USD)
+                convertedValue = rawValue / Decimal(conversionRate)
+            } else if assetCurrency == .usd && targetCurrency == .idr {
+                // USD to IDR: multiply by rate (e.g., 49.36 USD * 16586 = 818694 IDR)
+                convertedValue = rawValue * Decimal(conversionRate)
+            } else {
+                // Same currency or unexpected combination
+                convertedValue = rawValue
+            }
         }
         
-        // Create new AssetItem with converted value
+        // Always format with proper currency symbol
         return AssetItem(
             holding: asset.holding,
             name: asset.name,
             value: formatCurrencyValue(convertedValue, currency: targetCurrency),
+            rawValue: convertedValue,  // Store the converted raw value
             growthRate: asset.growthRate,
             profitAmount: asset.profitAmount,
             quantity: asset.quantity
@@ -323,6 +286,7 @@ final class PortfolioViewModel: ObservableObject {
             formatter.maximumFractionDigits = 2
             formatter.groupingSeparator = ","
             formatter.decimalSeparator = "."
+            formatter.locale = Locale(identifier: "en_US")
         }
         
         let number = NSDecimalNumber(decimal: value)

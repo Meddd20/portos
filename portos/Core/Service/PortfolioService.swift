@@ -110,6 +110,7 @@ class PortfolioService {
                     holding: h,  // Include the holding reference for currency conversion
                     name: h.asset.name,
                     value: formatDecimal(currentValue),
+                    rawValue: currentValue,  // Add raw Decimal value for currency conversion
                     growthRate: growth.rounded(scale: 2),
                     profitAmount: formatDecimal(profit),
                     quantity: qtyStr
@@ -119,6 +120,7 @@ class PortfolioService {
             return AssetGroup(
                 name: assetType.displayName,
                 value: formatDecimal(groupTotal),
+                rawValue: groupTotal,  // Add raw Decimal value for portfolio totals
                 assets: items )
         }
         .sorted { ($0.value ?? "") > ($1.value ?? "") }
@@ -172,6 +174,7 @@ class PortfolioService {
                 holding: h,
                 name: h.asset.name,
                 value: formatDecimal(currentValue),
+                rawValue: currentValue,  // Add raw Decimal value for currency conversion
                 growthRate: growth.rounded(scale: 2),
                 profitAmount: formatDecimal(profit),
                 quantity: qtyStr
@@ -181,6 +184,7 @@ class PortfolioService {
         return AssetGroup(
             name: assetType.displayName,
             value: formatDecimal(groupTotal),
+            rawValue: groupTotal,  // Add raw Decimal value for portfolio totals
             assets: items )
         }
         .sorted { ($0.value ?? "") > ($1.value ?? "") }
@@ -204,7 +208,7 @@ struct AssetPosition {
 }
 
 func formatDecimal(_ value: Decimal,
-                   locale: Locale = .current,
+                   locale: Locale = Locale(identifier: "en_US"),
                    useGrouping: Bool = true,
                    rounding: NumberFormatter.RoundingMode = .down) -> String? {
     let f = NumberFormatter()
