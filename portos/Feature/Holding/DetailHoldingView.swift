@@ -76,7 +76,7 @@ struct DetailHoldingView: View {
                     ForEach(viewModel.accountPosition, id: \.appSource.id) { account in
                         HoldingSummaryCard(
                             platform: account.appSource.name,
-                            totalValue: account.unrealizedPnL + (account.avgCost * account.qty * Decimal(viewModel.holding.asset.assetType.multiplier)),
+                            totalValue: account.unrealizedPnL + (account.avgCost * account.qty),
                             quantityLabel: account.qty.description,
                             currentPrice: account.lastPrice,
                             averagePrice: account.avgCost,
@@ -93,7 +93,7 @@ struct DetailHoldingView: View {
                             ForEach(viewModel.accountPosition, id: \.appSource.id) { account in
                                 HoldingSummaryCard(
                                     platform: account.appSource.name,
-                                    totalValue: account.unrealizedPnL + (account.avgCost * account.qty * Decimal(viewModel.holding.asset.assetType.multiplier)),
+                                    totalValue: account.unrealizedPnL + (account.avgCost * account.qty),
                                     quantityLabel: account.qty.description,
                                     currentPrice: holding.asset.lastPrice,
                                     averagePrice: account.avgCost,

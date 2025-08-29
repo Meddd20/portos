@@ -91,15 +91,6 @@ struct PortfolioScreen: View {
                             .foregroundColor(Color.textPrimary)
                             .transition(.opacity.combined(with: .scale))
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
-                            .onAppear {
-                                print("🎯 Title Value Display: \(viewModel.portfolioOverview.portfolioValue ?? "nil")")
-                                print("📊 Portfolio Overview Data:")
-                                print("  - Portfolio Value: \(viewModel.portfolioOverview.portfolioValue ?? "nil")")
-                                print("  - Group Items Count: \(viewModel.portfolioOverview.groupItems.count)")
-                                for (index, group) in viewModel.portfolioOverview.groupItems.enumerated() {
-                                    print("    Group \(index): \(group.name ?? "Unknown") = \(group.value ?? "nil")")
-                                }
-                            }
                             
                         
                         Button(action: {
@@ -270,13 +261,11 @@ struct PortfolioScreen: View {
         }
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-            print("🚀 onAppear - selectedIndex: \(selectedIndex), portfolio name: \(name ?? "ALL")")
             viewModel.getPortfolioOverviewWithCurrencyConversion(portfolioName: name)
             viewModel.refreshMarketValues()
         }
         .onChange(of: localizationManager.currentCurrency) {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-            print("🔄 Currency changed - selectedIndex: \(selectedIndex), portfolio name: \(name ?? "ALL")")
             viewModel.clearExchangeRateCache() // Clear cache for fresh rates
             viewModel.getPortfolioOverviewWithCurrencyConversion(portfolioName: name)
         }
@@ -418,8 +407,6 @@ struct PortfolioScreen: View {
     
     func onPickerChange() {
         let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-        print("📱 Tab changed - selectedIndex: \(selectedIndex), portfolio name: \(name ?? "ALL")")
-        print("📊 Available portfolios: \(portfolios.map { $0.name })")
         viewModel.getPortfolioOverviewWithCurrencyConversion(portfolioName: name)
         viewModel.refreshMarketValues()
     }

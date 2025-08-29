@@ -70,8 +70,6 @@ final class PortfolioViewModel: ObservableObject {
     func getPortfolioOverviewWithCurrencyConversion(portfolioName: String? = nil) {
         let targetCurrency = localizationManager.currentCurrency
         
-        print("🎯 Converting portfolio to: \(targetCurrency.rawValue)")
-        
         if portfolioName == nil {
             // Get overall portfolio overview and convert
             getPortfolioOverviewWithConversion(targetCurrency: targetCurrency)
@@ -83,53 +81,25 @@ final class PortfolioViewModel: ObservableObject {
     
     private func getPortfolioOverviewWithConversion(targetCurrency: Currency) {
         do {
-            print("🔄 Loading portfolio overview for ALL portfolios...")
             let originalOverview = try service.getPortfolioOverview()
-            print("📊 Original overview loaded:")
-            print("  - Portfolio Value: \(originalOverview.portfolioValue ?? "nil")")
-            print("  - Group Items Count: \(originalOverview.groupItems.count)")
-            
-            for (index, group) in originalOverview.groupItems.enumerated() {
-                print("  - Group \(index): \(group.name ?? "Unknown") = \(group.value ?? "nil")")
-                print("    Assets count: \(group.assets.count)")
-                for asset in group.assets {
-                    print("      Asset: \(asset.name ?? "Unknown") = \(asset.value ?? "nil")")
-                }
-            }
             
             let convertedOverview = try convertPortfolioOverviewToCurrency(originalOverview, targetCurrency: targetCurrency)
             portfolioOverview = convertedOverview
             assets = convertedOverview.groupItems
             
-            print("✅ Conversion completed for ALL portfolios")
         } catch {
-            print("❌ Error loading portfolio overview: \(error)")
             self.error = error.localizedDescription
         }
     }
     
     private func getPortfolioOverviewByGoalWithConversion(portfolioName: String, targetCurrency: Currency) {
         do {
-            print("🔄 Loading portfolio overview for specific portfolio: \(portfolioName)")
             let originalOverview = try service.getPortfolioOverviewByGoal(portfolioName)
-            print("📊 Original overview loaded for \(portfolioName):")
-            print("  - Portfolio Value: \(originalOverview.portfolioValue ?? "nil")")
-            print("  - Group Items Count: \(originalOverview.groupItems.count)")
-            
-            for (index, group) in originalOverview.groupItems.enumerated() {
-                print("  - Group \(index): \(group.name ?? "Unknown") = \(group.value ?? "nil")")
-                print("    Assets count: \(group.assets.count)")
-                for asset in group.assets {
-                    print("      Asset: \(asset.name ?? "Unknown") = \(asset.value ?? "nil")")
-                }
-            }
             
             let convertedOverview = try convertPortfolioOverviewToCurrency(originalOverview, targetCurrency: targetCurrency)
             portfolioOverview = convertedOverview
             
-            print("✅ Conversion completed for portfolio: \(portfolioName)")
         } catch {
-            print("❌ Error loading portfolio overview for \(portfolioName): \(error)")
             self.error = error.localizedDescription
         }
     }
@@ -141,7 +111,6 @@ final class PortfolioViewModel: ObservableObject {
         
         // Convert each group
         for group in overview.groupItems {
-            print("🔄 Processing group: \(group.name ?? "Unknown")")
             let convertedGroup = try convertAssetGroupToCurrency(group, targetCurrency: targetCurrency)
             convertedGroupItems.append(convertedGroup)
             
@@ -151,10 +120,6 @@ final class PortfolioViewModel: ObservableObject {
                 if let holding = asset.holding {
                     let assetCurrency = holding.asset.currency
                     let originalValue = asset.value ?? "0"
-                    
-                    print("  📊 Asset: \(asset.name ?? "Unknown")")
-                    print("    Original Value: \(originalValue)")
-                    print("    Asset Currency: \(assetCurrency.rawValue)")
                     
                     if let numericValue = parseFormattedValue(originalValue) {
                         let conversionRate = getCurrencyRate(from: assetCurrency, to: targetCurrency)
@@ -169,19 +134,11 @@ final class PortfolioViewModel: ObservableObject {
                         }
                         
                         groupTotal += convertedValue
-                        print("    Parsed Value: \(numericValue)")
-                        print("    Conversion Rate: \(conversionRate)")
-                        print("    Converted Value: \(convertedValue)")
-                        print("    Group Total so far: \(groupTotal)")
-                    } else {
-                        print("    ❌ Failed to parse value: \(originalValue)")
                     }
                 }
             }
             
             totalConvertedValue += groupTotal
-            print("  🎯 Group \(group.name ?? "Unknown") total: \(groupTotal)")
-            print("  📈 Portfolio total so far: \(totalConvertedValue)")
         }
         
         // Calculate total profit (this is a simplified approach)
@@ -191,8 +148,6 @@ final class PortfolioViewModel: ObservableObject {
         
         let finalPortfolioValue = formatCurrencyValue(totalConvertedValue, currency: targetCurrency)
         let finalProfitAmount = formatCurrencyValue(totalConvertedProfit, currency: targetCurrency)
-        
-        print("🎯 Portfolio converted: \(finalPortfolioValue)")
         
         // Create new PortfolioOverview with converted values
         return PortfolioOverview(
@@ -206,8 +161,6 @@ final class PortfolioViewModel: ObservableObject {
     private func convertAssetGroupToCurrency(_ group: AssetGroup, targetCurrency: Currency) throws -> AssetGroup {
         var convertedAssets: [AssetItem] = []
         var convertedGroupTotal: Decimal = Decimal(0)
-        
-        print("🔄 Converting group: \(group.name ?? "Unknown")")
         
         // Convert each asset in the group
         for asset in group.assets {
@@ -239,7 +192,6 @@ final class PortfolioViewModel: ObservableObject {
         }
         
         let formattedTotal = formatCurrencyValue(convertedGroupTotal, currency: targetCurrency)
-        print("  ✅ Group total: \(formattedTotal)")
         
         // Create new AssetGroup with converted values
         return AssetGroup(
@@ -300,7 +252,6 @@ final class PortfolioViewModel: ObservableObject {
     // Function to clear cache (useful when switching currencies)
     func clearExchangeRateCache() {
         exchangeRateCache.removeAll()
-        print("🗑️ Exchange rate cache cleared")
     }
     
     private func getCurrencyRate(from fromCurrency: Currency, to toCurrency: Currency) -> Double {
@@ -396,7 +347,6 @@ final class PortfolioViewModel: ObservableObject {
                 .replacingOccurrences(of: ",", with: ".")
             
             if let decimal = Decimal(string: indonesianFormat) {
-                print("🇮🇩 Indonesian format parsed: '\(valueString)' → \(decimal)")
                 return decimal
             }
         }
@@ -419,7 +369,6 @@ final class PortfolioViewModel: ObservableObject {
             return Decimal(double)
         }
         
-        print("❌ Failed to parse: '\(valueString)'")
         return nil
     }
     
