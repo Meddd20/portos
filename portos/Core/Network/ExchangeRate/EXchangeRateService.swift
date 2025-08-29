@@ -52,5 +52,49 @@ struct ExchangeRateService {
             }
         }.resume()
     }
-
+    
+    static func getConversionRate(from fromCurrency: Currency, to toCurrency: Currency, completion: @escaping (Result<Double, APIError>) -> Void) {
+        // If currencies are the same, return 1.0
+        if fromCurrency == toCurrency {
+            completion(.success(1.0))
+            return
+        }
+        
+        // Get the rate from the API
+        getRate(currency: fromCurrency.rawValue) { result in
+            switch result {
+            case .success(let response):
+                let rate = Double(truncating: response.data as NSNumber)
+                
+                // Calculate conversion rate
+                let conversionRate: Double
+                if fromCurrency == .usd && toCurrency == .idr {
+                    // USD to IDR: multiply by rate (e.g., 1 USD * 16586 = 16586 IDR)
+                    conversionRate = rate
+                } else if fromCurrency == .idr && toCurrency == .usd {
+                    // IDR to USD: divide by rate (e.g., 16586 IDR / 16586 = 1 USD)
+                    conversionRate = rate  // We'll divide by this rate in the ViewModel
+                } else {
+                    // Fallback for unexpected combinations
+                    conversionRate = 1.0
+                }
+                
+                completion(.success(conversionRate))
+                
+            case .failure(let error):
+                // If API fails, use fallback rate
+                let fallbackRate: Double
+                if fromCurrency == .usd && toCurrency == .idr {
+                    fallbackRate = 16586.0 // Fallback USD to IDR rate
+                } else if fromCurrency == .idr && toCurrency == .usd {
+                    fallbackRate = 16586.0 // Fallback IDR to USD rate (we'll divide by this)
+                } else {
+                    fallbackRate = 1.0
+                }
+                
+                print("API failed, using fallback rate: \(fallbackRate)")
+                completion(.success(fallbackRate))
+            }
+        }
+    }
 }

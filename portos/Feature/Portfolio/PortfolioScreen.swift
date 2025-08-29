@@ -58,7 +58,8 @@ struct PortfolioScreen: View {
     private var isProfitPositive: Bool {
         guard let profitAmount = viewModel.portfolioOverview.portfolioProfitAmount else { return true }
         // Remove currency symbol and check if it's negative
-        let cleanAmount = profitAmount.replacingOccurrences(of: "Rp ", with: "")
+        let cleanAmount = profitAmount.replacingOccurrences(of: "$ ", with: "")
+            .replacingOccurrences(of: "Rp ", with: "")
         return !cleanAmount.hasPrefix("-") && cleanAmount != "0"
     }
     
@@ -83,13 +84,22 @@ struct PortfolioScreen: View {
             ScrollView {
                 VStack(alignment: .center) {
                     HStack(alignment: .center, spacing: 12) {
-                        Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioValue!)" : coveredAmount)
+                        Text(localizationManager.showCash ? viewModel.portfolioOverview.portfolioValue ?? "0" : coveredAmount)
                             .font(.system(size: 28, weight: .bold))
                             .kerning(0.38)
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color.textPrimary)
                             .transition(.opacity.combined(with: .scale))
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
+                            .onAppear {
+                                print("🎯 Title Value Display: \(viewModel.portfolioOverview.portfolioValue ?? "nil")")
+                                print("📊 Portfolio Overview Data:")
+                                print("  - Portfolio Value: \(viewModel.portfolioOverview.portfolioValue ?? "nil")")
+                                print("  - Group Items Count: \(viewModel.portfolioOverview.groupItems.count)")
+                                for (index, group) in viewModel.portfolioOverview.groupItems.enumerated() {
+                                    print("    Group \(index): \(group.name ?? "Unknown") = \(group.value ?? "nil")")
+                                }
+                            }
                             
                         
                         Button(action: {
@@ -138,7 +148,7 @@ struct PortfolioScreen: View {
                             || viewModel.portfolioOverview.portfolioGrowthRate == "0"
                            ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
                         
-                       Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
+                       Text(localizationManager.showCash ? viewModel.portfolioOverview.portfolioProfitAmount ?? "0" : coveredAmount)
                             .font(.system(size: 15, weight: .bold))
                             .transition(.opacity.combined(with: .scale))
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
@@ -260,8 +270,15 @@ struct PortfolioScreen: View {
         }
         .onAppear() {
             let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-            viewModel.getPortfolioOverview(portfolioName: name)
+            print("🚀 onAppear - selectedIndex: \(selectedIndex), portfolio name: \(name ?? "ALL")")
+            viewModel.getPortfolioOverviewWithCurrencyConversion(portfolioName: name)
             viewModel.refreshMarketValues()
+        }
+        .onChange(of: localizationManager.currentCurrency) {
+            let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
+            print("🔄 Currency changed - selectedIndex: \(selectedIndex), portfolio name: \(name ?? "ALL")")
+            viewModel.clearExchangeRateCache() // Clear cache for fresh rates
+            viewModel.getPortfolioOverviewWithCurrencyConversion(portfolioName: name)
         }
         .alert("Delete Permanently", isPresented: $showingDeleteConfirmation) {
             Button("Delete", role: .destructive) {
@@ -289,7 +306,7 @@ struct PortfolioScreen: View {
             Text(group.name!)
                 .font(.system(size: 20, weight: .semibold))
             Spacer()
-            Text(localizationManager.showCash ? "Rp \(group.value!)" : coveredAmount)
+            Text(localizationManager.showCash ? group.value ?? "0" : coveredAmount)
                 .font(.system(size: 20, weight: .semibold))
                 .transition(.opacity.combined(with: .scale))
                 .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
@@ -349,7 +366,7 @@ struct PortfolioScreen: View {
                 
                 Spacer()
                 
-                Text(localizationManager.showCash ? "Rp \(asset.value!)" : coveredAmount)
+                Text(localizationManager.showCash ? asset.value ?? "0" : coveredAmount)
                     .font(.body)
                     .transition(.opacity.combined(with: .scale))
                     .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
@@ -401,7 +418,9 @@ struct PortfolioScreen: View {
     
     func onPickerChange() {
         let name = (selectedIndex == 0) ? nil : portfolios[selectedIndex-1].name
-        viewModel.getPortfolioOverview(portfolioName: name)
+        print("📱 Tab changed - selectedIndex: \(selectedIndex), portfolio name: \(name ?? "ALL")")
+        print("📊 Available portfolios: \(portfolios.map { $0.name })")
+        viewModel.getPortfolioOverviewWithCurrencyConversion(portfolioName: name)
         viewModel.refreshMarketValues()
     }
     

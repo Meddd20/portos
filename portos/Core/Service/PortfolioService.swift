@@ -77,86 +77,57 @@ class PortfolioService {
         portProfit = portValue - initialCapital
         portGrowthRate = portProfit / initialCapital
         
-        for portfolio in portfolios {
-            var portfolioValue: Decimal = 0.0
-            
-            let holdingsForPortfolio: [Holding] = holdings
-                .filter { $0.portfolio.name == portfolio.name }
-            
-            var holdingsByType: [String: [Holding]] = [
-                "Bonds": [],
-                "Stocks": [],
-                "Indonesian Stocks": [],
-                "Cryptos": [],
-                "Mutual Funds": [],
-                "Options": [],
-                "ETFs": []
-            ]
-            
-            for holding in holdingsForPortfolio {
-                portfolioValue += holding.quantity * holding.asset.lastPrice * Decimal(holding.asset.assetType.multiplier)
-                
-                switch holding.asset.assetType {
-                case .Bonds:
-                    holdingsByType["Bonds"]?.append(holding)
-                case .Stocks:
-                    holdingsByType["Stocks"]?.append(holding)
-                case .StocksId:
-                    holdingsByType["Indonesian Stocks"]?.append(holding)
-                case .Crypto:
-                    holdingsByType["Cryptos"]?.append(holding)
-                case .MutualFunds:
-                    holdingsByType["Mutual Funds"]?.append(holding)
-                case .Options:
-                    holdingsByType["Options"]?.append(holding)
-                case .ETF:
-                    holdingsByType["ETFs"]?.append(holding)
-            
-                }
-            }
-            
-            var portfolioItem: AssetGroup = AssetGroup(
-                name: portfolio.name,
-                value: formatDecimal(portfolioValue),
-                assets: []
-            )
-            
-            for (name, holdings) in holdingsByType {
-                if !holdings.isEmpty {
-                    let multiplier = Decimal(holdings.first!.asset.assetType.multiplier)
-                    let profitAmount: Decimal = holdings.reduce(0) { acc, h in
-                        acc + (h.quantity * h.averagePricePerUnit * multiplier)
-                    }.roundedWithoutFraction()
-                    
-                    let totalValue: Decimal = holdings.reduce(0) { acc, h in
-                        acc + (h.quantity * h.asset.lastPrice * multiplier)
-                    }.roundedWithoutFraction()
-                    
-                    let growthRate: Decimal = (totalValue - profitAmount) / profitAmount * 100
-                    
-                    let assetAllocation: AssetItem = AssetItem(
-                        holding: nil,
-                        name: name,
-                        value: formatDecimal(totalValue),
-                        growthRate: growthRate.rounded(scale: 2),
-                        profitAmount: profitAmount.formattedCash(),
-                        quantity: "")
-                    
-                    portfolioItem.assets.append(assetAllocation)
-                }
-                portfolioItem.assets.sort { ($0.value ?? "") < ($1.value ?? "") }
-            }
-            
-            portfolioItems.append(portfolioItem)
-        }
+        // Group all holdings by asset type (not by portfolio)
+        let grouped = Dictionary(grouping: holdings, by: { $0.asset.assetType })
         
-        portfolioItems.sort { ($0.value ?? "") < ($1.value ?? "") }
+        let groups: [AssetGroup] = grouped.map { (assetType, hs) in
+            let groupTotal: Decimal = hs.reduce(0) { acc, h in
+                acc + (h.quantity * h.asset.lastPrice * Decimal(h.asset.assetType.multiplier))
+            }
+
+            let items: [AssetItem] = hs.map { h in
+                let currentValue = h.quantity * h.asset.lastPrice * Decimal(h.asset.assetType.multiplier)
+                let cost         = h.quantity * h.averagePricePerUnit * Decimal(h.asset.assetType.multiplier)
+                let profit       = currentValue - cost
+                let growth       = cost == 0 ? 0 : (profit / cost) * 100
+
+                let qtyStr: String = {
+                    switch assetType {
+                    case .Stocks:
+                        return "\(formatDecimal(h.quantity) ?? "") Share(s)"
+                    case .Bonds:
+                        return "Rp \(formatDecimal(h.quantity) ?? "")"
+                    case .MutualFunds, .Options, .ETF:
+                        return formatDecimal(h.quantity) ?? ""
+                    case .Crypto:
+                        return "\(formatDecimal(h.quantity) ?? "") \(h.asset.ticker.lowercased())"
+                    case .StocksId:
+                        return "\(formatDecimal(h.quantity) ?? "") Lot"
+                    }
+                }()
+
+                return AssetItem(
+                    holding: h,  // Include the holding reference for currency conversion
+                    name: h.asset.name,
+                    value: formatDecimal(currentValue),
+                    growthRate: growth.rounded(scale: 2),
+                    profitAmount: formatDecimal(profit),
+                    quantity: qtyStr
+                )
+            }
+                
+            return AssetGroup(
+                name: assetType.displayName,
+                value: formatDecimal(groupTotal),
+                assets: items )
+        }
+        .sorted { ($0.value ?? "") > ($1.value ?? "") }
         
         let p = PortfolioOverview(
             portfolioValue: formatDecimal(portValue),
             portfolioGrowthRate: formatDecimal(portGrowthRate),
             portfolioProfitAmount: formatDecimal(portProfit),
-            groupItems: portfolioItems
+            groupItems: groups
         )
         return p
     }
