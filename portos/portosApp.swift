@@ -27,9 +27,9 @@ struct portosApp: App {
         di = .live(modelContext: ctx)
         
         // run seed if needed
-        #if DEBUG
+//        #if DEBUG
         runSeederIfNeeded(ctx: ctx)
-        #endif
+//        #endif
     }
     
     var body: some Scene {
@@ -41,7 +41,7 @@ struct portosApp: App {
     }
 }
 
-#if DEBUG
+//#if DEBUG
 private func runSeederIfNeeded(ctx: ModelContext) {
     let key = "seeded.v1"
     if !UserDefaults.standard.bool(forKey: key) {
@@ -52,4 +52,4 @@ private func runSeederIfNeeded(ctx: ModelContext) {
         }
     }
 }
-#endif
+//#endif
