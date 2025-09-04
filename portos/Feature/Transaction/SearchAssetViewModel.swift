@@ -50,7 +50,7 @@ class SearchAssetViewModel: ObservableObject {
         do {
             assetPosition = try portfolioService.getHoldings(portfolioName: "All")
         } catch {
-            print("")
+            print(error.localizedDescription)
         }
     }
     

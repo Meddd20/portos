@@ -26,10 +26,7 @@ struct portosApp: App {
         // build the DI using that context
         di = .live(modelContext: ctx)
         
-        // run seed if needed
-//        #if DEBUG
         runSeederIfNeeded(ctx: ctx)
-//        #endif
     }
     
     var body: some Scene {
@@ -41,15 +38,12 @@ struct portosApp: App {
     }
 }
 
-//#if DEBUG
 private func runSeederIfNeeded(ctx: ModelContext) {
     let key = "seeded.v1"
     if !UserDefaults.standard.bool(forKey: key) {
         Task { @MainActor in
-//            try? MockSeederV1(context: ctx).wipe()
             try? MockSeederV1(context: ctx).seed()
             UserDefaults.standard.set(true, forKey: key)
         }
     }
 }
-//#endif

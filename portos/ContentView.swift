@@ -54,7 +54,7 @@ enum NavigationRoute: Hashable {
     case transactionHistory(portfolio: Portfolio?)
     
     // Trade transaction routes
-    case buyAsset(asset: Asset, portfolio: Portfolio?, fromSearch: Bool = false)
+    case buyAsset(asset: Asset, portfolio: Portfolio?)
     case sellAsset(asset: Asset, portfolio: Portfolio?, holding: Holding)
     case editTransaction(transaction: Transaction, transactionMode: TransactionMode, asset: Asset, portfolio: Portfolio?)
     
@@ -84,7 +84,7 @@ extension NavigationRoute {
         case .transactionHistory(let portfolio):
             hasher.combine("transactionHistory")
             hasher.combine(portfolio?.id)
-        case .buyAsset(let asset, let portfolio, _):
+        case .buyAsset(let asset, let portfolio):
             hasher.combine("buyAsset")
             hasher.combine(asset.id)
             hasher.combine(portfolio?.id)
@@ -131,13 +131,12 @@ extension NavigationRoute {
             DetailHoldingView(di: di, holding: holding)
         case .transactionHistory(let portfolio):
             TransactionHistoryView(di: di, portfolio: portfolio)
-        case .buyAsset(let asset, let portfolio, let fromSearch):
+        case .buyAsset(let asset, let portfolio):
             TradeTransactionView(
                 di: di,
                 transactionMode: .buy,
                 asset: asset,
-                currentPortfolioAt: portfolio,
-                fromSearch: fromSearch
+                currentPortfolioAt: portfolio
             )
         case .sellAsset(let asset, let portfolio, let holding):
             TradeTransactionView(
@@ -188,19 +187,23 @@ enum BackAction {
     case popToRoot
 }
 
+@MainActor
 class NavigationManager: ObservableObject {
     @Published var path = NavigationPath()
     private var backStack: [BackAction] = []
-    
+
     func push(_ route: NavigationRoute, back: BackAction = .popOnce) {
         path.append(route)
         backStack.append(back)
     }
 
     func popToRoot() {
-        path = NavigationPath()
-        print(backStack)
+        print("POP TO ROOT before: path.count=\(path.count) back=\(backStack)")
+        while !path.isEmpty {
+            path.removeLast()
+        }
         backStack.removeAll()
+        print("POP TO ROOT after: path.count=\(path.count) back=\(backStack)")
     }
 
     func popLast() {
@@ -208,19 +211,17 @@ class NavigationManager: ObservableObject {
         if !backStack.isEmpty { backStack.removeLast() }
     }
 
-    func back(backStep: Int? = nil) {
-        if (backStep != nil) {
-            if !path.isEmpty { path.removeLast(backStep ?? 1) }
-            if !backStack.isEmpty { backStack.removeLast(backStep ?? 1) }
-        } else {
-            guard let last = backStack.last else {
-                popLast()
-                return
-            }
-            switch last {
-            case .popOnce: popLast()
-            case .popToRoot: popToRoot()
-            }
+    func back() {
+        guard let last = backStack.last else { popLast(); return }
+        print("back() last =", last)
+        switch last {
+        case .popOnce: popLast()
+        case .popToRoot: popToRoot()
         }
+    }
+    
+    func reset() {
+        path = NavigationPath()
+        backStack.removeAll()
     }
 }
