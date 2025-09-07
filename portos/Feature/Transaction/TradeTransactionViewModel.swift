@@ -222,7 +222,6 @@ class TradeTransactionViewModel: ObservableObject {
         }
     }
     
-    @MainActor
     func getRate(currency: String) {
         ExchangeRateService.getRate(currency: currency) { [weak self] result in
             Task { @MainActor in

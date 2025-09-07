@@ -28,7 +28,6 @@ struct TransactionItem: Identifiable {
 }
 
 struct DetailHoldingView: View {
-    @Environment(\.dismiss) var dismiss
     @Environment(\.di) private var di
     @EnvironmentObject private var navigationManager: NavigationManager
     
@@ -110,7 +109,7 @@ struct DetailHoldingView: View {
                         systemName: "plus",
                         title: "Add",
                         action: {
-                            navigationManager.push(.buyAsset(asset: holding.asset, portfolio: holding.portfolio), back: .popOnce)
+                            navigationManager.push(.buyAsset(asset: holding.asset, portfolio: holding.portfolio, fromSearch: false))
                         }
                     )
                     .foregroundStyle(Color.greenApp) // Green for Add
@@ -119,7 +118,7 @@ struct DetailHoldingView: View {
                         systemName: "minus",
                         title: "Liquidate",
                         action: {
-                            navigationManager.push(.sellAsset(asset: holding.asset, portfolio: holding.portfolio, holding: holding), back: .popOnce)
+                            navigationManager.push(.sellAsset(asset: holding.asset, portfolio: holding.portfolio, holding: holding))
                         }
                     )
                     .foregroundStyle(Color.redApp) // Red for Liquidate
@@ -128,7 +127,7 @@ struct DetailHoldingView: View {
                         systemName: "arrow.right",
                         title: "Transfer",
                         action: {
-                            navigationManager.push(.transferAsset(asset: holding.asset, holding: holding, transferMode: .transferToPortfolio), back: .popOnce)
+                            navigationManager.push(.transferAsset(asset: holding.asset, holding: holding, transferMode: .transferToPortfolio))
                         }
                     )
                     .foregroundStyle(Color.primaryApp) // Brown for Transfer
@@ -180,7 +179,7 @@ struct DetailHoldingView: View {
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
-                    dismiss()
+                    navigationManager.popLast()
                 }) {
                     Image(systemName: "arrow.left")
                         .foregroundColor(Color.textPrimary)
@@ -201,8 +200,7 @@ struct DetailHoldingView: View {
                         transactionMode: .editBuy,
                         asset: transaction.asset,
                         portfolio: transaction.portfolio
-                    ),
-                    back: .popOnce
+                    )
                 )
                 selectedTransactionForEdit = nil
             }

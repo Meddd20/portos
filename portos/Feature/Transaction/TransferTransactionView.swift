@@ -10,7 +10,6 @@ import SwiftUI
 
 struct TransferTransactionView: View {
     @Environment(\.di) private var di
-    @Environment(\.dismiss) var dismiss
     @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var viewModel: TransferTransactionViewModel
     let asset: Asset
@@ -157,7 +156,7 @@ struct TransferTransactionView: View {
             if viewModel.transferMode == .transferToPortfolio || (viewModel.transferMode == .editTransferTransaction && viewModel.isDataFilled) {
                 Button(action: {
                     viewModel.proceedTransaction()
-                    navigationManager.back()
+                    navigationManager.back(.popToRoot)
                 }, label: {
                     Text("Confirm")
                         .frame(width: 306, height: 53)
@@ -178,7 +177,7 @@ struct TransferTransactionView: View {
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
-                    dismiss()
+                    navigationManager.popLast()
                 }) {
                     Image(systemName: "arrow.left")
                         .foregroundColor(Color.textPrimary)

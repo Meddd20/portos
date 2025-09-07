@@ -13,6 +13,8 @@ struct portosApp: App {
     private let container: ModelContainer
     private let di: AppDI
     
+    @StateObject private var navigationManager = NavigationManager()
+    
     init() {
         // build the SwiftData container
         let storeURL = URL.documentsDirectory.appending(path: "Portos.store")
@@ -26,30 +28,25 @@ struct portosApp: App {
         // build the DI using that context
         di = .live(modelContext: ctx)
         
-        // run seed if needed
-//        #if DEBUG
         runSeederIfNeeded(ctx: ctx)
-//        #endif
     }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(\.di, di)
+                .environmentObject(navigationManager)
         }
         .modelContainer(container)
     }
 }
 
-//#if DEBUG
 private func runSeederIfNeeded(ctx: ModelContext) {
     let key = "seeded.v1"
     if !UserDefaults.standard.bool(forKey: key) {
         Task { @MainActor in
-//            try? MockSeederV1(context: ctx).wipe()
             try? MockSeederV1(context: ctx).seed()
             UserDefaults.standard.set(true, forKey: key)
         }
     }
 }
-//#endif

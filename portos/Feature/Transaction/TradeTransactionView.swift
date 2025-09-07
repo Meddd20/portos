@@ -43,7 +43,6 @@ enum TransactionMode {
 
 struct TradeTransactionView: View {
     @Environment(\.di) private var di
-    @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel: TradeTransactionViewModel
     @EnvironmentObject private var navigationManager: NavigationManager
@@ -52,7 +51,7 @@ struct TradeTransactionView: View {
     let portfolio: Portfolio?
     let transaction: Transaction?
     let holding: Holding?
-    let fromSearch: Bool
+    let fromSearch: Bool?
         
     init(di: AppDI,
          transactionMode: TransactionMode,
@@ -60,7 +59,7 @@ struct TradeTransactionView: View {
          holding: Holding? = nil,
          asset: Asset,
          currentPortfolioAt: Portfolio?,
-         fromSearch: Bool = false
+         fromSearch: Bool? = false
     ) {
         self.transactionMode = transactionMode
         self.asset = asset
@@ -232,9 +231,13 @@ struct TradeTransactionView: View {
                         
             if (viewModel.transactionMode == .buy || viewModel.transactionMode == .liquidate) || ( [.editBuy, .editLiquidate].contains(viewModel.transactionMode) && viewModel.isDataFilled ) {
                 Button(action: {
-                    Task {
-                        viewModel.proceedTransaction()
-                        navigationManager.back(backStep: nil)
+                    viewModel.proceedTransaction()
+                    withAnimation {
+                        if let fromSearch, fromSearch == true {
+                            navigationManager.reset()
+                        } else {
+                            navigationManager.popLast()
+                        }
                     }
                 }, label: {
                     Text("Confirm")
@@ -266,7 +269,7 @@ struct TradeTransactionView: View {
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
-                    presentationMode.wrappedValue.dismiss()
+                    navigationManager.popLast()
                 }) {
                     Image(systemName: "arrow.left")
                         .foregroundColor(Color.textPrimary)

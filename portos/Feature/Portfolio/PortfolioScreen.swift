@@ -11,7 +11,6 @@ import SwiftData
 struct PortfolioScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.di) var di
-    @Environment(\.dismiss) private var dismiss
     @StateObject private var localizationManager = LocalizationManager.shared
     
     enum Route: Hashable {
@@ -22,6 +21,7 @@ struct PortfolioScreen: View {
     
     @StateObject private var viewModel: PortfolioViewModel
     @EnvironmentObject private var navigationManager: NavigationManager
+    @State private var path = NavigationPath()
     
     init(di: AppDI) {
         _viewModel = StateObject(wrappedValue: PortfolioViewModel(di: di))
@@ -144,7 +144,7 @@ struct PortfolioScreen: View {
                             .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
                             //  .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
                            .foregroundStyle((
-                            viewModel.portfolioOverview.portfolioGrowthRate == nil 
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
                             || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
                             || viewModel.portfolioOverview.portfolioGrowthRate == "0"
                            ) ? Color.greyApp : (isProfitPositive ? Color.greenApp : Color.redApp))
@@ -187,12 +187,12 @@ struct PortfolioScreen: View {
                 HStack (spacing: 42) {
                     CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
                         let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
-                        navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )
+                        navigationManager.push(.transactionHistory(portfolio: portfolio))
                     }
                     
                     CircleButton(systemName: "plus", title: "Add") {
                         let portfolio = (selectedIndex == 0) ? nil : portfolios[selectedIndex - 1]
-                        navigationManager.push(.searchAsset(currentPortfolio: portfolio), back: BackAction.popOnce)
+                        navigationManager.push(.searchAsset(currentPortfolio: portfolio))
                     }
                     
                     Menu {
@@ -227,7 +227,7 @@ struct PortfolioScreen: View {
                     assetGroupsList
                 }
             }.scrollIndicators(.hidden)
-                .padding()
+//                .padding()
         }
         .task { await viewModel.loadChartData() }
         .navigationBarBackButtonHidden()
@@ -381,7 +381,7 @@ struct PortfolioScreen: View {
         }
         .onTapGesture {
             if let holding = asset.holding {
-                navigationManager.push(.detailHolding(holding: holding), back: .popOnce)
+                navigationManager.push(.detailHolding(holding: holding))
             }
         }
     }

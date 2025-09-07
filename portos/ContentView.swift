@@ -10,7 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var navigationManager = NavigationManager()
+    @EnvironmentObject private var navigationManager: NavigationManager
     
     var body: some View {
         let di = AppDI.live(modelContext: modelContext)
@@ -20,7 +20,7 @@ struct ContentView: View {
                     route.destination(di: di)
                 }
         }
-        .environmentObject(navigationManager)
+        .id(navigationManager.stackID)
     }
 }
 
@@ -54,7 +54,7 @@ enum NavigationRoute: Hashable {
     case transactionHistory(portfolio: Portfolio?)
     
     // Trade transaction routes
-    case buyAsset(asset: Asset, portfolio: Portfolio?, fromSearch: Bool = false)
+    case buyAsset(asset: Asset, portfolio: Portfolio?, fromSearch: Bool)
     case sellAsset(asset: Asset, portfolio: Portfolio?, holding: Holding)
     case editTransaction(transaction: Transaction, transactionMode: TransactionMode, asset: Asset, portfolio: Portfolio?)
     
@@ -84,10 +84,11 @@ extension NavigationRoute {
         case .transactionHistory(let portfolio):
             hasher.combine("transactionHistory")
             hasher.combine(portfolio?.id)
-        case .buyAsset(let asset, let portfolio, _):
+        case .buyAsset(let asset, let portfolio, let fromSearch):
             hasher.combine("buyAsset")
             hasher.combine(asset.id)
             hasher.combine(portfolio?.id)
+            hasher.combine(fromSearch)
         case .sellAsset(let asset, let portfolio, let holding):
             hasher.combine("sellAsset")
             hasher.combine(asset.id)
@@ -188,39 +189,32 @@ enum BackAction {
     case popToRoot
 }
 
+@MainActor
 class NavigationManager: ObservableObject {
     @Published var path = NavigationPath()
-    private var backStack: [BackAction] = []
-    
-    func push(_ route: NavigationRoute, back: BackAction = .popOnce) {
+    @Published var stackID = UUID()
+
+    func push(_ route: NavigationRoute) {
         path.append(route)
-        backStack.append(back)
     }
 
     func popToRoot() {
         path = NavigationPath()
-        print(backStack)
-        backStack.removeAll()
     }
 
     func popLast() {
         if !path.isEmpty { path.removeLast() }
-        if !backStack.isEmpty { backStack.removeLast() }
     }
-
-    func back(backStep: Int? = nil) {
-        if (backStep != nil) {
-            if !path.isEmpty { path.removeLast(backStep ?? 1) }
-            if !backStack.isEmpty { backStack.removeLast(backStep ?? 1) }
-        } else {
-            guard let last = backStack.last else {
-                popLast()
-                return
-            }
-            switch last {
-            case .popOnce: popLast()
-            case .popToRoot: popToRoot()
-            }
+    
+    func reset() {
+        popToRoot()
+        stackID = UUID()
+    }
+    
+    func back(_ action: BackAction) {
+        switch action {
+        case .popOnce: popLast()
+        case .popToRoot: reset()
         }
     }
 }
