@@ -10,7 +10,6 @@ import SwiftUI
 
 struct TransactionHistoryView: View {
     @Environment(\.di) private var di
-    @Environment(\.dismiss) var dismiss
     @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var viewModel: TransactionHistoryViewModel
     @State private var selectedTransactionForEdit: Transaction?
@@ -91,7 +90,7 @@ struct TransactionHistoryView: View {
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
-                    dismiss()
+                    navigationManager.popLast()
                 }) {
                     Image(systemName: "arrow.left")
                         .foregroundColor(Color.textPrimary)
@@ -110,7 +109,7 @@ struct TransactionHistoryView: View {
             
             let route: NavigationRoute = .editTransfer(transaction: tx, asset: tx.asset, holding: tx.holding, transferMode: .editTransferTransaction)
             
-            navigationManager.push(route, back: BackAction.popOnce)
+            navigationManager.push(route)
             selectedTransferForEdit = nil
             
         }
@@ -124,7 +123,7 @@ struct TransactionHistoryView: View {
                 portfolio: tx.portfolio
             )
 
-            navigationManager.push(route, back: BackAction.popOnce)
+            navigationManager.push(route)
             selectedTransactionForEdit = nil
         }
     }

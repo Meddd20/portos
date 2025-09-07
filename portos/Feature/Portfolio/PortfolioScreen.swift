@@ -65,173 +65,169 @@ struct PortfolioScreen: View {
     var body: some View {
         @State var expandedGroups: Set<UUID> = []
         
-        NavigationStack(path: $path) {
-            VStack(alignment: .center) {
-                PickerSegmented(
-                    selectedIndex: $selectedIndex,
-                    titles: ["All"] + portfolios.map { $0.name },
-                    onChange: onPickerChange,
-                    onAdd: { showingAdd = true }
-                )
-                
-                // for debug
-    //            Button("print ACTUAL Series for chart", action: {print("fnkcdsjfn cjdn fkjndjknfck \n \(viewModel.actualSeries)")})
-    //            Button("print PROJECTION Series for chart", action: {print("PROJECTION: \(viewModel.projectionSeries)")})
-    //            Button("???", action: {print(viewModel.actualSeries == viewModel.projectionSeries)})
-    //            Button("refresh api", action: {viewModel.refreshMarketValues()})
-    //            Button("generate projection", action: {viewModel.calculateProjection()})
-                
-                ScrollView {
-                    VStack(alignment: .center) {
-                        HStack(alignment: .center, spacing: 12) {
-                            Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioValue!)" : coveredAmount)
-                                .font(.system(size: 28, weight: .bold))
-                                .kerning(0.38)
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(Color.textPrimary)
-                                .transition(.opacity.combined(with: .scale))
-                                .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
-                                
+        VStack(alignment: .center) {
+            PickerSegmented(
+                selectedIndex: $selectedIndex,
+                titles: ["All"] + portfolios.map { $0.name },
+                onChange: onPickerChange,
+                onAdd: { showingAdd = true }
+            )
+            
+            // for debug
+//            Button("print ACTUAL Series for chart", action: {print("fnkcdsjfn cjdn fkjndjknfck \n \(viewModel.actualSeries)")})
+//            Button("print PROJECTION Series for chart", action: {print("PROJECTION: \(viewModel.projectionSeries)")})
+//            Button("???", action: {print(viewModel.actualSeries == viewModel.projectionSeries)})
+//            Button("refresh api", action: {viewModel.refreshMarketValues()})
+//            Button("generate projection", action: {viewModel.calculateProjection()})
+            
+            ScrollView {
+                VStack(alignment: .center) {
+                    HStack(alignment: .center, spacing: 12) {
+                        Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioValue!)" : coveredAmount)
+                            .font(.system(size: 28, weight: .bold))
+                            .kerning(0.38)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color.textPrimary)
+                            .transition(.opacity.combined(with: .scale))
+                            .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
                             
-                            Button(action: {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    localizationManager.setShowCash(!localizationManager.showCash)
-                                }
-                            }) {
-                                Image(systemName: localizationManager.showCash ? "eye" : "eye.slash")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundStyle(Color.secondary)
-                                    .frame(width: 32, height: 32)
-                                    .background(
-                                        Circle()
-                                            .fill(Color.secondary.opacity(0.1))
-                                    )
-                                    .rotation3DEffect(
-                                        .degrees(localizationManager.showCash ? 0 : 180),
-                                        axis: (x: 0, y: 1, z: 0)
-                                    )
-                                    .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        HStack(alignment: .center) {
-                           Image(
-                            systemName:
-                                (
-                                    viewModel.portfolioOverview.portfolioGrowthRate == nil
-                                    || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
-                                    || viewModel.portfolioOverview.portfolioGrowthRate == "0"
-                                )  ? "arrowtriangle.up" : "triangle.fill")
-                                .font(.system(size: 15))
-                                .rotationEffect(.degrees(isGrowthPositive ? 0 : 180))
-                               .foregroundStyle((
-                                viewModel.portfolioOverview.portfolioGrowthRate == nil
-                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
-                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
-                               ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
-                            
-                             Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
-                                .font(.system(size: 15, weight: .bold))
-                                .padding(.trailing, 14)
-                               .foregroundStyle((
-                                viewModel.portfolioOverview.portfolioGrowthRate == nil
-                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
-                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
-                               ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
-                            
-                           Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
-                                .font(.system(size: 15, weight: .bold))
-                                .transition(.opacity.combined(with: .scale))
-                                .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
-                                //  .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
-                               .foregroundStyle((
-                                viewModel.portfolioOverview.portfolioGrowthRate == nil
-                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
-                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
-                               ) ? Color.greyApp : (isProfitPositive ? Color.greenApp : Color.redApp))
-                        }
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                // .fill(isGrowthPositive ? Color.greenAppLight : Color.redAppLight)
-                                .fill((
-                                    viewModel.portfolioOverview.portfolioGrowthRate == nil
-                                    || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
-                                    || viewModel.portfolioOverview.portfolioGrowthRate == "0"
-                                ) ? Color.greyApp.opacity(0.2) : (isGrowthPositive ? Color.greenAppLight : Color.redAppLight))
-                        )
-                        .padding(.bottom, 32)
-                    }
-                    
-                    if selectedIndex == 0 {
-                        if viewModel.portfolioOverview.groupItems.isEmpty {
-                            EmptyAssetAllocationChart()
-                                .frame(height: 241)
-                                .padding(.top, 39)
-                        } else {
-                            AssetAllocationAllChart(overview: viewModel.portfolioOverview)
-                                .padding(.top, 39)
-                        }
-                    } else {
-                        if viewModel.actualSeries.isEmpty {
-                            EmptyInvestmentChart()
-                                .frame(height: 184)
-                                .padding(.top, 32)
-                        } else {
-                            InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
-                                                .frame(height: 184)
-                                                .padding(.top, 32)
-                        }
-                    }
-                    
-                    HStack (spacing: 42) {
-                        CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
-                            let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
-                            navigationManager.push(.transactionHistory(portfolio: portfolio), back: BackAction.popOnce )
-                        }
                         
-                        NavigationStack (path: $path){
-                            CircleButton(systemName: "plus", title: "Add") {
-                                let portfolio = (selectedIndex == 0) ? nil : portfolios[selectedIndex - 1]
-                                navigationManager.push(.searchAsset(currentPortfolio: portfolio), back: BackAction.popOnce)
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                localizationManager.setShowCash(!localizationManager.showCash)
                             }
+                        }) {
+                            Image(systemName: localizationManager.showCash ? "eye" : "eye.slash")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(Color.secondary)
+                                .frame(width: 32, height: 32)
+                                .background(
+                                    Circle()
+                                        .fill(Color.secondary.opacity(0.1))
+                                )
+                                .rotation3DEffect(
+                                    .degrees(localizationManager.showCash ? 0 : 180),
+                                    axis: (x: 0, y: 1, z: 0)
+                                )
+                                .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
                         }
-                        
-                        Menu {
-                            Button("Settings") { showingSetting = true }
-                            if selectedIndex != 0 {
-                                Button("Edit Portfolio")  { showingEdit = true }
-                                Button("Delete Portfolio") { showingDeleteConfirmation = true }
-                            }
-                        } label: {
-                            CircleButton(systemName: "ellipsis", title: "More") { }
-                                .foregroundStyle(Color.textPrimary)
-                        }
+                        .buttonStyle(.plain)
                     }
-                    .padding(.top, 32)
-                    
+                    HStack(alignment: .center) {
+                       Image(
+                        systemName:
+                            (
+                                viewModel.portfolioOverview.portfolioGrowthRate == nil
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                            )  ? "arrowtriangle.up" : "triangle.fill")
+                            .font(.system(size: 15))
+                            .rotationEffect(.degrees(isGrowthPositive ? 0 : 180))
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
+                        
+                         Text("\(viewModel.portfolioOverview.portfolioGrowthRate!)%")
+                            .font(.system(size: 15, weight: .bold))
+                            .padding(.trailing, 14)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isGrowthPositive ? Color.greenApp : Color.redApp))
+                        
+                       Text(localizationManager.showCash ? "Rp \(viewModel.portfolioOverview.portfolioProfitAmount!)" : coveredAmount)
+                            .font(.system(size: 15, weight: .bold))
+                            .transition(.opacity.combined(with: .scale))
+                            .animation(.easeInOut(duration: 0.3), value: localizationManager.showCash)
+                            //  .foregroundStyle(isProfitPositive ? Color.greenApp : Color.redApp)
+                           .foregroundStyle((
+                            viewModel.portfolioOverview.portfolioGrowthRate == nil
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                            || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                           ) ? Color.greyApp : (isProfitPositive ? Color.greenApp : Color.redApp))
+                    }
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            // .fill(isGrowthPositive ? Color.greenAppLight : Color.redAppLight)
+                            .fill((
+                                viewModel.portfolioOverview.portfolioGrowthRate == nil
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "NaN"
+                                || viewModel.portfolioOverview.portfolioGrowthRate == "0"
+                            ) ? Color.greyApp.opacity(0.2) : (isGrowthPositive ? Color.greenAppLight : Color.redAppLight))
+                    )
+                    .padding(.bottom, 32)
+                }
+                
+                if selectedIndex == 0 {
                     if viewModel.portfolioOverview.groupItems.isEmpty {
-                        Image(systemName: "plus.circle.dashed")
-                            .font(.system(size: 58))
-                            .padding(.top, 98)
-                            .foregroundColor(Color.textSecondary)
-                        
-                        Text(selectedIndex == 0 ? "No Portfolio" : "No Asset")
-                            .font(.system(size: 20, weight: .semibold))
-                            .padding(.top, 15)
-                            .multilineTextAlignment(.center)
-                        
-                        Text(selectedIndex == 0 ? "Create portfolios, and they will be here." : "Try add an asset, and it will be shown here.")
-                            .font(.system(size: 17))
-                            .padding(.top, 10)
-                            .multilineTextAlignment(.center)
+                        EmptyAssetAllocationChart()
+                            .frame(height: 241)
+                            .padding(.top, 39)
                     } else {
-                        assetGroupsList
+                        AssetAllocationAllChart(overview: viewModel.portfolioOverview)
+                            .padding(.top, 39)
                     }
-                }.scrollIndicators(.hidden)
-                    .padding()
-            }
+                } else {
+                    if viewModel.actualSeries.isEmpty {
+                        EmptyInvestmentChart()
+                            .frame(height: 184)
+                            .padding(.top, 32)
+                    } else {
+                        InvestmentChartWithRange(projection: nil, actual: viewModel.actualSeries)
+                                            .frame(height: 184)
+                                            .padding(.top, 32)
+                    }
+                }
+                
+                HStack (spacing: 42) {
+                    CircleButton(systemName: "arrow.trianglehead.clockwise", title: "History") {
+                        let portfolio = selectedIndex == 0 ? nil : portfolios[selectedIndex - 1]
+                        navigationManager.push(.transactionHistory(portfolio: portfolio))
+                    }
+                    
+                    CircleButton(systemName: "plus", title: "Add") {
+                        let portfolio = (selectedIndex == 0) ? nil : portfolios[selectedIndex - 1]
+                        navigationManager.push(.searchAsset(currentPortfolio: portfolio))
+                    }
+                    
+                    Menu {
+                        Button("Settings") { showingSetting = true }
+                        if selectedIndex != 0 {
+                            Button("Edit Portfolio")  { showingEdit = true }
+                            Button("Delete Portfolio") { showingDeleteConfirmation = true }
+                        }
+                    } label: {
+                        CircleButton(systemName: "ellipsis", title: "More") { }
+                            .foregroundStyle(Color.textPrimary)
+                    }
+                }
+                .padding(.top, 32)
+                
+                if viewModel.portfolioOverview.groupItems.isEmpty {
+                    Image(systemName: "plus.circle.dashed")
+                        .font(.system(size: 58))
+                        .padding(.top, 98)
+                        .foregroundColor(Color.textSecondary)
+                    
+                    Text(selectedIndex == 0 ? "No Portfolio" : "No Asset")
+                        .font(.system(size: 20, weight: .semibold))
+                        .padding(.top, 15)
+                        .multilineTextAlignment(.center)
+                    
+                    Text(selectedIndex == 0 ? "Create portfolios, and they will be here." : "Try add an asset, and it will be shown here.")
+                        .font(.system(size: 17))
+                        .padding(.top, 10)
+                        .multilineTextAlignment(.center)
+                } else {
+                    assetGroupsList
+                }
+            }.scrollIndicators(.hidden)
+//                .padding()
         }
         .task { await viewModel.loadChartData() }
         .navigationBarBackButtonHidden()
@@ -385,7 +381,7 @@ struct PortfolioScreen: View {
         }
         .onTapGesture {
             if let holding = asset.holding {
-                navigationManager.push(.detailHolding(holding: holding), back: .popOnce)
+                navigationManager.push(.detailHolding(holding: holding))
             }
         }
     }

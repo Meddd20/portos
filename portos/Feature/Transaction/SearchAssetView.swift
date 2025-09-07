@@ -10,7 +10,6 @@ import SwiftUI
 
 struct SearchAssetView: View {
     @Environment(\.di) private var di
-    @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: SearchAssetViewModel
     @EnvironmentObject private var navigationManager: NavigationManager
     let portfolio: Portfolio?
@@ -43,7 +42,7 @@ struct SearchAssetView: View {
                         
                         ForEach (assetPosition.holdings, id: \.persistentModelID) { holding in
                             Button {
-                                navigationManager.push(.buyAsset(asset: holding.asset, portfolio: portfolio), back: .popToRoot)
+                                navigationManager.push(.buyAsset(asset: holding.asset, portfolio: portfolio, fromSearch: true))
                             } label: {
                                 HStack {
                                     Text("\(holding.asset.symbol)")
@@ -94,10 +93,8 @@ struct SearchAssetView: View {
                                                                     to: nil, from: nil, for: nil)
 
                                     DispatchQueue.main.async {
-                                        navigationManager.push(.buyAsset(asset: selected, portfolio: portfolio),
-                                                               back: .popToRoot)
+                                        navigationManager.push(.buyAsset(asset: selected, portfolio: portfolio, fromSearch: true))
                                     }
-//                                navigationManager.push(.buyAsset(asset: asset, portfolio: portfolio), back: .popToRoot)
                             } label: {
                                 HStack {
                                     Text(asset.symbol)
@@ -129,7 +126,7 @@ struct SearchAssetView: View {
             .frame(maxWidth: .infinity)
             .padding(.leading, 20)
             .padding(.trailing, 26)
-            .padding(.bottom, 100) // Add bottom padding for search bar
+            .padding(.bottom, 100)
         }
         .background(
             LinearGradient(
@@ -153,7 +150,7 @@ struct SearchAssetView: View {
         .toolbar {
             ToolbarItem (placement: .topBarLeading) {
                 Button (action: {
-                    dismiss()
+                    navigationManager.popLast()
                 }) {
                     Image(systemName: "arrow.left")
                         .foregroundColor(Color.textPrimary)

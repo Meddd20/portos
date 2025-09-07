@@ -13,6 +13,8 @@ struct portosApp: App {
     private let container: ModelContainer
     private let di: AppDI
     
+    @StateObject private var navigationManager = NavigationManager()
+    
     init() {
         // build the SwiftData container
         let storeURL = URL.documentsDirectory.appending(path: "Portos.store")
@@ -33,6 +35,7 @@ struct portosApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.di, di)
+                .environmentObject(navigationManager)
         }
         .modelContainer(container)
     }
